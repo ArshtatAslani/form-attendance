@@ -254,7 +254,7 @@
     }).then(() => {
       const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد. تاریخ: ${new Date().toLocaleString('fa-IR', {timeZone: 'Asia/Tehran'})}`, true);
+      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       document.getElementById("code").value = "";
       document.getElementById("type").value = "";
       document.getElementById("marketerName").value = "";
