@@ -239,14 +239,14 @@ function showDates() {
     const dist = distanceInMeters(lat, lon, spotLat, spotLon);
 
     if (dist > 500) {
-      setStatus(❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر));
+      setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر)`);
       return;
     }
 
     const form = new FormData();
     form.append("entry.1655541032", type);
     form.append("entry.1228562108", code);
-    form.append("entry.2093256559", ${lat.toFixed(6)}, ${lon.toFixed(6)});
+    form.append("entry.2093256559", `${lat.toFixed(6)}, ${lon.toFixed(6)}`);
 
     fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
       method: "POST",
