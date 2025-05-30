@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>ثبت حضور بازاریاب</title>
     <style>
       body { font-family: sans-serif; text-align: center; padding: 50px; direction: rtl; }
@@ -46,9 +46,9 @@
         }
 
         const form = new FormData();
-        form.append("entry.1655541032", type);             // نوع شیفت
-        form.append("entry.1228562108", code);             // کد بازاریاب
-        form.append("entry.2093256559", `${lat}, ${lon}`); // موقعیت
+        form.append("entry.1655541032", type);
+        form.append("entry.1228562108", code);
+        form.append("entry.2093256559", `${lat}, ${lon}`);
 
         fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
           method: "POST",
