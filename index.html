@@ -249,4 +249,29 @@
     }).then(() => {
       const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت
+      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد. تاریخ: ${new Date().toLocaleString('fa-IR', {timeZone: 'Asia/Tehran'})}`, true);
+      document.getElementById("code").value = "";
+      document.getElementById("type").value = "";
+      document.getElementById("marketerName").value = "";
+    }).catch(err => {
+      setStatus("❌ خطا در ارسال فرم. لطفا دوباره تلاش کنید.");
+      console.error(err);
+    });
+  }
+
+  // تابع محاسبه فاصله بر حسب متر (هارساين)
+  function distanceInMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = angle => (angle * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+</script>
+
+</body>
+</html>
