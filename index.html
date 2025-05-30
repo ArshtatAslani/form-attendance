@@ -70,7 +70,7 @@
 <body>
   <h2>📍 ثبت حضور بازاریاب</h2>
 
-  <input type="text" id="code" placeholder="کد بازاریاب را وارد کنید" autocomplete="off" />
+  <input type="text" id="code" placeholder="کد بازاریابی را وارد کنید" autocomplete="off" />
 
   <select id="type" aria-label="نوع ثبت حضور">
     <option value="" disabled selected>نوع ثبت حضور را انتخاب کنید</option>
@@ -252,12 +252,12 @@
       mode: "no-cors",
       body: form,
     }).then(() => {
-      const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
+      const name = (marketerData[code].promoterName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
       setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       document.getElementById("code").value = "";
       document.getElementById("type").value = "";
-      document.getElementById("marketerName").value = "";
+      document.getElementById("promoterName").value = "";
     }).catch(err => {
       setStatus("❌ خطا در ارسال فرم. لطفا دوباره تلاش کنید.");
       console.error(err);
