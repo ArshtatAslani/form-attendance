@@ -168,7 +168,7 @@
       return;
     }
     if (marketerData.hasOwnProperty(code)) {
-      nameInput.value = marketerData[code].marketerName || "نام موجود نیست";
+      nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
       clearStatus();
     } else {
       nameInput.value = "کد بازاریاب معتبر نیست!";
@@ -233,7 +233,7 @@
       mode: "no-cors",
       body: form,
     }).then(() => {
-      const name = marketerData[code].marketerName || "بازاریاب";
+      const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
       setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
     }).catch(err => {
