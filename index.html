@@ -171,7 +171,7 @@
   function updateMarketerName() {
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
+    const nameInput = document.getElementById("promoterName");
 
     if (!code) {
       nameInput.value = "";
@@ -191,7 +191,7 @@
       return;
     }
 
-    nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
+    nameInput.value = marketerData[code].promoterName || "نام موجود نیست";
     clearStatus();
   }
 
@@ -199,7 +199,7 @@
     clearStatus();
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
+    const nameInput = document.getElementById("promoterName")alue;
 
     if (!code) {
       setStatus("❗ لطفاً کد بازاریاب را وارد کنید.");
@@ -252,7 +252,7 @@
       mode: "no-cors",
       body: form,
     }).then(() => {
-      const name = (marketerData[code].promoterName || "").trim() || "بازاریاب";
+      const name = marketerData[code].promoterName || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
       setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       document.getElementById("code").value = "";
