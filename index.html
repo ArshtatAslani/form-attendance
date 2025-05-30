@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8">
+    <title>ثبت حضور بازاریاب</title>
+    <style>
+      body { font-family: sans-serif; text-align: center; padding: 50px; direction: rtl; }
+      input, select, button { margin: 10px; padding: 10px; font-size: 16px; }
+    </style>
+  </head>
+  <body>
+    <h2>ثبت حضور بازاریاب</h2>
+
+    <label>کد بازاریاب:</label><br>
+    <input type="text" id="code" placeholder="مثلاً 123"><br>
+
+    <label>نوع شیفت:</label><br>
+    <select id="type">
+      <option value="شروع شیفت">شروع شیفت</option>
+      <option value="پایان شیفت">پایان شیفت</option>
+    </select><br>
+
+    <button onclick="getLocation()">📍 ثبت حضور با GPS</button>
+
+    <p id="status"></p>
+
+    <script>
+      function getLocation() {
+        document.getElementById("status").innerText = "در حال دریافت موقعیت...";
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(sendForm, showError, {timeout: 10000});
+        } else {
+          document.getElementById("status").innerText = "مرورگر شما مکان‌یابی را پشتیبانی نمی‌کند.";
+        }
+      }
+
+      function sendForm(position) {
+        const code = document.getElementById("code").value.trim();
+        const type = document.getElementById("type").value;
+        const lat = position.coords.latitude.toFixed(6);
+        const lon = position.coords.longitude.toFixed(6);
+
+        if (!code) {
+          document.getElementById("status").innerText = "لطفاً کد بازاریاب را وارد کنید.";
+          return;
+        }
+
+        const form = new FormData();
+        form.append("entry.1655541032", type);             // نوع شیفت
+        form.append("entry.1228562108", code);             // کد بازاریاب
+        form.append("entry.2093256559", `${lat}, ${lon}`); // موقعیت
+
+        fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
+          method: "POST",
+          mode: "no-cors",
+          body: form,
+        }).then(() => {
+          document.getElementById("status").innerText = "✅ حضور با موفقیت ثبت شد.";
+        }).catch((error) => {
+          document.getElementById("status").innerText = "❌ خطا در ارسال اطلاعات.";
+          console.error(error);
+        });
+      }
+
+      function showError(error) {
+        document.getElementById("status").innerText = "❌ خطا در دریافت موقعیت: " + error.message;
+      }
+    </script>
+  </body>
+</html>
