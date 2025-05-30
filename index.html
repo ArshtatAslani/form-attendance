@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>ثبت اسپات</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      margin: 20px;
+    }
+    #dateDisplay {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    #resultLog p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="dateDisplay"></div>
+  <div id="resultLog"></div>
+
+  <script>
+    function toJalali(gy, gm, gd) {
+      var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      var jy = -1595 + (33 * parseInt(days / 12053));
+      days %= 12053;
+      jy += 4 * parseInt(days / 1461);
+      days %= 1461;
+      if (days > 365) {
+        jy += parseInt((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+      return [jy, jm, jd];
+    }
+
+    function showDate() {
+      const dateDiv = document.getElementById("dateDisplay");
+      const now = new Date();
+      const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+      const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+      const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+
+      const [jy, jm, jd] = toJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const persianDayIndex = (now.getDay() + 6) % 7;
+      const persianWeekday = days[persianDayIndex];
+      const dateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
+
+      dateDiv.textContent = dateText;
+    }
+
+    function logResult(success, marketerName, spotName) {
+      const resultDiv = document.getElementById("resultLog");
+      const message = success
+        ? `✅ ثبت موفق اسپات "${spotName}" برای بازاریاب "${marketerName}"`
+        : `❌ فاصله شما از اسپات "${spotName}" بیش از حد مجاز است`;
+
+      const p = document.createElement("p");
+      p.textContent = message;
+      p.style.color = success ? "green" : "red";
+      resultDiv.appendChild(p);
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const toRad = angle => angle * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function processMarketer(code, currentLat, currentLon, marketerData) {
+      const data = marketerData[code];
+      if (!data) return;
+
+      const spotLat = parseFloat(data.lat);
+      const spotLon = parseFloat(data.lon);
+      const marketerName = data.marketerName || "بازاریاب";
+      const spotName = data.spotName || "اسپات";
+
+      const distance = calculateDistance(currentLat, currentLon, spotLat, spotLon);
+      const success = distance <= 500;
+      logResult(success, marketerName, spotName);
+    }
+
+    showDate();
+
+    // مثال تستی:
+    const marketerData = {
+      "101": { lat: "35.6892", lon: "51.3890", marketerName: "علی تهرانی", spotName: "پارک لاله" },
+      "102": { lat: "35.7", lon: "51.4", marketerName: "مینا محمدی", spotName: "میدان ولیعصر" }
+    };
+
+    processMarketer("101", 35.6895, 51.3895, marketerData); // موفق ✅
+    processMarketer("102", 35.6, 51.5, marketerData);       // خطا ❌
+  </script>
+
+</body>
+</html>
 
