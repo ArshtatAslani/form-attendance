@@ -123,7 +123,7 @@
     const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
     const gregorianDateText = now.toLocaleDateString('en-US');
 
-    datesDiv.textContent = `تاریخ شمسی: ${persianDateText} | تاریخ میلادی: ${gregorianDateText}`;
+    datesDiv.innerHTML = `تاریخ شمسی: ${persianDateText} <br> تاریخ میلادی: ${gregorianDateText}`;
   }
 
   showDates();
