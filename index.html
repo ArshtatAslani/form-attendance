@@ -92,7 +92,7 @@
   </footer>
 
 <script>
-function showDates() {
+  function showDates() {
   const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
   const nowTehran = new Date(nowTehranStr);
 
@@ -128,9 +128,8 @@ function showDates() {
   const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
   const gregorianDateText = nowTehran.toLocaleDateString('en-US');
 
-  document.getElementById("dates").innerHTML = `تاریخ شمسی: ${persianDateText} <br> تاریخ میلادی: ${gregorianDateText}`;
+  document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
 }
-
 
   showDates();
   setInterval(showDates, 30000);
@@ -255,7 +254,7 @@ function showDates() {
     }).then(() => {
       const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
-      setStatus(✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد., true);
+      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       document.getElementById("code").value = "";
       document.getElementById("type").value = "";
       document.getElementById("marketerName").value = "";
