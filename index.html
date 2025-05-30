@@ -161,7 +161,7 @@
       mode: "no-cors",
       body: form,
     }).then(() => {
-      const name = marketerData[code].marketerName || "بازاریاب";
+      const name = marketerData[code].promoterName || "بازاریاب";
       const spotName = marketerData[code].spotName || "";
     setStatus(`✅ ${name} عزیز، حضور شما در "اسپات ${spotName}" با موفقیت ثبت شد.`, true);
     }).catch(err => {
