@@ -18,8 +18,13 @@
       justify-content: center;
     }
     h2 {
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       color: #2c3e50;
+    }
+    #dateDisplay {
+      font-size: 18px;
+      margin-bottom: 30px;
+      direction: rtl;
     }
     input, select, button {
       width: 90%;
@@ -47,6 +52,12 @@
       font-weight: bold;
       min-height: 1.5em;
     }
+    #spotName, #marketerName {
+      margin: 10px auto;
+      font-weight: bold;
+      color: #34495e;
+      max-width: 300px;
+    }
     footer {
       margin-top: 40px;
       font-size: 14px;
@@ -58,8 +69,13 @@
 </head>
 <body>
   <h2>📍 ثبت حضور بازاریاب</h2>
+  <div id="dateDisplay"></div>
 
-  <input type="text" id="code" placeholder="کد بازاریاب را وارد کنید" />
+  <input type="text" id="code" placeholder="کد بازاریاب را وارد کنید" oninput="fetchMarketerInfo()" autocomplete="off" />
+  
+  <div id="spotName"></div>
+  <div id="marketerName"></div>
+
   <select id="type">
     <option value="شروع شیفت">شروع شیفت</option>
     <option value="پایان شیفت">پایان شیفت</option>
@@ -73,47 +89,74 @@
   </footer>
 
   <script>
-    function getLocation() {
-      const status = document.getElementById("status");
-      status.textContent = "در حال دریافت موقعیت مکانی...";
-      if (!navigator.geolocation) {
-        status.textContent = "مرورگر شما از GPS پشتیبانی نمی‌کند.";
-        return;
+    // برای نمایش تاریخ حرفه ای با استیکر متناسب
+    function showDate() {
+      const dateDiv = document.getElementById("dateDisplay");
+      const now = new Date();
+
+      const days = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+      const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
+      // تبدیل میلادی به شمسی ساده
+      function toJalali(gy, gm, gd) {
+        // کد ساده تبدیل میلادی به شمسی (از کتابخانه نبود، از اینجا کپی شده):
+        // (برای دقت بهتر پیشنهاد استفاده از js-jalali یا moment-jalaali ولی این برای نمونه کافیه)
+        var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+        var gy2 = (gm > 2) ? (gy + 1) : gy;
+        var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+        var jy = -1595 + (33 * parseInt(days / 12053));
+        days %= 12053;
+        jy += 4 * parseInt(days / 1461);
+        days %= 1461;
+        if (days > 365) {
+          jy += parseInt((days - 1) / 365);
+          days = (days - 1) % 365;
+        }
+        var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+        var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+        return [jy, jm, jd];
       }
 
-      navigator.geolocation.getCurrentPosition(sendForm, (err) => {
-        status.textContent = "❌ خطا در دریافت موقعیت: " + err.message;
-      }, { timeout: 10000 });
+      const [jy, jm, jd] = toJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const weekday = days[now.getDay()]; // توجه: JS یکشنبه=0، فارسی شنبه=6، پس اینجا باید اصلاح کنیم:
+
+      // چون JS: Sunday=0, Persian Saturday=6
+      // برای تطبیق، جاهای دیگه میتونیم اصلاح کنیم:
+      // تبدیل JS weekday به فارسی:
+      const persianDayIndex = (now.getDay() + 6) % 7; // Sunday(0)->6, Monday(1)->0,... Saturday(6)->5
+      const persianWeekday = days[persianDayIndex];
+
+      // استیکر ساده بر اساس روز هفته (مثلا 🌞 برای شنبه، 🌜 برای یکشنبه و غیره)
+      const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+
+      const dateText = `${persianWeekday} ${jd} ${months[jm -1]} ${jy} ${stickers[persianDayIndex]}`;
+
+      dateDiv.textContent = dateText;
     }
 
-    function sendForm(position) {
-      const code = document.getElementById("code").value.trim();
-      const type = document.getElementById("type").value;
-      const lat = position.coords.latitude.toFixed(6);
-      const lon = position.coords.longitude.toFixed(6);
-      const status = document.getElementById("status");
+    showDate();
+
+    // ذخیره دیتا اسپات و بازاریاب
+    let marketerData = {};
+
+    // گرفتن اطلاعات اسپات و بازاریاب با کد بازاریاب از سرور (API گوگل شیت)
+    function fetchMarketerInfo() {
+      const codeInput = document.getElementById("code");
+      const spotDiv = document.getElementById("spotName");
+      const marketerDiv = document.getElementById("marketerName");
+      const code = codeInput.value.trim();
 
       if (!code) {
-        status.textContent = "❗ لطفاً کد بازاریاب را وارد کنید.";
+        spotDiv.textContent = "";
+        marketerDiv.textContent = "";
         return;
       }
 
-      const form = new FormData();
-      form.append("entry.1655541032", type);
-      form.append("entry.1228562108", code);
-      form.append("entry.2093256559", `${lat}, ${lon}`);
+      // اگر دیتا قبلا ذخیره شده، استفاده کن
+      if (marketerData[code]) {
+        spotDiv.textContent = `اسپات: ${marketerData[code].spotName}`;
+        marketerDiv.textContent = `نام بازاریاب: ${marketerData[code].marketerName}`;
+        return;
+      }
 
-      fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
-        method: "POST",
-        mode: "no-cors",
-        body: form,
-      }).then(() => {
-        status.textContent = "✅ حضور با موفقیت ثبت شد.";
-      }).catch((err) => {
-        status.textContent = "❌ خطا در ارسال حضور.";
-        console.error(err);
-      });
-    }
-  </script>
-</body>
-</html>
+      fetch('https://script.google.com/macros/s/###YOUR_DEPLOYED_WEB_APP
