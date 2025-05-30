@@ -47,6 +47,7 @@
       font-weight: bold;
       min-height: 1.5em;
       color: #d35400;
+      white-space: pre-line;
     }
     #dates {
       margin-top: 20px;
@@ -84,35 +85,26 @@
   <script>
     let marketerData = {};
 
-    // آدرس API اسکریپت گوگل شیت (تغییر بده به اسکریپت خودت)
-    const apiURL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec";
+    const apiURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
-    // بارگذاری داده‌ها از API هنگام بارگذاری صفحه
     window.onload = function() {
       fetch(apiURL)
         .then(res => res.json())
         .then(data => {
           marketerData = data;
-          console.log("داده‌های بازاریاب‌ها:", marketerData);
         })
         .catch(err => {
-          console.error("خطا در بارگذاری داده‌ها:", err);
           setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
         });
 
-      // حذف listener که نام و اسپات رو نشون میداد (یعنی کاری انجام نمیده)
-      // نمایش تاریخ شمسی و میلادی به صورت لحظه‌ای
       showDates();
-      setInterval(showDates, 1000 * 30); // هر ۳۰ ثانیه آپدیت کن
+      setInterval(showDates, 30000);
     };
 
     function setStatus(msg, success = false) {
       const status = document.getElementById("status");
       status.style.color = success ? "green" : "#d35400";
       status.textContent = msg;
-    }
-    function clearStatus() {
-      document.getElementById("status").textContent = "";
     }
 
     function getLocation() {
@@ -143,17 +135,18 @@
         return;
       }
 
-      // محاسبه فاصله بین موقعیت GPS و اسپات (به متر)
       const spotLat = marketerData[code].lat;
       const spotLon = marketerData[code].lon;
       const dist = distanceInMeters(lat, lon, spotLat, spotLon);
 
+      const name = marketerData[code].marketerName || "بازاریاب";
+      const spot = marketerData[code].spotName || "اسپات";
+
       if (dist > 500) {
-        setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر)`);
+        setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید!\n📍 ${spot}`);
         return;
       }
 
-      // ارسال داده به گوگل فرم
       const form = new FormData();
       form.append("entry.1655541032", type);
       form.append("entry.1228562108", code);
@@ -164,9 +157,6 @@
         mode: "no-cors",
         body: form,
       }).then(() => {
-        // پیام موفقیت همراه با نام بازاریاب و نام اسپات
-        const name = marketerData[code].marketerName || "بازاریاب";
-        const spot = marketerData[code].spotName || "اسپات";
         setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       }).catch(err => {
         setStatus("❌ خطا در ارسال حضور.");
@@ -174,9 +164,8 @@
       });
     }
 
-    // تابع محاسبه فاصله بین دو مختصات (فرمول هارورسین)
     function distanceInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // شعاع زمین به متر
+      const R = 6371e3;
       const toRad = angle => angle * Math.PI / 180;
       const φ1 = toRad(lat1);
       const φ2 = toRad(lat2);
@@ -190,12 +179,10 @@
       return R * c;
     }
 
-    // نمایش تاریخ شمسی و میلادی
     function showDates() {
       const datesDiv = document.getElementById("dates");
       const now = new Date();
 
-      // شمسی با کتابخانه ساده
       const persianDate = toPersianDate(now);
       const gregorianDate = now.toLocaleString("en-US", {
         year: "numeric",
@@ -208,7 +195,6 @@
       datesDiv.textContent = `📅 تاریخ شمسی: ${persianDate} — تاریخ میلادی: ${gregorianDate}`;
     }
 
-    // تبدیل تاریخ میلادی به شمسی ساده (سال/ماه/روز)
     function toPersianDate(gDate) {
       return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
         year: 'numeric',
