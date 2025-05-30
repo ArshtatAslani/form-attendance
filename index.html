@@ -1,70 +1,100 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>ثبت حضور بازاریاب</title>
-    <style>
-      body { font-family: sans-serif; text-align: center; padding: 50px; direction: rtl; }
-      input, select, button { margin: 10px; padding: 10px; font-size: 16px; }
-    </style>
-  </head>
-  <body>
-    <h2>ثبت حضور بازاریاب</h2>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ثبت حضور بازاریاب</title>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding: 40px;
+      color: #333;
+    }
+    h2 {
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    input, select, button {
+      width: 90%;
+      max-width: 300px;
+      padding: 12px;
+      margin: 10px auto;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #27ae60;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📍 ثبت حضور بازاریاب</h2>
 
-    <label>کد بازاریاب:</label><br>
-    <input type="text" id="code" placeholder="مثلاً 123"><br>
+  <input type="text" id="code" placeholder="کد بازاریاب را وارد کنید" />
+  <select id="type">
+    <option value="شروع شیفت">شروع شیفت</option>
+    <option value="پایان شیفت">پایان شیفت</option>
+  </select>
+  <button onclick="getLocation()">ثبت حضور</button>
 
-    <label>نوع شیفت:</label><br>
-    <select id="type">
-      <option value="شروع شیفت">شروع شیفت</option>
-      <option value="پایان شیفت">پایان شیفت</option>
-    </select><br>
+  <p id="status"></p>
 
-    <button onclick="getLocation()">📍 ثبت حضور با GPS</button>
-
-    <p id="status"></p>
-
-    <script>
-      function getLocation() {
-        document.getElementById("status").innerText = "در حال دریافت موقعیت...";
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(sendForm, showError, {timeout: 10000});
-        } else {
-          document.getElementById("status").innerText = "مرورگر شما مکان‌یابی را پشتیبانی نمی‌کند.";
-        }
+  <script>
+    function getLocation() {
+      const status = document.getElementById("status");
+      status.textContent = "در حال دریافت موقعیت مکانی...";
+      if (!navigator.geolocation) {
+        status.textContent = "مرورگر شما از GPS پشتیبانی نمی‌کند.";
+        return;
       }
 
-      function sendForm(position) {
-        const code = document.getElementById("code").value.trim();
-        const type = document.getElementById("type").value;
-        const lat = position.coords.latitude.toFixed(6);
-        const lon = position.coords.longitude.toFixed(6);
+      navigator.geolocation.getCurrentPosition(sendForm, (err) => {
+        status.textContent = "❌ خطا در دریافت موقعیت: " + err.message;
+      }, { timeout: 10000 });
+    }
 
-        if (!code) {
-          document.getElementById("status").innerText = "لطفاً کد بازاریاب را وارد کنید.";
-          return;
-        }
+    function sendForm(position) {
+      const code = document.getElementById("code").value.trim();
+      const type = document.getElementById("type").value;
+      const lat = position.coords.latitude.toFixed(6);
+      const lon = position.coords.longitude.toFixed(6);
+      const status = document.getElementById("status");
 
-        const form = new FormData();
-        form.append("entry.1655541032", type);
-        form.append("entry.1228562108", code);
-        form.append("entry.2093256559", `${lat}, ${lon}`);
-
-        fetch("https://docs.google.com/forms/d/1UOFLCsAIiznWRVACmhQtCcEBFu_tggKW_dVeN_20x5g/edit#responses", {
-          method: "POST",
-          mode: "no-cors",
-          body: form,
-        }).then(() => {
-          document.getElementById("status").innerText = "✅ حضور با موفقیت ثبت شد.";
-        }).catch((error) => {
-          document.getElementById("status").innerText = "❌ خطا در ارسال اطلاعات.";
-          console.error(error);
-        });
+      if (!code) {
+        status.textContent = "❗ لطفاً کد بازاریاب را وارد کنید.";
+        return;
       }
 
-      function showError(error) {
-        document.getElementById("status").innerText = "❌ خطا در دریافت موقعیت: " + error.message;
-      }
-    </script>
-  </body>
+      const form = new FormData();
+      form.append("entry.1655541032", type); // نوع شیفت
+      form.append("entry.1228562108", code); // کد بازاریاب
+      form.append("entry.2093256559", `${lat}, ${lon}`); // لوکیشن
+
+      fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: form,
+      }).then(() => {
+        status.textContent = "✅ حضور با موفقیت ثبت شد.";
+      }).catch((err) => {
+        status.textContent = "❌ خطا در ارسال حضور.";
+        console.error(err);
+      });
+    }
+  </script>
+</body>
 </html>
