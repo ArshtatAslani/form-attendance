@@ -93,40 +93,37 @@
 <script>
   function showDates() {
     const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
-const nowTehran = new Date(nowTehranStr);
+    const nowTehran = new Date(nowTehranStr);
 
-const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
-function toJalali(gy, gm, gd) {
-  var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-  var gy2 = (gm > 2) ? (gy + 1) : gy;
-  var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-  var jy = -1595 + (33 * parseInt(days / 12053));
-  days %= 12053;
-  jy += 4 * parseInt(days / 1461);
-  days %= 1461;
-  if (days > 365) {
-    jy += parseInt((days - 1) / 365);
-    days = (days - 1) % 365;
-  }
-  var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
-  var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-  return [jy, jm, jd];
-}
+    function toJalali(gy, gm, gd) {
+      var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      var jy = -1595 + (33 * parseInt(days / 12053));
+      days %= 12053;
+      jy += 4 * parseInt(days / 1461);
+      days %= 1461;
+      if (days > 365) {
+        jy += parseInt((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+      return [jy, jm, jd];
+    }
 
-const persianDayIndex = (nowTehran.getDay() + 6) % 7;
-const persianWeekday = days[persianDayIndex];
-const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
-const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+    const persianDayIndex = (nowTehran.getDay() + 6) % 7;
+    const persianWeekday = days[persianDayIndex];
+    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
+    const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
 
-const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
-const gregorianDateText = nowTehran.toLocaleDateString('en-US');
+    const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
+    const gregorianDateText = nowTehran.toLocaleDateString('en-US');
 
-console.log('تاریخ شمسی:', persianDateText);
-console.log('تاریخ میلادی:', gregorianDateText);
-
-    datesDiv.innerHTML = `تاریخ شمسی: ${persianDateText} <br> تاریخ میلادی: ${gregorianDateText}`;
+    document.getElementById("dates").innerHTML = `تاریخ شمسی: ${persianDateText} <br> تاریخ میلادی: ${gregorianDateText}`;
   }
 
   showDates();
@@ -148,8 +145,11 @@ console.log('تاریخ میلادی:', gregorianDateText);
         setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
       });
 
-    // اضافه کردن رویداد تغییر به select نوع ثبت حضور
+    // رویداد تغییر در انتخاب نوع ثبت حضور
     document.getElementById("type").addEventListener("change", updateMarketerName);
+
+    // رویداد تغییر در فیلد کد بازاریاب (input)
+    document.getElementById("code").addEventListener("input", updateMarketerName);
   };
 
   function setStatus(msg, success = false) {
@@ -162,21 +162,32 @@ console.log('تاریخ میلادی:', gregorianDateText);
     document.getElementById("status").textContent = "";
   }
 
-  // وقتی نوع ثبت حضور تغییر می‌کند، نام بازاریاب آپدیت می‌شود
+  // به‌روزرسانی نام بازاریاب با توجه به کد و نوع ثبت حضور
   function updateMarketerName() {
     const code = document.getElementById("code").value.trim();
+    const type = document.getElementById("type").value;
     const nameInput = document.getElementById("marketerName");
+
     if (!code) {
       nameInput.value = "";
+      clearStatus();
       return;
     }
-    if (marketerData.hasOwnProperty(code)) {
-      nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
-      clearStatus();
-    } else {
+
+    if (!marketerData.hasOwnProperty(code)) {
       nameInput.value = "کد بازاریاب معتبر نیست!";
       setStatus("❌ کد بازاریاب معتبر نیست.");
+      return;
     }
+
+    if (!type) {
+      nameInput.value = "";
+      clearStatus();
+      return;
+    }
+
+    nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
+    clearStatus();
   }
 
   function getLocation() {
@@ -238,29 +249,4 @@ console.log('تاریخ میلادی:', gregorianDateText);
     }).then(() => {
       const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
-    }).catch(err => {
-      setStatus("❌ خطا در ارسال اطلاعات.");
-      console.error(err);
-    });
-  }
-
-  // محاسبه فاصله دو نقطه بر حسب متر (فرمول هارورسین)
-  function distanceInMeters(lat1, lon1, lat2, lon2) {
-    function toRad(x) {
-      return x * Math.PI / 180;
-    }
-    var R = 6378137;
-    var dLat = toRad(lat2 - lat1);
-    var dLon = toRad(lon2 - lon1);
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c;
-    return d;
-  }
-</script>
-
-</body>
-</html>
+      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت
