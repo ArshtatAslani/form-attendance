@@ -48,11 +48,6 @@
       min-height: 1.5em;
       color: #d35400;
     }
-    #spotName, #marketerName {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #2980b9;
-    }
     #dates {
       margin-top: 20px;
       font-size: 14px;
@@ -71,8 +66,6 @@
   <h2>📍 ثبت حضور بازاریاب</h2>
 
   <input type="text" id="code" placeholder="کد بازاریاب را وارد کنید" autocomplete="off" />
-  <div id="spotName"></div>
-  <div id="marketerName"></div>
 
   <select id="type" aria-label="نوع ثبت حضور">
     <option value="شروع شیفت">شروع شیفت</option>
@@ -92,7 +85,7 @@
     let marketerData = {};
 
     // آدرس API اسکریپت گوگل شیت (تغییر بده به اسکریپت خودت)
-    const apiURL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec";
+    const apiURL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
     // بارگذاری داده‌ها از API هنگام بارگذاری صفحه
     window.onload = function() {
@@ -107,37 +100,19 @@
           setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
         });
 
-      // نمایش نام اسپات و بازاریاب هنگام تایپ کد
-      document.getElementById("code").addEventListener("input", function() {
-        const code = this.value.trim();
-        if (marketerData.hasOwnProperty(code)) {
-          setSpotName("اسپات: " + marketerData[code].spotName);
-          setMarketerName("نام بازاریاب: " + marketerData[code].marketerName);
-          clearStatus();
-        } else {
-          setSpotName("");
-          setMarketerName("");
-        }
-      });
-
+      // حذف listener که نام و اسپات رو نشون میداد (یعنی کاری انجام نمیده)
       // نمایش تاریخ شمسی و میلادی به صورت لحظه‌ای
       showDates();
       setInterval(showDates, 1000 * 30); // هر ۳۰ ثانیه آپدیت کن
     };
 
-    function setStatus(msg) {
+    function setStatus(msg, success = false) {
       const status = document.getElementById("status");
-      status.style.color = msg.startsWith("✅") ? "green" : "#d35400";
+      status.style.color = success ? "green" : "#d35400";
       status.textContent = msg;
     }
     function clearStatus() {
       document.getElementById("status").textContent = "";
-    }
-    function setSpotName(msg) {
-      document.getElementById("spotName").textContent = msg;
-    }
-    function setMarketerName(msg) {
-      document.getElementById("marketerName").textContent = msg;
     }
 
     function getLocation() {
@@ -189,7 +164,10 @@
         mode: "no-cors",
         body: form,
       }).then(() => {
-        setStatus("✅ حضور با موفقیت ثبت شد.");
+        // پیام موفقیت همراه با نام بازاریاب و نام اسپات
+        const name = marketerData[code].marketerName || "بازاریاب";
+        const spot = marketerData[code].spotName || "اسپات";
+        setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
       }).catch(err => {
         setStatus("❌ خطا در ارسال حضور.");
         console.error(err);
@@ -232,18 +210,11 @@
 
     // تبدیل تاریخ میلادی به شمسی ساده (سال/ماه/روز)
     function toPersianDate(gDate) {
-      const months = [
-        "فروردین", "اردیبهشت", "خرداد",
-        "تیر", "مرداد", "شهریور",
-        "مهر", "آبان", "آذر",
-        "دی", "بهمن", "اسفند"
-      ];
-      const pDate = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       }).format(gDate);
-      return pDate;
     }
   </script>
 </body>
