@@ -159,4 +159,92 @@
         return;
       }
 
-      fetch('https://script.google.com/macros/s/###YOUR_DEPLOYED_WEB_APP
+      fetch('https://script.google.com/macros/s/###YOUR_DEPLOYED_WEB_APP_URL###/exec')
+        .then(res => res.json())
+        .then(data => {
+          marketerData = data;
+          if (marketerData[code]) {
+            spotDiv.textContent = `اسپات: ${marketerData[code].spotName}`;
+            marketerDiv.textContent = `نام بازاریاب: ${marketerData[code].marketerName}`;
+          } else {
+            spotDiv.textContent = "کد بازاریاب یافت نشد";
+            marketerDiv.textContent = "";
+          }
+        })
+        .catch(e => {
+          spotDiv.textContent = "خطا در دریافت داده‌ها";
+          marketerDiv.textContent = "";
+          console.error(e);
+        });
+    }
+
+    // محاسبه فاصله بین دو مختصات (در متر)
+    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371000; // شعاع زمین به متر
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+    function deg2rad(deg) {
+      return deg * (Math.PI/180);
+    }
+
+    // گرفتن موقعیت کاربر و ثبت حضور
+    function getLocation() {
+      const status = document.getElementById("status");
+      const code = document.getElementById("code").value.trim();
+      const type = document.getElementById("type").value;
+
+      if (!code) {
+        status.textContent = "لطفا کد بازاریاب را وارد کنید.";
+        return;
+      }
+
+      if (!marketerData[code]) {
+        status.textContent = "کد بازاریاب معتبر نیست.";
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        status.textContent = "مرورگر شما از مکان‌یابی پشتیبانی نمی‌کند.";
+        return;
+      }
+
+      status.textContent = "لطفا منتظر بمانید، موقعیت شما در حال دریافت است...";
+
+      navigator.geolocation.getCurrentPosition(position => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+
+        const spotLat = marketerData[code].lat;
+        const spotLon = marketerData[code].lon;
+
+        const distance = getDistanceFromLatLonInMeters(userLat, userLon, spotLat, spotLon);
+
+        if (distance > 500) {
+          status.textContent = `شما بیش از ۵۰۰ متر با اسپات خود فاصله دارید (فاصله: ${Math.round(distance)} متر). ثبت حضور امکان‌پذیر نیست.`;
+          return;
+        }
+
+        status.textContent = "ثبت حضور در حال انجام...";
+
+        google.script.run
+          .withSuccessHandler(() => {
+            status.textContent = "حضور شما با موفقیت ثبت شد. 🌟";
+          })
+          .withFailureHandler(err => {
+            status.textContent = "خطا در ثبت حضور: " + err.message;
+          })
+          .addAttendance(code, userLat, userLon, type);
+
+      }, error => {
+        status.textContent = "خطا در دریافت موقعیت: " + error.message;
+      });
+    }
+  </script>
+</body>
+</html>
