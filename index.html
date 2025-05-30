@@ -139,7 +139,7 @@
       const spotLon = marketerData[code].lon;
       const dist = distanceInMeters(lat, lon, spotLat, spotLon);
 
-      const name = marketerData[code].marketerName || "بازاریاب";
+      const name = marketerData[code].promoterName || "بازاریاب";
       const spot = marketerData[code].spotName || "اسپات";
 
       if (dist > 500) {
