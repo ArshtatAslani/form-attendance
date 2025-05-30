@@ -92,7 +92,12 @@
     fetch(apiURL)
       .then(res => res.json())
       .then(data => {
-        marketerData = data;
+        marketerData = {};
+        data.forEach(item => {
+          if (item.code) {
+            marketerData[item.code] = item;
+          }
+        });
         console.log("داده‌های بازاریاب‌ها:", marketerData);
       })
       .catch(err => {
@@ -147,7 +152,8 @@
     const dist = distanceInMeters(lat, lon, spotLat, spotLon);
 
     if (dist > 500) {
-      setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر)`);
+      const spotName = marketerData[code].spotName || "";
+      setStatus(`❌ فاصله شما بیش از ۵۰۰ متر است! (${Math.round(dist)} متر)\n📍 ${spotName}`);
       return;
     }
 
@@ -163,7 +169,7 @@
     }).then(() => {
       const name = marketerData[code].promoterName || "بازاریاب";
       const spotName = marketerData[code].spotName || "";
-    setStatus(`✅ ${name} عزیز، حضور شما در "اسپات ${spotName}" با موفقیت ثبت شد.`, true);
+      setStatus(`✅ ${name} عزیز، حضور شما در "${spotName}" با موفقیت ثبت شد.`, true);
     }).catch(err => {
       setStatus("❌ خطا در ارسال حضور.");
       console.error(err);
