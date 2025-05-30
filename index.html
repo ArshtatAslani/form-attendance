@@ -162,8 +162,8 @@
       body: form,
     }).then(() => {
       const name = marketerData[code].marketerName || "بازاریاب";
-      const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
+      const spotName = marketerData[code].spotName || "";
+    setStatus(`✅ ${name} عزیز، حضور شما در "اسپات ${spotName}" با موفقیت ثبت شد.`, true);
     }).catch(err => {
       setStatus("❌ خطا در ارسال حضور.");
       console.error(err);
