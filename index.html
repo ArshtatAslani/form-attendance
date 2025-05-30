@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ثبت حضور بازاریاب</title>
   <style>
     body {
@@ -38,6 +38,7 @@
     #status {
       margin-top: 20px;
       font-weight: bold;
+      min-height: 24px;
     }
   </style>
 </head>
@@ -54,6 +55,36 @@
   <p id="status"></p>
 
   <script>
+    let locations = {}; // محل ذخیره مختصات بازاریاب‌ها
+
+    // آدرس وب اپ اسکریپت شما (لینک Deploy شده)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec"; // ← این رو با لینک خودت جایگزین کن
+
+    // بارگذاری مختصات بازاریاب‌ها از Google Sheets
+    fetch(SCRIPT_URL)
+      .then(res => res.json())
+      .then(data => {
+        locations = data;
+        console.log("مختصات بازاریاب‌ها بارگذاری شد:", locations);
+      })
+      .catch(err => {
+        console.error("❌ خطا در بارگذاری مختصات:", err);
+        document.getElementById("status").textContent = "خطا در بارگذاری اطلاعات بازاریاب‌ها";
+      });
+
+    // تابع محاسبه فاصله دو نقطه جغرافیایی به متر
+    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371000; // شعاع زمین به متر
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
     function getLocation() {
       const status = document.getElementById("status");
       status.textContent = "در حال دریافت موقعیت مکانی...";
@@ -70,8 +101,8 @@
     function sendForm(position) {
       const code = document.getElementById("code").value.trim();
       const type = document.getElementById("type").value;
-      const lat = position.coords.latitude.toFixed(6);
-      const lon = position.coords.longitude.toFixed(6);
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
       const status = document.getElementById("status");
 
       if (!code) {
@@ -79,10 +110,24 @@
         return;
       }
 
+      if (!locations[code]) {
+        status.textContent = "❌ کد بازاریاب یافت نشد.";
+        return;
+      }
+
+      const loc = locations[code];
+      const distance = getDistanceFromLatLonInMeters(lat, lon, loc.lat, loc.lon);
+
+      if (distance > 500) {
+        status.textContent = `❌ شما بیش از ۵۰۰ متر از موقعیت تعریف‌شده فاصله دارید (فاصله: ${distance.toFixed(0)} متر).`;
+        return;
+      }
+
+      // آماده‌سازی داده‌ها برای ارسال به گوگل فرم
       const form = new FormData();
-      form.append("entry.1655541032", type); // نوع شیفت
-      form.append("entry.1228562108", code); // کد بازاریاب
-      form.append("entry.2093256559", `${lat}, ${lon}`); // لوکیشن
+      form.append("entry.1655541032", type);           // نوع شیفت
+      form.append("entry.1228562108", code);           // کد بازاریاب
+      form.append("entry.2093256559", `${lat.toFixed(6)}, ${lon.toFixed(6)}`); // لوکیشن
 
       fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
         method: "POST",
