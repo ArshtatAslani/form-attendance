@@ -92,7 +92,7 @@
   </footer>
 
 <script>
-  function showDates() {
+function showDates() {
   const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
   const nowTehran = new Date(nowTehranStr);
 
@@ -125,11 +125,12 @@
   const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
   const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
 
-  const persianDateText = ${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]};
+  const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
   const gregorianDateText = nowTehran.toLocaleDateString('en-US');
 
-  document.getElementById("dates").innerHTML = ${persianDateText} <br> ${gregorianDateText};
+  document.getElementById("dates").innerHTML = `تاریخ شمسی: ${persianDateText} <br> تاریخ میلادی: ${gregorianDateText}`;
 }
+
 
   showDates();
   setInterval(showDates, 30000);
