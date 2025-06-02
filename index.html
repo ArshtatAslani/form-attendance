@@ -210,28 +210,35 @@
     }
   }
 
-  // تابع دریافت داده‌های بازاریاب‌ها
-  async function fetchMarketerData() {
-    try {
-      setStatus("در حال دریافت اطلاعات بازاریاب‌ها...");
-      
-      const response = await fetch(apiURL);
-      if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
-      
-      const data = await response.json();
-      marketerData = data;
-      console.log("داده‌های بازاریاب‌ها:", marketerData);
-      
-      document.getElementById('captureBtn').style.display = "block";
-      setStatus("", true);
-      return true;
-    } catch (err) {
-      console.error("خطا در دریافت داده‌ها:", err);
-      setStatus("❌ خطا در دریافت اطلاعات بازاریاب‌ها از سرور");
-      return false;
+// در تابع fetchMarketerData
+async function fetchMarketerData() {
+  try {
+    setStatus("در حال دریافت اطلاعات بازاریاب‌ها...");
+    
+    const response = await fetch(apiURL);
+    if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
+    
+    const data = await response.json();
+    console.log("داده‌های دریافتی از سرور:", data); // برای دیباگ
+    
+    // بررسی ساختار داده
+    if (Object.keys(data).length > 0) {
+      const sampleKey = Object.keys(data)[0];
+      if (!data[sampleKey].marketerName || !data[sampleKey].spotName) {
+        throw new Error("ساختار داده ناقص است");
+      }
     }
+    
+    marketerData = data;
+    document.getElementById('captureBtn').style.display = "block";
+    setStatus("", true);
+    return true;
+  } catch (err) {
+    console.error("خطا در دریافت داده‌ها:", err);
+    setStatus("❌ مشکل در داده‌های دریافتی: " + err.message);
+    return false;
   }
-
+}
   // تابع نمایش اطلاعات بازاریاب
   function updateMarketerInfo() {
     const code = document.getElementById("code").value.trim();
