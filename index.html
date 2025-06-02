@@ -25,7 +25,7 @@
       width: 90%;
       max-width: 320px;
       padding: 12px;
-      margin: 10px auto 5px auto;
+      margin: 10px auto 5px auto;;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -48,8 +48,7 @@
       background-color: #27ae60;
     }
     #status {
-      position: relative;
-      top: -10px;
+      -top: 10px;
       font-weight: bold;
       min-height: 1.5em;
       color: #d35400;
@@ -69,7 +68,6 @@
     }
     #canvas {
       display: none;
-      margin-bottom: 10px;
     }
     footer {
       margin-top: 30px;
@@ -102,7 +100,6 @@
 
   <video id="video" width="320" height="240" autoplay></video>
   <canvas id="canvas" width="320" height="240"></canvas>
-  <button id="snap">📸 گرفتن عکس</button>
 
   <footer>
     Dev by: <br> Snapp North Zone Sales Management 💎
@@ -171,10 +168,20 @@
     document.getElementById("type").addEventListener("change", updateMarketerName);
     document.getElementById("code").addEventListener("input", updateMarketerName);
 
-    // راه‌اندازی وب‌کم
-    navigator.mediaDevices.getUserMedia({ video: true })
+    // راه‌اندازی وب‌کم با دوربین پشت
+    navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: { exact: "environment" } }  // اینجا دوربین پشت تنظیم شده
+    })
       .then(stream => {
         document.getElementById('video').srcObject = stream;
+      })
+      .catch(err => {
+        console.warn("دوربین پشت در دسترس نیست، دوربین پیش‌فرض باز می‌شود.");
+        // fallback به دوربین پیش‌فرض
+        return navigator.mediaDevices.getUserMedia({ video: true });
+      })
+      .then(stream => {
+        if (stream) document.getElementById('video').srcObject = stream;
       })
       .catch(err => {
         console.error("خطا در دسترسی به وب‌کم:", err);
@@ -222,73 +229,75 @@
     clearStatus();
   }
 
-  // گرفتن عکس و آپلود
-  document.getElementById("snap").onclick = () => {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
+  // تابع گرفتن عکس
+  function takePhoto() {
+    return new Promise((resolve, reject) => {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject("خطا در گرفتن عکس");
+        }
+      }, 'image/jpeg', 0.9);
+    });
+  }
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.style.display = 'block';
+  // ثبت حضور
+  document.getElementById("registerBtn").addEventListener("click", async () => {
+    setStatus("در حال ثبت... لطفاً صبر کنید");
 
-    // غیرفعال کردن دکمه پس از عکس گرفتن
-    document.getElementById("snap").disabled = true;
-    setStatus("✅ عکس گرفته شد. در حال آپلود...");
-
-    canvas.toBlob(blob => {
-      const formData = new FormData();
-      formData.append('file', blob, 'photo.jpg');
-
-      fetch('https://example.com/upload-photo', {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.text())
-      .then(txt => {
-        setStatus("✅ عکس با موفقیت آپلود شد", true);
-        document.getElementById("snap").disabled = false;
-      })
-      .catch(err => {
-        setStatus("❌ خطا در آپلود عکس: " + err);
-        document.getElementById("snap").disabled = false;
-      });
-    }, 'image/jpeg');
-  };
-
-  // ارسال داده فرم به سرور (مثال)
-  document.getElementById("registerBtn").onclick = () => {
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
-    const name = document.getElementById("marketerName").value.trim();
+    const name = document.getElementById("marketerName").value;
 
     if (!code) {
-      setStatus("⚠️ لطفا کد بازاریابی را وارد کنید");
+      setStatus("لطفاً کد بازاریابی را وارد کنید");
       return;
     }
     if (!type) {
-      setStatus("⚠️ لطفا نوع ثبت حضور را انتخاب کنید");
+      setStatus("لطفاً نوع ثبت حضور را انتخاب کنید");
       return;
     }
     if (!name) {
-      setStatus("⚠️ نام بازاریاب یافت نشد یا فعال نیست");
+      setStatus("نام بازاریاب معتبر نیست");
       return;
     }
 
-    setStatus("در حال ارسال داده‌ها...");
+    try {
+      // عکس بگیر
+      const photoBlob = await takePhoto();
 
-    fetch(apiURL + "?code=" + encodeURIComponent(code) + "&type=" + encodeURIComponent(type))
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setStatus("✅ حضور با موفقیت ثبت شد", true);
-        } else {
-          setStatus("❌ خطا در ثبت حضور: " + (data.message || "نامشخص"));
-        }
-      })
-      .catch(err => {
-        setStatus("❌ خطا در ارسال داده‌ها: " + err);
+      // داده‌ها را آماده کن
+      const formData = new FormData();
+      formData.append("code", code);
+      formData.append("type", type);
+      formData.append("name", name);
+      formData.append("photo", photoBlob, "photo.jpg");
+
+      // ارسال به سرور (آدرس api را باید جایگزین کنی)
+      const response = await fetch(apiURL, {
+        method: "POST",
+        body: formData,
       });
-  };
+
+      const result = await response.json();
+
+      if (result.success) {
+        setStatus("✔️ ثبت حضور با موفقیت انجام شد", true);
+        document.getElementById("code").value = "";
+        document.getElementById("type").value = "";
+        document.getElementById("marketerName").value = "";
+      } else {
+        setStatus("❌ ثبت حضور با خطا مواجه شد: " + (result.message || "خطای نامشخص"));
+      }
+    } catch (error) {
+      setStatus("❌ خطا در ثبت حضور: " + error);
+    }
+  });
 </script>
 
 </body>
