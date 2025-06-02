@@ -9,7 +9,7 @@
       font-family: 'Vazirmatn', sans-serif;
       background-color: #f8f9fa;
       text-align: center;
-      padding: 40px;
+      padding: 20px;
       color: #333;
       margin: 0;
       min-height: 100vh;
@@ -25,7 +25,7 @@
       width: 90%;
       max-width: 320px;
       padding: 12px;
-      margin: 10px auto 5px auto;;
+      margin: 10px auto 5px auto;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -65,10 +65,10 @@
       text-align: left;
       direction: ltr;
     }
-    /* استایل‌های دوربین و عکس */
+    /* استایل‌های دوربین و عکس عمودی */
     #videoContainer {
-      width: 320px;
-      height: 240px;
+      width: 240px;
+      height: 320px;
       margin: 0 auto 20px auto;
       position: relative;
       border-radius: 8px;
@@ -80,9 +80,20 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transform: scaleX(-1); /* آینه‌ای کردن تصویر */
     }
     #canvasElement {
       display: none;
+    }
+    #photoPreview {
+      display: none;
+      width: 240px;
+      height: 320px;
+      margin: 0 auto 20px auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      object-fit: cover;
+      transform: scaleX(-1); /* آینه‌ای کردن تصویر پیش‌نمایش */
     }
     #captureBtn {
       display: none;
@@ -100,21 +111,24 @@
     #retakeBtn:hover {
       background-color: #2980b9;
     }
-    #photoPreview {
-      display: none;
-      width: 320px;
-      height: 240px;
-      margin: 0 auto 20px auto;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      object-fit: cover;
+    #submitBtn {
+      margin-top: 10px;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 320px;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
   <h2>📍 ثبت حضور بازاریاب</h2>
 
-  <!-- دوربین فعال هنگام ورود -->
+  <!-- دوربین عمودی -->
   <div id="videoContainer">
     <video id="videoElement" autoplay playsinline></video>
   </div>
@@ -132,9 +146,11 @@
 
   <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
 
-  <button id="captureBtn" onclick="capturePhoto()">عکس بگیر</button>
-  <button id="retakeBtn" onclick="retakePhoto()">عکس مجدد</button>
-  <button id="submitBtn" onclick="submitRegistration()">ثبت حضور</button>
+  <div class="button-group">
+    <button id="captureBtn" onclick="capturePhoto()">عکس بگیر</button>
+    <button id="retakeBtn" onclick="retakePhoto()">عکس مجدد</button>
+    <button id="submitBtn" onclick="submitRegistration()">ثبت حضور</button>
+  </div>
 
   <p id="status"></p>
 
@@ -162,38 +178,46 @@
     document.getElementById("code").addEventListener("input", updateMarketerName);
   };
 
-  // تابع راه‌اندازی دوربین
+  // تابع راه‌اندازی دوربین با حالت عمودی
   async function initCamera() {
     try {
       const video = document.getElementById('videoElement');
       currentStream = await navigator.mediaDevices.getUserMedia({
         video: { 
           facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 720 },  // تنظیم برای حالت عمودی
+          height: { ideal: 1280 }
         }
       });
       video.srcObject = currentStream;
+      
+      // تنظیم جهت دوربین برای دستگاه‌های مختلف
+      if (window.screen.orientation) {
+        await window.screen.orientation.lock('portrait');
+      }
     } catch (err) {
       console.error("خطا در دسترسی به دوربین:", err);
       setStatus("❌ دسترسی به دوربین ممکن نیست. لطفاً مجوزها را بررسی کنید.");
     }
   }
 
-  // تابع گرفتن عکس
+  // تابع گرفتن عکس با حالت عمودی
   function capturePhoto() {
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('canvasElement');
     const photoPreview = document.getElementById('photoPreview');
     
+    // تنظیم ابعاد کانواس برای حالت عمودی
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const context = canvas.getContext('2d');
     
-    // تنظیم جهت عکس (آینه‌ای برای نمایش طبیعی‌تر)
+    // چرخش تصویر برای حالت عمودی
+    context.save();
     context.translate(canvas.width, 0);
     context.scale(-1, 1);
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    context.restore();
     
     // ذخیره عکس به عنوان Data URL
     capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
@@ -269,7 +293,8 @@
         persianDate: persianDate,
         photo: capturedPhoto,
         deviceInfo: navigator.userAgent,
-        location: "دریافت نشد" // می‌توانید با API موقعیت مکانی اضافه کنید
+        location: "دریافت نشد",
+        orientation: "portrait" // اضافه کردن اطلاعات جهت‌گیری عکس
       };
 
       // ارسال به سرور
@@ -295,14 +320,13 @@
     }
   }
 
-  // توابع کمکی
+  // توابع کمکی (بقیه توابع بدون تغییر مانند قبل)
   function fetchMarketerData() {
     fetch(apiURL)
       .then(res => res.json())
       .then(data => {
         marketerData = data;
         console.log("داده‌های بازاریاب‌ها:", marketerData);
-        // نمایش دکمه عکس بعد از بارگذاری داده‌ها
         document.getElementById('captureBtn').style.display = "block";
       })
       .catch(err => {
@@ -360,7 +384,6 @@
     clearStatus();
   }
 
-  // توابع تاریخ و تقویم
   function showDates() {
     const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
     const nowTehran = new Date(nowTehranStr);
