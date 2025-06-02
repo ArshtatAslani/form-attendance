@@ -58,6 +58,17 @@
       font-size: 14px;
       color: #555;
     }
+    #video, #canvas {
+      margin: 10px auto;
+      border-radius: 8px;
+      max-width: 320px;
+      width: 90%;
+      height: auto;
+      direction: ltr;
+    }
+    #canvas {
+      display: none;
+    }
     footer {
       margin-top: 30px;
       font-size: 14px;
@@ -81,61 +92,66 @@
 
   <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
 
-  <button onclick="getLocation()">ثبت حضور</button>
+  <button id="registerBtn">ثبت حضور</button>
 
   <p id="status"></p>
 
   <div id="dates"></div>
+
+  <video id="video" width="320" height="240" autoplay></video>
+  <button id="snap">📸 گرفتن عکس</button>
+  <canvas id="canvas" width="320" height="240"></canvas>
 
   <footer>
     Dev by: <br> Snapp North Zone Sales Management 💎
   </footer>
 
 <script>
+  // تاریخ شمسی و میلادی
   function showDates() {
-  const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
-  const nowTehran = new Date(nowTehranStr);
+    const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
+    const nowTehran = new Date(nowTehranStr);
 
-  const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-  const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
-  function toJalali(gy, gm, gd) {
-    var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-    var gy2 = (gm > 2) ? (gy + 1) : gy;
-    var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-    var jy = -1595 + (33 * parseInt(days / 12053));
-    days %= 12053;
-    jy += 4 * parseInt(days / 1461);
-    days %= 1461;
-    if (days > 365) {
-      jy += parseInt((days - 1) / 365);
-      days = (days - 1) % 365;
+    function toJalali(gy, gm, gd) {
+      var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      var jy = -1595 + (33 * parseInt(days / 12053));
+      days %= 12053;
+      jy += 4 * parseInt(days / 1461);
+      days %= 1461;
+      if (days > 365) {
+        jy += parseInt((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+      return [jy, jm, jd];
     }
-    var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
-    var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-    return [jy, jm, jd];
+
+    function getPersianWeekday(date) {
+      return (date.getDay() + 1) % 7;
+    }
+
+    const persianDayIndex = getPersianWeekday(nowTehran);
+    const persianWeekday = days[persianDayIndex];
+    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
+    const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+
+    const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
+    const gregorianDateText = nowTehran.toLocaleDateString('en-US');
+
+    document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
   }
-
-  function getPersianWeekday(date) {
-    return (date.getDay() + 1) % 7;
-  }
-
-  const persianDayIndex = getPersianWeekday(nowTehran);
-  const persianWeekday = days[persianDayIndex];
-  const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
-  const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
-
-  const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
-  const gregorianDateText = nowTehran.toLocaleDateString('en-US');
-
-  document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
-}
 
   showDates();
   setInterval(showDates, 30000);
 
+  // داده بازاریاب‌ها
   let marketerData = {};
-
   const apiURL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec";
 
   window.onload = function() {
@@ -150,11 +166,17 @@
         setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
       });
 
-    // رویداد تغییر در انتخاب نوع ثبت حضور
     document.getElementById("type").addEventListener("change", updateMarketerName);
-
-    // رویداد تغییر در فیلد کد بازاریاب (input)
     document.getElementById("code").addEventListener("input", updateMarketerName);
+
+    // راه‌اندازی وب‌کم
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        document.getElementById('video').srcObject = stream;
+      })
+      .catch(err => {
+        console.error("خطا در دسترسی به وب‌کم:", err);
+      });
   };
 
   function setStatus(msg, success = false) {
@@ -179,104 +201,101 @@
       return;
     }
 
-    if (!marketerData.hasOwnProperty(code)) {
-      nameInput.value = "کد بازاریاب معتبر نیست!";
-      setStatus("❌ کد بازاریاب معتبر نیست.");
-      return;
-    }
-
-    if (!type) {
+    if (!marketerData[code]) {
       nameInput.value = "";
-      clearStatus();
+      setStatus("⚠️ کد بازاریابی یافت نشد");
       return;
     }
 
-    nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
+    // فرض بر اینکه داده‌ها به شکل { code: {name: "", active: true/false} }
+    const marketer = marketerData[code];
+
+    if (!marketer.active) {
+      setStatus("⚠️ این بازاریاب فعال نیست");
+      nameInput.value = "";
+      return;
+    }
+
+    nameInput.value = marketer.name || "";
     clearStatus();
   }
 
-  function getLocation() {
-    clearStatus();
+  // گرفتن عکس و آپلود
+  document.getElementById("snap").onclick = () => {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+      // آپلود عکس
+      const formData = new FormData();
+      formData.append('file', blob, 'photo.jpg');
+
+      fetch('YOUR_PHOTO_UPLOAD_URL', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.text())
+      .then(txt => {
+        alert("✅ عکس با موفقیت آپلود شد");
+      })
+      .catch(err => {
+        alert("❌ خطا در آپلود عکس: " + err);
+      });
+    }, 'image/jpeg');
+  };
+
+  // ارسال داده فرم به سرور (مثال)
+  document.getElementById("registerBtn").onclick = () => {
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
+    const name = document.getElementById("marketerName").value.trim();
 
-    if (!code) {
-      setStatus("❗ لطفاً کد بازاریاب را وارد کنید.");
-      nameInput.value = "";
-      return;
-    }
-    if (!type) {
-      setStatus("❗ لطفاً نوع ثبت حضور را انتخاب کنید.");
-      return;
-    }
-    if (!marketerData.hasOwnProperty(code)) {
-      setStatus("❌ کد بازاریاب معتبر نیست.");
-      nameInput.value = "کد بازاریاب معتبر نیست!";
+    if (!code || !type) {
+      setStatus("لطفاً کد و نوع ثبت حضور را وارد کنید");
       return;
     }
 
-    setStatus("در حال دریافت موقعیت مکانی...");
+    setStatus("در حال ارسال اطلاعات...");
+
+    // موقعیت مکانی
     if (!navigator.geolocation) {
-      setStatus("مرورگر شما از GPS پشتیبانی نمی‌کند.");
+      setStatus("موقعیت مکانی در این مرورگر پشتیبانی نمی‌شود");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(sendForm, err => {
-      setStatus("❌ خطا در دریافت موقعیت: " + err.message);
-    }, { timeout: 10000 });
-  }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
 
-  function sendForm(position) {
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
+        const dataToSend = {
+          code, type, name, lat, lon
+        };
 
-    const spotLat = marketerData[code].lat;
-    const spotLon = marketerData[code].lon;
-    const dist = distanceInMeters(lat, lon, spotLat, spotLon);
-
-    if (dist > 500) {
-      setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر)`);
-      return;
-    }
-
-    const form = new FormData();
-    form.append("entry.1655541032", type);
-    form.append("entry.1228562108", code);
-    form.append("entry.2093256559", `${lat.toFixed(6)}, ${lon.toFixed(6)}`);
-
-    fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
-      method: "POST",
-      mode: "no-cors",
-      body: form,
-    }).then(() => {
-      const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
-      const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
-      document.getElementById("code").value = "";
-      document.getElementById("type").value = "";
-      document.getElementById("marketerName").value = "";
-    }).catch(err => {
-      setStatus("❌ خطا در ارسال فرم. لطفا دوباره تلاش کنید.");
-      console.error(err);
-    });
-  }
-
-  // تابع محاسبه فاصله بر حسب متر (هارساين)
-  function distanceInMeters(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const toRad = angle => (angle * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
+        fetch(apiURL, {
+          method: 'POST',
+          body: JSON.stringify(dataToSend),
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(resJson => {
+          if (resJson.success) {
+            setStatus("✅ ثبت حضور موفق بود", true);
+          } else {
+            setStatus("❌ خطا در ثبت حضور");
+          }
+        })
+        .catch(err => {
+          setStatus("❌ خطا در ارسال: " + err);
+        });
+      },
+      (err) => {
+        setStatus("❌ خطا در دریافت موقعیت مکانی: " + err.message);
+      }
+    );
+  };
 </script>
-
 </body>
 </html>
