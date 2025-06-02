@@ -78,7 +78,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scaleX(-1);
       display: block;
     }
     #photoPreview {
@@ -88,7 +87,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scaleX(-1);
       display: none;
     }
     #canvasElement {
@@ -194,14 +192,18 @@
   async function initCamera() {
     try {
       const video = document.getElementById('videoElement');
+      
+      // درخواست دسترسی به دوربین
       currentStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
+        video: {
           facingMode: "environment",
           width: { ideal: 720 },
           height: { ideal: 1280 }
         }
       });
+      
       video.srcObject = currentStream;
+      
       return true;
     } catch (err) {
       console.error("خطا در دسترسی به دوربین:", err);
@@ -210,53 +212,41 @@
     }
   }
 
-  // تابع بهبود یافته برای دریافت داده‌های بازاریاب‌ها
+  // تابع دریافت داده‌های بازاریاب‌ها
   async function fetchMarketerData() {
     try {
       setStatus("در حال دریافت اطلاعات بازاریاب‌ها...");
       
       const response = await fetch(apiURL);
-      if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
+      
+      if (!response.ok) {
+        throw new Error(`خطای سرور: ${response.status}`);
+      }
       
       const data = await response.json();
-      console.log("داده‌های دریافتی از سرور:", data); // برای دیباگ
       
       // اعتبارسنجی ساختار داده
-      if (Object.keys(data).length === 0) {
-        throw new Error("داده‌ای از سرور دریافت نشد");
+      if (!data || !data.data) {
+        throw new Error("ساختار داده نامعتبر است");
       }
       
-      const sampleKey = Object.keys(data)[0];
-      if (!data[sampleKey].marketerName || !data[sampleKey].spotName) {
-        console.warn("ساختار داده ناقص است. داده‌های نمونه:", data[sampleKey]);
-        // ایجاد ساختار جایگزین برای سازگاری
-        for (const code in data) {
-          data[code] = {
-            ...data[code],
-            marketerName: data[code].marketerName || "نام نامشخص",
-            spotName: data[code].spotName || "اسپات نامشخص"
-          };
-        }
-      }
-      
-      marketerData = data;
+      marketerData = data.data;
       document.getElementById('captureBtn').style.display = "block";
       setStatus("", true);
       return true;
     } catch (err) {
       console.error("خطا در دریافت داده‌ها:", err);
-      setStatus("❌ مشکل در دریافت اطلاعات بازاریاب‌ها: " + err.message);
+      setStatus("❌ خطا در دریافت اطلاعات بازاریاب‌ها: " + err.message);
       return false;
     }
   }
 
-  // تابع بهبود یافته برای نمایش اطلاعات بازاریاب
+  // تابع نمایش اطلاعات بازاریاب
   function updateMarketerInfo() {
     const code = document.getElementById("code").value.trim();
     const nameInput = document.getElementById("marketerName");
     const spotInput = document.getElementById("spotName");
     
-    // Reset fields
     nameInput.value = "";
     spotInput.value = "";
     showError("codeError", "");
@@ -292,11 +282,7 @@
       canvas.height = video.videoHeight;
       const context = canvas.getContext('2d');
       
-      context.save();
-      context.translate(canvas.width, 0);
-      context.scale(-1, 1);
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      context.restore();
       
       capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
       photoPreview.src = capturedPhoto;
@@ -311,7 +297,7 @@
       setStatus("عکس با موفقیت گرفته شد. برای ثبت حضور دکمه زیر را بزنید.");
     } catch (err) {
       console.error("خطا در گرفتن عکس:", err);
-      setStatus("❌ خطا در گرفتن عکس");
+      setStatus("❌ خطا در گرفتن عکس: " + err.message);
     }
   }
 
@@ -331,7 +317,7 @@
     setStatus("لطفاً کد بازاریابی را وارد کنید و عکس جدید بگیرید.");
   }
 
-  // تابع بهبود یافته برای ارسال اطلاعات
+  // تابع ارسال اطلاعات
   async function submitRegistration() {
     // Reset errors
     showError("codeError", "");
@@ -381,27 +367,35 @@
         photo: capturedPhoto,
         fileName: `${code}-${formattedDate}-${formattedTime}.jpg`,
         deviceInfo: navigator.userAgent,
-        action: "submitAttendance" // اضافه کردن action برای سرور
+        action: "submitAttendance"
       };
 
-      console.log("داده‌های ارسالی به سرور:", formData); // برای دیباگ
-
+      // اضافه کردن timeout برای fetch
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
       
       const response = await fetch(apiURL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(formData),
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
       
-      if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`خطای سرور: ${response.status} - ${errorText}`);
+      }
       
       const result = await response.json();
-      console.log("پاسخ سرور:", result); // برای دیباگ
+      
+      if (!result) {
+        throw new Error("پاسخ نامعتبر از سرور");
+      }
       
       if (result.status === "success") {
         setStatus("✅ ثبت حضور با موفقیت انجام شد. شماره پیگیری: " + (result.referenceId || ''), true);
@@ -411,7 +405,12 @@
       }
     } catch (error) {
       console.error("خطا در ارسال:", error);
-      setStatus(`❌ خطا در ارسال اطلاعات: ${error.message || "خطای اتصال به سرور"}`);
+      
+      if (error.name === "AbortError") {
+        setStatus("❌ زمان ارسال اطلاعات به پایان رسید");
+      } else {
+        setStatus(`❌ خطا در ارسال اطلاعات: ${error.message || "خطای اتصال به سرور"}`);
+      }
     }
   }
 
@@ -470,22 +469,27 @@
 
   // رویدادهای صفحه
   window.addEventListener('load', async () => {
-    const cameraReady = await initCamera();
-    const dataReady = await fetchMarketerData();
-    
-    if (cameraReady && dataReady) {
-      showDates();
-      setInterval(showDates, 30000);
+    try {
+      const cameraReady = await initCamera();
+      const dataReady = await fetchMarketerData();
       
-      document.getElementById("type").addEventListener("change", () => {
-        updateMarketerInfo();
-        showError("typeError", "");
-      });
-      
-      document.getElementById("code").addEventListener("input", () => {
-        updateMarketerInfo();
-        showError("codeError", "");
-      });
+      if (cameraReady && dataReady) {
+        showDates();
+        setInterval(showDates, 30000);
+        
+        document.getElementById("type").addEventListener("change", () => {
+          updateMarketerInfo();
+          showError("typeError", "");
+        });
+        
+        document.getElementById("code").addEventListener("input", () => {
+          updateMarketerInfo();
+          showError("codeError", "");
+        });
+      }
+    } catch (err) {
+      console.error("خطا در راه‌اندازی:", err);
+      setStatus("❌ خطا در راه‌اندازی سیستم: " + err.message);
     }
   });
 
