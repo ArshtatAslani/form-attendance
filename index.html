@@ -210,36 +210,47 @@
     }
   }
 
-// در تابع fetchMarketerData
-async function fetchMarketerData() {
-  try {
-    setStatus("در حال دریافت اطلاعات بازاریاب‌ها...");
-    
-    const response = await fetch(apiURL);
-    if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
-    
-    const data = await response.json();
-    console.log("داده‌های دریافتی از سرور:", data); // برای دیباگ
-    
-    // بررسی ساختار داده
-    if (Object.keys(data).length > 0) {
+  // تابع بهبود یافته برای دریافت داده‌های بازاریاب‌ها
+  async function fetchMarketerData() {
+    try {
+      setStatus("در حال دریافت اطلاعات بازاریاب‌ها...");
+      
+      const response = await fetch(apiURL);
+      if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
+      
+      const data = await response.json();
+      console.log("داده‌های دریافتی از سرور:", data); // برای دیباگ
+      
+      // اعتبارسنجی ساختار داده
+      if (Object.keys(data).length === 0) {
+        throw new Error("داده‌ای از سرور دریافت نشد");
+      }
+      
       const sampleKey = Object.keys(data)[0];
       if (!data[sampleKey].marketerName || !data[sampleKey].spotName) {
-        throw new Error("ساختار داده ناقص است");
+        console.warn("ساختار داده ناقص است. داده‌های نمونه:", data[sampleKey]);
+        // ایجاد ساختار جایگزین برای سازگاری
+        for (const code in data) {
+          data[code] = {
+            ...data[code],
+            marketerName: data[code].marketerName || "نام نامشخص",
+            spotName: data[code].spotName || "اسپات نامشخص"
+          };
+        }
       }
+      
+      marketerData = data;
+      document.getElementById('captureBtn').style.display = "block";
+      setStatus("", true);
+      return true;
+    } catch (err) {
+      console.error("خطا در دریافت داده‌ها:", err);
+      setStatus("❌ مشکل در دریافت اطلاعات بازاریاب‌ها: " + err.message);
+      return false;
     }
-    
-    marketerData = data;
-    document.getElementById('captureBtn').style.display = "block";
-    setStatus("", true);
-    return true;
-  } catch (err) {
-    console.error("خطا در دریافت داده‌ها:", err);
-    setStatus("❌ مشکل در داده‌های دریافتی: " + err.message);
-    return false;
   }
-}
-  // تابع نمایش اطلاعات بازاریاب
+
+  // تابع بهبود یافته برای نمایش اطلاعات بازاریاب
   function updateMarketerInfo() {
     const code = document.getElementById("code").value.trim();
     const nameInput = document.getElementById("marketerName");
@@ -252,11 +263,17 @@ async function fetchMarketerData() {
     
     if (!code) return;
 
+    if (!marketerData || Object.keys(marketerData).length === 0) {
+      nameInput.value = "داده‌ها بارگذاری نشده";
+      spotInput.value = "داده‌ها بارگذاری نشده";
+      return;
+    }
+
     const marketer = marketerData[code];
     if (!marketer) {
       showError("codeError", "کد بازاریاب معتبر نیست");
-      nameInput.value = "نام یافت نشد";
-      spotInput.value = "اسپات یافت نشد";
+      nameInput.value = "کد نامعتبر";
+      spotInput.value = "کد نامعتبر";
       return;
     }
 
@@ -314,7 +331,7 @@ async function fetchMarketerData() {
     setStatus("لطفاً کد بازاریابی را وارد کنید و عکس جدید بگیرید.");
   }
 
-  // تابع ارسال اطلاعات
+  // تابع بهبود یافته برای ارسال اطلاعات
   async function submitRegistration() {
     // Reset errors
     showError("codeError", "");
@@ -363,10 +380,12 @@ async function fetchMarketerData() {
         persianDate: `${jy}/${jm}/${jd}`,
         photo: capturedPhoto,
         fileName: `${code}-${formattedDate}-${formattedTime}.jpg`,
-        deviceInfo: navigator.userAgent
+        deviceInfo: navigator.userAgent,
+        action: "submitAttendance" // اضافه کردن action برای سرور
       };
 
-      // اضافه کردن timeout برای fetch
+      console.log("داده‌های ارسالی به سرور:", formData); // برای دیباگ
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
       
@@ -382,6 +401,7 @@ async function fetchMarketerData() {
       if (!response.ok) throw new Error("پاسخ نامعتبر از سرور");
       
       const result = await response.json();
+      console.log("پاسخ سرور:", result); // برای دیباگ
       
       if (result.status === "success") {
         setStatus("✅ ثبت حضور با موفقیت انجام شد. شماره پیگیری: " + (result.referenceId || ''), true);
