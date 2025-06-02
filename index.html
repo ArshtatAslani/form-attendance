@@ -143,10 +143,11 @@
   </select>
 
   <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
+  <input type="text" id="spotName" placeholder="نام اسپات" readonly />
 
   <div class="button-group">
-    <button id="captureBtn" onclick="capturePhoto()">عکس برداری</button>
-    <button id="retakeBtn" onclick="retakePhoto()">عکس برداری مجدد</button>
+    <button id="captureBtn" onclick="capturePhoto()">عکس بگیر</button>
+    <button id="retakeBtn" onclick="retakePhoto()">عکس مجدد</button>
     <button id="submitBtn" onclick="submitRegistration()">ثبت حضور</button>
   </div>
 
@@ -170,8 +171,8 @@
     showDates();
     setInterval(showDates, 30000);
     
-    document.getElementById("type").addEventListener("change", updateMarketerName);
-    document.getElementById("code").addEventListener("input", updateMarketerName);
+    document.getElementById("type").addEventListener("change", updateMarketerInfo);
+    document.getElementById("code").addEventListener("input", updateMarketerInfo);
   };
 
   async function initCamera() {
@@ -272,11 +273,11 @@
         marketerCode: code,
         type: type,
         marketerName: marketerData[code].marketerName || "",
+        spotName: marketerData[code].spotName || "",
         datetime: nowTehran.toISOString(),
         persianDate: persianDate,
         photo: capturedPhoto,
         fileName: `${code}-${formattedDate}-${formattedTime}.jpg`,
-        folderId: "1qiYcWSH2FR4S7Ju2Gmjcys55PMUbK5x7",
         deviceInfo: navigator.userAgent
       };
 
@@ -316,10 +317,43 @@
       });
   }
 
+  function updateMarketerInfo() {
+    const code = document.getElementById("code").value.trim();
+    const type = document.getElementById("type").value;
+    const nameInput = document.getElementById("marketerName");
+    const spotInput = document.getElementById("spotName");
+
+    if (!code) {
+      nameInput.value = "";
+      spotInput.value = "";
+      clearStatus();
+      return;
+    }
+
+    if (!marketerData.hasOwnProperty(code)) {
+      nameInput.value = "کد بازاریاب معتبر نیست!";
+      spotInput.value = "";
+      setStatus("❌ کد بازاریاب معتبر نیست.");
+      return;
+    }
+
+    if (!type) {
+      nameInput.value = "";
+      spotInput.value = "";
+      clearStatus();
+      return;
+    }
+
+    nameInput.value = marketerData[code].marketerName || "نام موجود نیست";
+    spotInput.value = marketerData[code].spotName || "نام اسپات موجود نیست";
+    clearStatus();
+  }
+
   function resetForm() {
     document.getElementById("code").value = "";
     document.getElementById("type").value = "";
     document.getElementById("marketerName").value = "";
+    document.getElementById("spotName").value = "";
     document.getElementById('photoPreview').style.display = "none";
     document.getElementById('videoElement').style.display = "block";
     document.getElementById('captureBtn').style.display = "block";
@@ -332,33 +366,6 @@
     const status = document.getElementById("status");
     status.style.color = success ? "green" : "#d35400";
     status.textContent = msg;
-  }
-
-  function updateMarketerName() {
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
-
-    if (!code) {
-      nameInput.value = "";
-      clearStatus();
-      return;
-    }
-
-    if (!marketerData.hasOwnProperty(code)) {
-      nameInput.value = "کد بازاریاب معتبر نیست!";
-      setStatus("❌ کد بازاریاب معتبر نیست.");
-      return;
-    }
-
-    if (!type) {
-      nameInput.value = "";
-      clearStatus();
-      return;
-    }
-
-    nameInput.value = (marketerData[code].marketerName || "").trim() || "نام موجود نیست";
-    clearStatus();
   }
 
   function showDates() {
