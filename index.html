@@ -2,300 +2,194 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ثبت حضور بازاریاب</title>
+  <title>ثبت حضور با عکس و موقعیت</title>
   <style>
     body {
-      font-family: 'Vazirmatn', sans-serif;
-      background-color: #f8f9fa;
-      text-align: center;
-      padding: 40px;
-      color: #333;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      font-family: Tahoma, sans-serif;
+      direction: rtl;
+      padding: 10px;
+      background: #f0f0f0;
     }
-    h2 {
-      margin-bottom: 20px;
-      color: #2c3e50;
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
     }
     input, select, button {
-      width: 90%;
-      max-width: 320px;
-      padding: 12px;
-      margin: 10px auto 5px auto;;
+      padding: 8px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      direction: rtl;
-    }
-    input[readonly] {
-      background-color: #e9ecef;
-      color: #555;
-      cursor: default;
-    }
-    button {
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #27ae60;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 5px;
     }
     #status {
-      -top: 10px;
+      margin-top: 15px;
       font-weight: bold;
-      min-height: 1.5em;
-      color: #d35400;
     }
-    #dates {
-      margin-top: 5px;
-      font-size: 14px;
-      color: #555;
-    }
-    #video, #canvas {
-      margin: 10px auto;
-      border-radius: 8px;
-      max-width: 320px;
-      width: 90%;
-      height: auto;
-      direction: ltr;
-    }
-    #canvas {
+    canvas {
       display: none;
-    }
-    footer {
-      margin-top: 30px;
-      font-size: 14px;
-      color: #666;
-      text-align: left;
-      direction: ltr;
     }
   </style>
 </head>
 <body>
-  <h2>📍 ثبت حضور بازاریاب</h2>
 
-  <input type="text" id="code" placeholder="کد بازاریابی را وارد کنید" autocomplete="off" />
+  <h2>ثبت حضور بازاریاب</h2>
 
-  <select id="type" aria-label="نوع ثبت حضور">
-    <option value="" disabled selected>نوع ثبت حضور را انتخاب کنید</option>
-    <option value="شروع شیفت">شروع شیفت</option>
-    <option value="پایان شیفت">پایان شیفت</option>
-    <option value="ثبت نام جدید">ثبت نام جدید</option>
+  <div>تاریخ شمسی: <span id="shamsiDate"></span></div>
+  <div>تاریخ میلادی: <span id="gregorianDate"></span></div>
+
+  <label for="code">کد بازاریابی:</label>
+  <input type="text" id="code" autocomplete="off" />
+
+  <label for="marketerName">نام بازاریاب:</label>
+  <input type="text" id="marketerName" readonly />
+
+  <label for="type">نوع ثبت حضور:</label>
+  <select id="type">
+    <option value="">انتخاب کنید</option>
+    <option value="ورود">ورود</option>
+    <option value="خروج">خروج</option>
   </select>
 
-  <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
+  <video id="video" autoplay playsinline style="width: 300px; margin-top: 15px; border: 1px solid #ccc;"></video>
+  <canvas id="canvas" width="300" height="225"></canvas>
 
-  <button id="registerBtn">ثبت حضور</button>
+  <button id="registerBtn" style="margin-top: 20px;">ثبت حضور</button>
 
-  <p id="status"></p>
+  <div id="status"></div>
 
-  <div id="dates"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@persian-date/persian-date/dist/persian-date.min.js"></script>
+  <script>
+    // نمایش تاریخ شمسی و میلادی
+    const pd = new persianDate();
+    document.getElementById('shamsiDate').innerText = pd.format('YYYY/MM/DD');
+    document.getElementById('gregorianDate').innerText = new Date().toISOString().split('T')[0];
 
-  <video id="video" width="320" height="240" autoplay></video>
-  <button id="snap">📸 گرفتن عکس</button>
-  <canvas id="canvas" width="320" height="240"></canvas>
+    // نمونه داده بازاریاب‌ها
+    const marketerData = {
+      "1001": { name: "علی رضایی", active: true },
+      "1002": { name: "سارا احمدی", active: true },
+      "1003": { name: "مهدی حسینی", active: false }
+    };
 
-  <footer>
-    Dev by: <br> Snapp North Zone Sales Management 💎
-  </footer>
-
-<script>
-  // تاریخ شمسی و میلادی
-  function showDates() {
-    const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
-    const nowTehran = new Date(nowTehranStr);
-
-    const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
-
-    function toJalali(gy, gm, gd) {
-      var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-      var gy2 = (gm > 2) ? (gy + 1) : gy;
-      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-      var jy = -1595 + (33 * parseInt(days / 12053));
-      days %= 12053;
-      jy += 4 * parseInt(days / 1461);
-      days %= 1461;
-      if (days > 365) {
-        jy += parseInt((days - 1) / 365);
-        days = (days - 1) % 365;
-      }
-      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
-      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-      return [jy, jm, jd];
-    }
-
-    function getPersianWeekday(date) {
-      return (date.getDay() + 1) % 7;
-    }
-
-    const persianDayIndex = getPersianWeekday(nowTehran);
-    const persianWeekday = days[persianDayIndex];
-    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
-    const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
-
-    const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
-    const gregorianDateText = nowTehran.toLocaleDateString('en-US');
-
-    document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
-  }
-
-  showDates();
-  setInterval(showDates, 30000);
-
-  // داده بازاریاب‌ها
-  let marketerData = {};
-  const apiURL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec";
-
-  window.onload = function() {
-    fetch(apiURL)
-      .then(res => res.json())
-      .then(data => {
-        marketerData = data;
-        console.log("داده‌های بازاریاب‌ها:", marketerData);
-      })
-      .catch(err => {
-        console.error("خطا در بارگذاری داده‌ها:", err);
-        setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
-      });
-
-    document.getElementById("type").addEventListener("change", updateMarketerName);
-    document.getElementById("code").addEventListener("input", updateMarketerName);
-
-    // راه‌اندازی وب‌کم
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        document.getElementById('video').srcObject = stream;
-      })
-      .catch(err => {
-        console.error("خطا در دسترسی به وب‌کم:", err);
-      });
-  };
-
-  function setStatus(msg, success = false) {
-    const status = document.getElementById("status");
-    status.style.color = success ? "green" : "#d35400";
-    status.textContent = msg;
-  }
-
-  function clearStatus() {
-    document.getElementById("status").textContent = "";
-  }
-
-  // به‌روزرسانی نام بازاریاب با توجه به کد و نوع ثبت حضور
-  function updateMarketerName() {
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
-
-    if (!code) {
-      nameInput.value = "";
-      clearStatus();
-      return;
-    }
-
-    if (!marketerData[code]) {
-      nameInput.value = "";
-      setStatus("⚠️ کد بازاریابی یافت نشد");
-      return;
-    }
-
-    // فرض بر اینکه داده‌ها به شکل { code: {name: "", active: true/false} }
-    const marketer = marketerData[code];
-
-    if (!marketer.active) {
-      setStatus("⚠️ این بازاریاب فعال نیست");
-      nameInput.value = "";
-      return;
-    }
-
-    nameInput.value = marketer.name || "";
-    clearStatus();
-  }
-
-  // گرفتن عکس و آپلود
-  document.getElementById("snap").onclick = () => {
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext('2d');
 
-    canvas.toBlob(blob => {
-      // آپلود عکس
-      const formData = new FormData();
-      formData.append('file', blob, 'photo.jpg');
-
-      fetch('YOUR_PHOTO_UPLOAD_URL', {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.text())
-      .then(txt => {
-        alert("✅ عکس با موفقیت آپلود شد");
-      })
-      .catch(err => {
-        alert("❌ خطا در آپلود عکس: " + err);
+    // باز کردن دوربین پشت (environment)
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } }
+    }).then(stream => {
+      video.srcObject = stream;
+    }).catch(err => {
+      // اگر دوربین پشت در دسترس نبود، دوربین جلو باز شود
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      }).then(stream => {
+        video.srcObject = stream;
+      }).catch(error => {
+        alert("دوربین فعال نیست: " + error.message);
       });
-    }, 'image/jpeg');
-  };
+    });
 
-  // ارسال داده فرم به سرور (مثال)
-  document.getElementById("registerBtn").onclick = () => {
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const name = document.getElementById("marketerName").value.trim();
+    // نمایش نام بازاریاب با توجه به کد
+    document.getElementById("code").addEventListener("input", () => {
+      const code = document.getElementById("code").value.trim();
+      const nameInput = document.getElementById("marketerName");
+      if (!marketerData[code]) {
+        nameInput.value = "";
+        setStatus("⚠️ کد بازاریابی یافت نشد");
+        return;
+      }
+      const marketer = marketerData[code];
+      if (!marketer.active) {
+        setStatus("⚠️ این بازاریاب فعال نیست");
+        nameInput.value = "";
+        return;
+      }
+      nameInput.value = marketer.name;
+      clearStatus();
+    });
 
-    if (!code || !type) {
-      setStatus("لطفاً کد و نوع ثبت حضور را وارد کنید");
-      return;
+    function setStatus(msg, success = false) {
+      const s = document.getElementById("status");
+      s.innerText = msg;
+      s.style.color = success ? "green" : "red";
+    }
+    function clearStatus() {
+      setStatus("");
     }
 
-    setStatus("در حال ارسال اطلاعات...");
-
-    // موقعیت مکانی
-    if (!navigator.geolocation) {
-      setStatus("موقعیت مکانی در این مرورگر پشتیبانی نمی‌شود");
-      return;
+    // تابع گرفتن عکس و بازگشت blob
+    function capturePhoto() {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      return new Promise((resolve) => {
+        canvas.toBlob(blob => {
+          resolve(blob);
+        }, 'image/jpeg');
+      });
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    // ثبت حضور و گرفتن عکس و آپلود
+    document.getElementById("registerBtn").onclick = async () => {
+      const code = document.getElementById("code").value.trim();
+      const type = document.getElementById("type").value;
+      const name = document.getElementById("marketerName").value.trim();
+
+      if (!code || !type) {
+        setStatus("لطفاً کد و نوع ثبت حضور را وارد کنید");
+        return;
+      }
+
+      setStatus("در حال ثبت حضور و گرفتن عکس...");
+
+      // گرفتن موقعیت مکانی
+      if (!navigator.geolocation) {
+        setStatus("موقعیت مکانی در این مرورگر پشتیبانی نمی‌شود");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
 
-        const dataToSend = {
-          code, type, name, lat, lon
-        };
+        // گرفتن عکس
+        const photoBlob = await capturePhoto();
 
-        fetch(apiURL, {
-          method: 'POST',
-          body: JSON.stringify(dataToSend),
-          headers: { 'Content-Type': 'application/json' }
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          if (resJson.success) {
-            setStatus("✅ ثبت حضور موفق بود", true);
+        // آپلود عکس
+        const formData = new FormData();
+        formData.append('file', photoBlob, 'photo.jpg');
+
+        try {
+          // جایگزین با آدرس آپلود عکس واقعی شما
+          const uploadResponse = await fetch('YOUR_PHOTO_UPLOAD_URL', {
+            method: 'POST',
+            body: formData
+          });
+          if (!uploadResponse.ok) throw new Error('خطا در آپلود عکس');
+
+          // ارسال اطلاعات ثبت حضور به API
+          const dataToSend = { code, type, name, lat, lon };
+          const registerResponse = await fetch('YOUR_REGISTER_API_URL', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataToSend)
+          });
+          const registerResult = await registerResponse.json();
+
+          if (registerResult.success) {
+            setStatus("✅ ثبت حضور و آپلود عکس موفق بود", true);
           } else {
             setStatus("❌ خطا در ثبت حضور");
           }
-        })
-        .catch(err => {
-          setStatus("❌ خطا در ارسال: " + err);
-        });
-      },
-      (err) => {
+        } catch (error) {
+          setStatus("❌ خطا: " + error.message);
+        }
+      }, (err) => {
         setStatus("❌ خطا در دریافت موقعیت مکانی: " + err.message);
-      }
-    );
-  };
-</script>
+      });
+    };
+  </script>
+
 </body>
 </html>
