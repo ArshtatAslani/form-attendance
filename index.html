@@ -65,7 +65,6 @@
       text-align: left;
       direction: ltr;
     }
-    /* استایل‌های جدید برای دوربین و عکس */
     #cameraWrapper {
       width: 240px;
       height: 320px;
@@ -128,7 +127,6 @@
 <body>
   <h2>📍 ثبت حضور بازاریاب</h2>
 
-  <!-- کادر دوربین با استایل جدید -->
   <div id="cameraWrapper">
     <video id="videoElement" autoplay playsinline></video>
     <img id="photoPreview" alt="عکس ثبت شده">
@@ -147,8 +145,8 @@
   <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
 
   <div class="button-group">
-    <button id="captureBtn" onclick="capturePhoto()">عکس بگیر</button>
-    <button id="retakeBtn" onclick="retakePhoto()">عکس مجدد</button>
+    <button id="captureBtn" onclick="capturePhoto()">عکس برداری</button>
+    <button id="retakeBtn" onclick="retakePhoto()">عکس برداری مجدد</button>
     <button id="submitBtn" onclick="submitRegistration()">ثبت حضور</button>
   </div>
 
@@ -161,13 +159,11 @@
   </footer>
 
 <script>
-  // متغیرهای全局
   let marketerData = {};
   let currentStream = null;
   let capturedPhoto = null;
   const apiURL = "https://script.google.com/macros/s/AKfycbystRT9QASXITDMlIYQB-068PIvH310F4wVkroqq6E16aYcwXPd7pKjp-svxjffgqxz/exec";
 
-  // فعال کردن دوربین هنگام بارگذاری صفحه
   window.onload = async function() {
     await initCamera();
     fetchMarketerData();
@@ -178,7 +174,6 @@
     document.getElementById("code").addEventListener("input", updateMarketerName);
   };
 
-  // تابع راه‌اندازی دوربین
   async function initCamera() {
     try {
       const video = document.getElementById('videoElement');
@@ -196,7 +191,6 @@
     }
   }
 
-  // تابع گرفتن عکس
   function capturePhoto() {
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('canvasElement');
@@ -215,11 +209,9 @@
     capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
     photoPreview.src = capturedPhoto;
     
-    // نمایش عکس و مخفی کردن دوربین
     video.style.display = "none";
     photoPreview.style.display = "block";
     
-    // تغییر وضعیت دکمه‌ها
     document.getElementById('captureBtn').style.display = "none";
     document.getElementById('retakeBtn').style.display = "block";
     document.getElementById('submitBtn').style.display = "block";
@@ -227,16 +219,13 @@
     setStatus("عکس با موفقیت گرفته شد. برای ثبت حضور دکمه زیر را بزنید.");
   }
 
-  // تابع عکس مجدد
   function retakePhoto() {
     const video = document.getElementById('videoElement');
     const photoPreview = document.getElementById('photoPreview');
     
-    // نمایش دوربین و مخفی کردن عکس
     video.style.display = "block";
     photoPreview.style.display = "none";
     
-    // تغییر وضعیت دکمه‌ها
     document.getElementById('captureBtn').style.display = "block";
     document.getElementById('retakeBtn').style.display = "none";
     document.getElementById('submitBtn').style.display = "none";
@@ -245,7 +234,6 @@
     setStatus("لطفاً کد بازاریابی را وارد کنید و عکس جدید بگیرید.");
   }
 
-  // تابع ارسال اطلاعات
   async function submitRegistration() {
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
@@ -273,8 +261,9 @@
     setStatus("در حال ارسال اطلاعات ...");
 
     try {
-      const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
-      const nowTehran = new Date(nowTehranStr);
+      const nowTehran = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+      const formattedDate = nowTehran.toISOString().slice(0,10).replace(/-/g, '');
+      const formattedTime = nowTehran.toTimeString().slice(0,8).replace(/:/g, '');
       
       const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
       const persianDate = `${jy}/${jm.toString().padStart(2,'0')}/${jd.toString().padStart(2,'0')}`;
@@ -286,8 +275,9 @@
         datetime: nowTehran.toISOString(),
         persianDate: persianDate,
         photo: capturedPhoto,
-        deviceInfo: navigator.userAgent,
-        location: "دریافت نشد"
+        fileName: `${code}-${formattedDate}-${formattedTime}.jpg`,
+        folderId: "1qiYcWSH2FR4S7Ju2Gmjcys55PMUbK5x7",
+        deviceInfo: navigator.userAgent
       };
 
       const response = await fetch(apiURL, {
@@ -298,13 +288,13 @@
         body: JSON.stringify(formData)
       });
 
-      const result = await response.text();
+      const result = await response.json();
 
-      if (result.includes("موفق")) {
+      if (result.status === "success") {
         setStatus("✅ ثبت حضور با موفقیت انجام شد.", true);
         resetForm();
       } else {
-        setStatus("❌ خطا در ثبت حضور: " + result);
+        setStatus("❌ خطا در ثبت حضور: " + result.message);
       }
     } catch (error) {
       console.error("خطا در ارسال:", error);
@@ -312,9 +302,8 @@
     }
   }
 
-  // بقیه توابع بدون تغییر
   function fetchMarketerData() {
-    fetch(apiURL)
+    fetch(apiURL + "?action=getMarketers")
       .then(res => res.json())
       .then(data => {
         marketerData = data;
