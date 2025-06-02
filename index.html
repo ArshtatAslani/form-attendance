@@ -65,38 +65,37 @@
       text-align: left;
       direction: ltr;
     }
-    /* استایل‌های دوربین و عکس عمودی */
-    #videoContainer {
+    /* استایل‌های جدید برای دوربین و عکس */
+    #cameraWrapper {
       width: 240px;
       height: 320px;
       margin: 0 auto 20px auto;
       position: relative;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid #ccc;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background-color: #000;
     }
     #videoElement {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scaleX(-1); /* آینه‌ای کردن تصویر */
+      transform: scaleX(-1);
+      display: block;
+    }
+    #photoPreview {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: none;
     }
     #canvasElement {
       display: none;
     }
-    #photoPreview {
-      display: none;
-      width: 240px;
-      height: 320px;
-      margin: 0 auto 20px auto;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      object-fit: cover;
-      transform: scaleX(-1); /* آینه‌ای کردن تصویر پیش‌نمایش */
-    }
     #captureBtn {
-      display: none;
       background-color: #e74c3c;
       margin-top: 10px;
     }
@@ -104,15 +103,16 @@
       background-color: #c0392b;
     }
     #retakeBtn {
-      display: none;
       background-color: #3498db;
       margin-top: 10px;
+      display: none;
     }
     #retakeBtn:hover {
       background-color: #2980b9;
     }
     #submitBtn {
       margin-top: 10px;
+      display: none;
     }
     .button-group {
       display: flex;
@@ -128,12 +128,12 @@
 <body>
   <h2>📍 ثبت حضور بازاریاب</h2>
 
-  <!-- دوربین عمودی -->
-  <div id="videoContainer">
+  <!-- کادر دوربین با استایل جدید -->
+  <div id="cameraWrapper">
     <video id="videoElement" autoplay playsinline></video>
+    <img id="photoPreview" alt="عکس ثبت شده">
   </div>
   <canvas id="canvasElement"></canvas>
-  <img id="photoPreview" alt="عکس ثبت شده">
 
   <input type="text" id="code" placeholder="کد بازاریابی را وارد کنید" autocomplete="off" />
 
@@ -178,54 +178,48 @@
     document.getElementById("code").addEventListener("input", updateMarketerName);
   };
 
-  // تابع راه‌اندازی دوربین با حالت عمودی
+  // تابع راه‌اندازی دوربین
   async function initCamera() {
     try {
       const video = document.getElementById('videoElement');
       currentStream = await navigator.mediaDevices.getUserMedia({
         video: { 
           facingMode: "environment",
-          width: { ideal: 720 },  // تنظیم برای حالت عمودی
+          width: { ideal: 720 },
           height: { ideal: 1280 }
         }
       });
       video.srcObject = currentStream;
-      
-      // تنظیم جهت دوربین برای دستگاه‌های مختلف
-      if (window.screen.orientation) {
-        await window.screen.orientation.lock('portrait');
-      }
     } catch (err) {
       console.error("خطا در دسترسی به دوربین:", err);
       setStatus("❌ دسترسی به دوربین ممکن نیست. لطفاً مجوزها را بررسی کنید.");
     }
   }
 
-  // تابع گرفتن عکس با حالت عمودی
+  // تابع گرفتن عکس
   function capturePhoto() {
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('canvasElement');
     const photoPreview = document.getElementById('photoPreview');
     
-    // تنظیم ابعاد کانواس برای حالت عمودی
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const context = canvas.getContext('2d');
     
-    // چرخش تصویر برای حالت عمودی
     context.save();
     context.translate(canvas.width, 0);
     context.scale(-1, 1);
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     context.restore();
     
-    // ذخیره عکس به عنوان Data URL
     capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
     photoPreview.src = capturedPhoto;
     
-    // تغییر وضعیت نمایش
-    photoPreview.style.display = "block";
+    // نمایش عکس و مخفی کردن دوربین
     video.style.display = "none";
+    photoPreview.style.display = "block";
+    
+    // تغییر وضعیت دکمه‌ها
     document.getElementById('captureBtn').style.display = "none";
     document.getElementById('retakeBtn').style.display = "block";
     document.getElementById('submitBtn').style.display = "block";
@@ -238,8 +232,11 @@
     const video = document.getElementById('videoElement');
     const photoPreview = document.getElementById('photoPreview');
     
-    photoPreview.style.display = "none";
+    // نمایش دوربین و مخفی کردن عکس
     video.style.display = "block";
+    photoPreview.style.display = "none";
+    
+    // تغییر وضعیت دکمه‌ها
     document.getElementById('captureBtn').style.display = "block";
     document.getElementById('retakeBtn').style.display = "none";
     document.getElementById('submitBtn').style.display = "none";
@@ -276,15 +273,12 @@
     setStatus("در حال ارسال اطلاعات ...");
 
     try {
-      // تاریخ و زمان فعلی
       const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
       const nowTehran = new Date(nowTehranStr);
       
-      // تاریخ شمسی
       const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
       const persianDate = `${jy}/${jm.toString().padStart(2,'0')}/${jd.toString().padStart(2,'0')}`;
       
-      // اطلاعات ارسالی
       const formData = {
         marketerCode: code,
         type: type,
@@ -293,11 +287,9 @@
         persianDate: persianDate,
         photo: capturedPhoto,
         deviceInfo: navigator.userAgent,
-        location: "دریافت نشد",
-        orientation: "portrait" // اضافه کردن اطلاعات جهت‌گیری عکس
+        location: "دریافت نشد"
       };
 
-      // ارسال به سرور
       const response = await fetch(apiURL, {
         method: 'POST',
         headers: {
@@ -320,7 +312,7 @@
     }
   }
 
-  // توابع کمکی (بقیه توابع بدون تغییر مانند قبل)
+  // بقیه توابع بدون تغییر
   function fetchMarketerData() {
     fetch(apiURL)
       .then(res => res.json())
@@ -351,10 +343,6 @@
     const status = document.getElementById("status");
     status.style.color = success ? "green" : "#d35400";
     status.textContent = msg;
-  }
-
-  function clearStatus() {
-    document.getElementById("status").textContent = "";
   }
 
   function updateMarketerName() {
@@ -419,7 +407,6 @@
     return [jy, jm, jd];
   }
 
-  // تمیز کردن منابع هنگام بسته شدن صفحه
   window.addEventListener('beforeunload', () => {
     if (currentStream) {
       currentStream.getTracks().forEach(track => track.stop());
