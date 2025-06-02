@@ -65,6 +65,18 @@
       text-align: left;
       direction: ltr;
     }
+    /* اضافه کردن استایل برای ویدئو و کَنواس مخفی */
+    #videoElement {
+      display: none;
+      width: 320px;
+      height: 240px;
+      margin: 0 auto 10px auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    #canvasElement {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -81,7 +93,11 @@
 
   <input type="text" id="marketerName" placeholder="نام بازاریاب" readonly />
 
-  <button onclick="getLocation()">ثبت حضور</button>
+  <!-- ویدئو و کانواس برای عکس گرفتن -->
+  <video id="videoElement" autoplay playsinline></video>
+  <canvas id="canvasElement"></canvas>
+
+  <button onclick="startCaptureAndRegister()">ثبت حضور</button>
 
   <p id="status"></p>
 
@@ -92,44 +108,46 @@
   </footer>
 
 <script>
+  // کد اصلی بدون تغییر
+
   function showDates() {
-  const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
-  const nowTehran = new Date(nowTehranStr);
+    const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
+    const nowTehran = new Date(nowTehranStr);
 
-  const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-  const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    const days = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
-  function toJalali(gy, gm, gd) {
-    var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-    var gy2 = (gm > 2) ? (gy + 1) : gy;
-    var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
-    var jy = -1595 + (33 * parseInt(days / 12053));
-    days %= 12053;
-    jy += 4 * parseInt(days / 1461);
-    days %= 1461;
-    if (days > 365) {
-      jy += parseInt((days - 1) / 365);
-      days = (days - 1) % 365;
+    function toJalali(gy, gm, gd) {
+      var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      var jy = -1595 + (33 * parseInt(days / 12053));
+      days %= 12053;
+      jy += 4 * parseInt(days / 1461);
+      days %= 1461;
+      if (days > 365) {
+        jy += parseInt((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+      return [jy, jm, jd];
     }
-    var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
-    var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-    return [jy, jm, jd];
+
+    function getPersianWeekday(date) {
+      return (date.getDay() + 1) % 7;
+    }
+
+    const persianDayIndex = getPersianWeekday(nowTehran);
+    const persianWeekday = days[persianDayIndex];
+    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
+    const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+
+    const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
+    const gregorianDateText = nowTehran.toLocaleDateString('en-US');
+
+    document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
   }
-
-  function getPersianWeekday(date) {
-    return (date.getDay() + 1) % 7;
-  }
-
-  const persianDayIndex = getPersianWeekday(nowTehran);
-  const persianWeekday = days[persianDayIndex];
-  const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
-  const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
-
-  const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
-  const gregorianDateText = nowTehran.toLocaleDateString('en-US');
-
-  document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
-}
 
   showDates();
   setInterval(showDates, 30000);
@@ -150,10 +168,7 @@
         setStatus("❌ خطا در بارگذاری داده‌های بازاریاب‌ها");
       });
 
-    // رویداد تغییر در انتخاب نوع ثبت حضور
     document.getElementById("type").addEventListener("change", updateMarketerName);
-
-    // رویداد تغییر در فیلد کد بازاریاب (input)
     document.getElementById("code").addEventListener("input", updateMarketerName);
   };
 
@@ -167,7 +182,6 @@
     document.getElementById("status").textContent = "";
   }
 
-  // به‌روزرسانی نام بازاریاب با توجه به کد و نوع ثبت حضور
   function updateMarketerName() {
     const code = document.getElementById("code").value.trim();
     const type = document.getElementById("type").value;
@@ -195,88 +209,120 @@
     clearStatus();
   }
 
-  function getLocation() {
+  // تابع اصلی جایگزین شده: هنگام کلیک ثبت حضور، ابتدا عکس بگیریم سپس ادامه کار را انجام دهیم
+  function startCaptureAndRegister() {
     clearStatus();
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const nameInput = document.getElementById("marketerName");
 
-    if (!code) {
-      setStatus("❗ لطفاً کد بازاریاب را وارد کنید.");
-      nameInput.value = "";
-      return;
-    }
-    if (!type) {
-      setStatus("❗ لطفاً نوع ثبت حضور را انتخاب کنید.");
-      return;
-    }
-    if (!marketerData.hasOwnProperty(code)) {
-      setStatus("❌ کد بازاریاب معتبر نیست.");
-      nameInput.value = "کد بازاریاب معتبر نیست!";
-      return;
-    }
+    const video = document.getElementById('videoElement');
 
-    setStatus("در حال دریافت موقعیت مکانی...");
-    if (!navigator.geolocation) {
-      setStatus("مرورگر شما از GPS پشتیبانی نمی‌کند.");
-      return;
-    }
+    // درخواست دسترسی به دوربین پشت
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } }
+    }).then(stream => {
+      video.srcObject = stream;
+      video.play();
 
-    navigator.geolocation.getCurrentPosition(sendForm, err => {
-      setStatus("❌ خطا در دریافت موقعیت: " + err.message);
-    }, { timeout: 10000 });
-  }
-
-  function sendForm(position) {
-    const code = document.getElementById("code").value.trim();
-    const type = document.getElementById("type").value;
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-
-    const spotLat = marketerData[code].lat;
-    const spotLon = marketerData[code].lon;
-    const dist = distanceInMeters(lat, lon, spotLat, spotLon);
-
-    if (dist > 500) {
-      setStatus(`❌ شما بیش از ۵۰۰ متر از محل اسپات فاصله دارید! (${Math.round(dist)} متر)`);
-      return;
-    }
-
-    const form = new FormData();
-    form.append("entry.1655541032", type);
-    form.append("entry.1228562108", code);
-    form.append("entry.2093256559", `${lat.toFixed(6)}, ${lon.toFixed(6)}`);
-
-    fetch("https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse", {
-      method: "POST",
-      mode: "no-cors",
-      body: form,
-    }).then(() => {
-      const name = (marketerData[code].marketerName || "").trim() || "بازاریاب";
-      const spot = marketerData[code].spotName || "اسپات";
-      setStatus(`✅ ${name} عزیز، حضور شما در "${spot}" با موفقیت ثبت شد.`, true);
-      document.getElementById("code").value = "";
-      document.getElementById("type").value = "";
-      document.getElementById("marketerName").value = "";
+      // پس از اینکه ویدئو آماده شد (1 ثانیه تاخیر برای اطمینان)
+      setTimeout(() => {
+        takePhotoAndSend(stream);
+      }, 1000);
     }).catch(err => {
-      setStatus("❌ خطا در ارسال فرم. لطفا دوباره تلاش کنید.");
+      setStatus("❌ دسترسی به دوربین ممکن نیست یا دوربین پشت موجود نیست.");
       console.error(err);
     });
   }
 
-  // تابع محاسبه فاصله بر حسب متر (هارساين)
-  function distanceInMeters(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const toRad = angle => (angle * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+  // گرفتن عکس از ویدئو و ارسال فرم همراه با عکس
+  function takePhotoAndSend(stream) {
+    const video = document.getElementById('videoElement');
+    const canvas = document.getElementById('canvasElement');
+    const context = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth || 320;
+    canvas.height = video.videoHeight || 240;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // متوقف کردن دوربین
+    stream.getTracks().forEach(track => track.stop());
+
+    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+    sendRegistration(imageDataUrl);
+  }
+
+  // ارسال داده‌ها به سرور
+  function sendRegistration(imageDataUrl) {
+    const code = document.getElementById("code").value.trim();
+    const type = document.getElementById("type").value;
+
+    if (!code) {
+      setStatus("❌ لطفاً کد بازاریاب را وارد کنید.");
+      return;
+    }
+
+    if (!type) {
+      setStatus("❌ لطفاً نوع ثبت حضور را انتخاب کنید.");
+      return;
+    }
+
+    if (!marketerData.hasOwnProperty(code)) {
+      setStatus("❌ کد بازاریاب معتبر نیست.");
+      return;
+    }
+
+    setStatus("در حال ارسال اطلاعات ...");
+
+    const nowTehranStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' });
+    const nowTehran = new Date(nowTehranStr);
+
+    // قالب تاریخ شمسی
+    function toJalali(gy, gm, gd) {
+      var g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+      var gy2 = (gm > 2) ? (gy + 1) : gy;
+      var days = 355666 + (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) + gd + g_d_m[gm - 1];
+      var jy = -1595 + (33 * parseInt(days / 12053));
+      days %= 12053;
+      jy += 4 * parseInt(days / 1461);
+      days %= 1461;
+      if (days > 365) {
+        jy += parseInt((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+      var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+      return [jy, jm, jd];
+    }
+    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
+    const persianDate = `${jy}/${jm.toString().padStart(2,'0')}/${jd.toString().padStart(2,'0')}`;
+
+    const params = new URLSearchParams({
+      marketerCode: code,
+      type: type,
+      marketerName: marketerData[code].marketerName || "",
+      datetime: nowTehran.toISOString(),
+      persianDate: persianDate,
+      photo: imageDataUrl
+    });
+
+    fetch(apiURL + "?" + params.toString())
+      .then(response => response.text())
+      .then(data => {
+        if (data.includes("موفق")) {
+          setStatus("✅ ثبت حضور با موفقیت انجام شد.", true);
+          // پاک کردن فیلدها
+          document.getElementById("code").value = "";
+          document.getElementById("type").value = "";
+          document.getElementById("marketerName").value = "";
+        } else {
+          setStatus("❌ خطا در ثبت حضور: " + data);
+        }
+      })
+      .catch(error => {
+        console.error("خطا در ارسال:", error);
+        setStatus("❌ خطا در ارسال اطلاعات به سرور.");
+      });
   }
 </script>
-
 </body>
 </html>
