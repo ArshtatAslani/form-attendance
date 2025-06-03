@@ -283,8 +283,8 @@
       const context = canvas.getContext('2d');
       
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      capturedPhoto = canvas.toDataURL('image/jpeg', 0.85);
+      const quality = 0.7;
+      capturedPhoto = canvas.toDataURL('image/jpeg', quality);
       photoPreview.src = capturedPhoto;
       
       video.style.display = "none";
