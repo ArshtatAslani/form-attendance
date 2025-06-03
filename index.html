@@ -127,6 +127,11 @@
       margin-bottom: 5px;
       display: none;
     }
+    .location-status {
+      font-size: 12px;
+      color: #3498db;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -138,7 +143,7 @@
   </div>
   <canvas id="canvasElement"></canvas>
 
-  <input type="text" id="code" placeholder="کد بازاریابی را وارد کنید" autocomplete="off" />
+  <input type="text" id="code" placeholder="کد بازاریابی را وارد کنید" autocomplete="off" autofocus />
   <p id="codeError" class="error-message"></p>
 
   <select id="type" aria-label="نوع ثبت حضور">
@@ -158,6 +163,7 @@
     <button id="submitBtn" onclick="submitRegistration()">ثبت حضور</button>
   </div>
 
+  <p id="locationStatus" class="location-status"></p>
   <p id="status"></p>
 
   <div id="dates"></div>
@@ -171,7 +177,9 @@
   let marketerData = {};
   let currentStream = null;
   let capturedPhoto = null;
+  let locationData = null;
   const apiURL = "https://script.google.com/macros/s/AKfycbwrkmDm2f1equ5pjw4GrteqlNDndKOwbyL-wnVzaYoBNxeDXFhOqeFFLYR2EjQn9i-B/exec";
+  const PHOTO_QUALITY = 0.75; // کاهش حجم عکس
 
   // تابع نمایش وضعیت
   function setStatus(msg, success = false) {
@@ -203,12 +211,64 @@
       });
       
       video.srcObject = currentStream;
-      
       return true;
     } catch (err) {
       console.error("خطا در دسترسی به دوربین:", err);
       setStatus("❌ دسترسی به دوربین ممکن نیست. لطفاً مجوزها را بررسی کنید.");
       return false;
+    }
+  }
+
+  // تابع دریافت موقعیت جغرافیایی
+  async function getLocation() {
+    const locationStatus = document.getElementById('locationStatus');
+    
+    if (!navigator.geolocation) {
+      locationStatus.textContent = "مرورگر شما از GPS پشتیبانی نمی‌کند";
+      return null;
+    }
+
+    try {
+      locationStatus.textContent = "در حال دریافت موقعیت...";
+      
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+      
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      locationStatus.textContent = `موقعیت دریافت شد: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+      locationStatus.style.color = "#27ae60";
+      
+      return {
+        lat: lat,
+        lon: lon,
+        accuracy: position.coords.accuracy
+      };
+    } catch (error) {
+      console.error("خطا در دریافت موقعیت:", error);
+      
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          locationStatus.textContent = "دسترسی به موقعیت جغرافیایی رد شد";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          locationStatus.textContent = "اطلاعات موقعیت در دسترس نیست";
+          break;
+        case error.TIMEOUT:
+          locationStatus.textContent = "دریافت موقعیت زمان‌بر شد";
+          break;
+        default:
+          locationStatus.textContent = "خطای ناشناخته در دریافت موقعیت";
+      }
+      
+      locationStatus.style.color = "#e74c3c";
+      return null;
     }
   }
 
@@ -283,8 +343,8 @@
       const context = canvas.getContext('2d');
       
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const quality = 0.7;
-      capturedPhoto = canvas.toDataURL('image/jpeg', quality);
+      
+      capturedPhoto = canvas.toDataURL('image/jpeg', PHOTO_QUALITY);
       photoPreview.src = capturedPhoto;
       
       video.style.display = "none";
@@ -348,6 +408,15 @@
 
     if (!isValid) return;
 
+    // دریافت موقعیت جغرافیایی
+    setStatus("در حال دریافت موقعیت جغرافیایی...");
+    locationData = await getLocation();
+    
+    if (!locationData) {
+      const proceed = confirm("آیا می‌خواهید بدون موقعیت جغرافیایی ادامه دهید؟");
+      if (!proceed) return;
+    }
+
     setStatus("در حال ارسال اطلاعات... لطفاً صبر کنید");
 
     try {
@@ -367,6 +436,8 @@
         photo: capturedPhoto,
         fileName: `${code}-${formattedDate}-${formattedTime}.jpg`,
         deviceInfo: navigator.userAgent,
+        location: locationData ? `${locationData.lat},${locationData.lon}` : "0,0",
+        accuracy: locationData ? locationData.accuracy : 0,
         action: "submitAttendance"
       };
 
@@ -426,6 +497,8 @@
     document.getElementById('retakeBtn').style.display = "none";
     document.getElementById('submitBtn').style.display = "none";
     capturedPhoto = null;
+    locationData = null;
+    document.getElementById('locationStatus').textContent = "";
     showError("codeError", "");
     showError("typeError", "");
   }
