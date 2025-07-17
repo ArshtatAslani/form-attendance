@@ -355,7 +355,8 @@
       
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      capturedPhoto = canvas.toDataURL('image/jpeg', PHOTO_QUALITY);
+      capturedPhoto = canvas.toDataURL('image/jpeg', PHOTO_QUALITY).split(',')[1];
+}
       photoPreview.src = capturedPhoto;
       
       video.style.display = "none";
