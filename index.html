@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم ثبت حضور | ارسال به گوگل فرم</title>
+    <title>سیستم ثبت حضور | دوربین و موقعیت‌یابی</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -49,11 +49,6 @@
         .header h1 {
             font-size: 1.8rem;
             margin-bottom: 5px;
-        }
-        
-        .header p {
-            font-size: 1rem;
-            opacity: 0.9;
         }
         
         .content {
@@ -119,7 +114,6 @@
             height: 100%;
             object-fit: cover;
             display: none;
-            transform: scaleX(-1);
         }
         
         .camera-placeholder {
@@ -144,6 +138,7 @@
             display: flex;
             justify-content: space-between;
             gap: 10px;
+            margin-bottom: 15px;
         }
         
         .btn {
@@ -172,6 +167,12 @@
             flex: 1;
         }
         
+        .btn-tertiary {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            width: 100%;
+        }
+        
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
@@ -179,6 +180,11 @@
         
         .btn-secondary:hover {
             background-color: #dfe4ea;
+        }
+        
+        .btn-tertiary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(255, 126, 95, 0.4);
         }
         
         .btn:disabled {
@@ -308,33 +314,20 @@
             display: none;
         }
         
-        .form-link {
-            display: block;
-            margin-top: 20px;
-            text-align: center;
-            color: #1a2980;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .form-link:hover {
-            transform: translateY(-2px);
-            color: #26d0ce;
-        }
-        
-        .form-link i {
-            margin-left: 5px;
-        }
-        
-        .success-animation {
-            animation: successPulse 2s ease;
-        }
-        
-        @keyframes successPulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 176, 155, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 176, 155, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 176, 155, 0.4); }
+        .camera-rotation-control {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
         }
         
         @media (max-width: 480px) {
@@ -363,7 +356,7 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-camera"></i> سیستم ثبت حضور</h1>
-            <p>اطلاعات به صورت خودکار به گوگل فرم ارسال می‌شود</p>
+            <!-- حذف توضیح اضافه طبق درخواست -->
         </div>
         
         <div class="content">
@@ -380,6 +373,9 @@
                         <p>دوربین عقب آماده است</p>
                     </div>
                     <video id="camera-feed" autoplay playsinline></video>
+                    <div class="camera-rotation-control" id="rotate-camera">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
                 </div>
                 
                 <div class="camera-controls">
@@ -410,19 +406,18 @@
                         <span id="accuracy-value" class="location-value">---</span>
                     </div>
                 </div>
+                
+                <!-- دکمه دریافت موقعیت جغرافیایی -->
+                <button id="get-location-btn" class="btn btn-tertiary">
+                    <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
+                </button>
             </div>
             
             <button id="submit-btn" class="submit-btn" disabled>
-                <i class="fas fa-paper-plane"></i> ارسال به گوگل فرم
+                <i class="fas fa-paper-plane"></i> ارسال اطلاعات
             </button>
             
             <div id="status-message" class="status-message"></div>
-            
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/viewform" 
-               target="_blank" 
-               class="form-link">
-               <i class="fas fa-external-link-alt"></i> مشاهده گوگل فرم مقصد
-            </a>
         </div>
     </div>
 
@@ -438,23 +433,30 @@
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
         const confettiElement = document.getElementById('confetti');
+        const rotateCameraBtn = document.getElementById('rotate-camera');
+        const getLocationBtn = document.getElementById('get-location-btn');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
+        let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
         
-        // فعال‌سازی دوربین عقب
-        startCameraBtn.addEventListener('click', async () => {
+        // فعال‌سازی دوربین
+        async function startCamera() {
             try {
-                // تنظیمات برای استفاده از دوربین عقب
+                // تنظیمات برای استفاده از دوربین
                 const constraints = {
                     video: {
-                        facingMode: "environment",
+                        facingMode: currentCameraMode,
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     },
                     audio: false
                 };
+                
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
                 
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 cameraFeed.srcObject = stream;
@@ -463,10 +465,31 @@
                 captureBtn.disabled = false;
                 startCameraBtn.disabled = true;
                 startCameraBtn.innerHTML = '<i class="fas fa-check"></i> دوربین فعال شد';
+                
+                // تنظیم عنوان دوربین
+                const cameraType = currentCameraMode === "environment" ? "عقب" : "جلو";
+                document.querySelector('.camera-placeholder p').textContent = `دوربین ${cameraType} فعال است`;
+                
             } catch (err) {
                 showStatus(`خطا در دسترسی به دوربین: ${err.message}`, 'error');
                 console.error('خطای دوربین:', err);
             }
+        }
+        
+        // دکمه شروع دوربین
+        startCameraBtn.addEventListener('click', startCamera);
+        
+        // دکمه چرخش دوربین
+        rotateCameraBtn.addEventListener('click', () => {
+            currentCameraMode = currentCameraMode === "environment" ? "user" : "environment";
+            startCamera();
+        });
+        
+        // دریافت موقعیت جغرافیایی با دکمه
+        getLocationBtn.addEventListener('click', () => {
+            showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
+            getLocationBtn.disabled = true;
+            getLocation();
         });
         
         // دریافت موقعیت جغرافیایی
@@ -485,6 +508,7 @@
                         accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
                         
                         showStatus('موقعیت جغرافیایی دریافت شد', 'success');
+                        getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
                         
                         // فعال کردن دکمه ارسال
                         if (marketingCodeInput.value.trim() !== '') {
@@ -494,6 +518,7 @@
                     error => {
                         showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
                         console.error('خطای موقعیت‌یابی:', error);
+                        getLocationBtn.disabled = false;
                     },
                     {
                         enableHighAccuracy: true,
@@ -503,11 +528,9 @@
                 );
             } else {
                 showStatus('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند', 'error');
+                getLocationBtn.disabled = false;
             }
         }
-        
-        // فراخوانی دریافت موقعیت هنگام لود صفحه
-        window.addEventListener('load', getLocation);
         
         // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
         submitBtn.addEventListener('click', async () => {
@@ -520,8 +543,7 @@
             }
             
             if (!locationData) {
-                showStatus('در حال دریافت موقعیت جغرافیایی...', 'error');
-                getLocation();
+                showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
                 return;
             }
             
@@ -559,6 +581,8 @@
                 setTimeout(() => {
                     marketingCodeInput.value = '';
                     submitBtn.disabled = true;
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
                     
                     // توقف دوربین
                     if (stream) {
@@ -569,6 +593,12 @@
                         startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                         captureBtn.disabled = true;
                     }
+                    
+                    // ریست موقعیت
+                    locationData = null;
+                    latitudeValue.textContent = '---';
+                    longitudeValue.textContent = '---';
+                    accuracyValue.textContent = '---';
                 }, 2000);
                 
             } catch (error) {
