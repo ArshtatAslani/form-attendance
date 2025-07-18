@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم ثبت حضور | دوربین و موقعیت‌یابی</title>
+    <title>پرتال حضور در اسپات | دوربین و موقعیت‌یابی</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -347,15 +347,19 @@
         }
         
         .dev-credit {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
+            text-align: left; /* تغییر به چپ‌چین */
+            direction: ltr; /* جهت متن انگلیسی */
+            font-size: 13px; /* فونت کوچکتر */
+            margin-top: 15px;
+            padding: 8px 12px;
             background: rgba(38, 208, 206, 0.1);
-            border-radius: 10px;
+            border-radius: 8px;
             color: #1a2980;
-            font-weight: 600;
-            animation: fadeIn 1s ease-out;
+            font-weight: 500;
             border: 1px solid rgba(26, 41, 128, 0.1);
+            display: inline-block; /* عرض متناسب با محتوا */
+            float: left; /* قرارگیری در سمت چپ */
+            margin-left: 10px;
         }
         
         .dev-credit span {
