@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم ثبت حضور</title>
+    <title>سیستم ثبت حضور | ارسال به گوگل فرم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -30,10 +30,16 @@
             border-radius: 20px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
             overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .header {
-            background: linear-gradient(to right, #4b6cb7, #182848);
+            background: linear-gradient(to right, #1a2980, #26d0ce);
             color: white;
             text-align: center;
             padding: 25px 20px;
@@ -56,6 +62,7 @@
         
         .input-group {
             margin-bottom: 25px;
+            position: relative;
         }
         
         .input-group label {
@@ -67,17 +74,25 @@
         
         .input-group input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 15px 15px 45px;
             border: 2px solid #ddd;
             border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            font-size: 20px;
+            color: #1a2980;
         }
         
         .input-group input:focus {
-            border-color: #4b6cb7;
+            border-color: #1a2980;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.2);
+            box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.2);
         }
         
         .camera-section {
@@ -87,8 +102,8 @@
         .camera-container {
             position: relative;
             width: 100%;
-            height: 250px;
-            background-color: #1a1a2e;
+            height: 280px;
+            background-color: #0f172a;
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 15px;
@@ -96,6 +111,7 @@
             justify-content: center;
             align-items: center;
             color: white;
+            border: 3px solid #1a2980;
         }
         
         #camera-feed {
@@ -103,6 +119,7 @@
             height: 100%;
             object-fit: cover;
             display: none;
+            transform: scaleX(-1); /* Flip for selfie view */
         }
         
         .camera-placeholder {
@@ -113,12 +130,20 @@
         .camera-placeholder i {
             font-size: 64px;
             margin-bottom: 15px;
-            color: #4b6cb7;
+            color: #26d0ce;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
         }
         
         .camera-controls {
             display: flex;
             justify-content: space-between;
+            gap: 10px;
         }
         
         .btn {
@@ -136,10 +161,9 @@
         }
         
         .btn-primary {
-            background: linear-gradient(to right, #4b6cb7, #182848);
+            background: linear-gradient(to right, #1a2980, #26d0ce);
             color: white;
             flex: 1;
-            margin-right: 10px;
         }
         
         .btn-secondary {
@@ -150,7 +174,7 @@
         
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(75, 108, 183, 0.4);
+            box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
         }
         
         .btn-secondary:hover {
@@ -206,7 +230,7 @@
         }
         
         .location-value {
-            color: #4b6cb7;
+            color: #1a2980;
             font-weight: 500;
         }
         
@@ -222,11 +246,22 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
         
         .submit-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 176, 155, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: linear-gradient(to right, #cccccc, #999999);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
         }
         
         .snapshot-preview {
@@ -237,6 +272,7 @@
             margin-top: 15px;
             display: none;
             overflow: hidden;
+            border: 2px solid #1a2980;
         }
         
         #snapshot-img {
@@ -251,16 +287,43 @@
             margin-top: 20px;
             text-align: center;
             display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .success {
             background-color: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
         .error {
             background-color: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .processing {
+            background-color: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+        
+        .form-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #1a2980;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .form-link i {
+            margin-left: 5px;
         }
         
         @media (max-width: 480px) {
@@ -273,7 +336,12 @@
             }
             
             .camera-container {
-                height: 200px;
+                height: 220px;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 14px;
             }
         }
     </style>
@@ -282,12 +350,13 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-camera"></i> سیستم ثبت حضور</h1>
-            <p>لطفا کد بازاریابی را وارد و عکس سلفی بگیرید</p>
+            <p>اطلاعات به صورت خودکار به گوگل فرم ارسال می‌شود</p>
         </div>
         
         <div class="content">
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
+                <i class="fas fa-tag"></i>
                 <input type="text" id="marketing-code" placeholder="کد بازاریابی خود را وارد نمایید...">
             </div>
             
@@ -295,7 +364,7 @@
                 <div class="camera-container">
                     <div class="camera-placeholder">
                         <i class="fas fa-camera"></i>
-                        <p>دوربین آماده است</p>
+                        <p>دوربین عقب آماده است</p>
                     </div>
                     <video id="camera-feed" autoplay playsinline></video>
                 </div>
@@ -306,7 +375,7 @@
                 
                 <div class="camera-controls">
                     <button id="start-camera" class="btn btn-primary">
-                        <i class="fas fa-camera"></i> فعال‌سازی دوربین
+                        <i class="fas fa-video"></i> فعال‌سازی دوربین
                     </button>
                     <button id="capture-btn" class="btn btn-secondary" disabled>
                         <i class="fas fa-camera-retro"></i> عکس‌برداری
@@ -334,13 +403,27 @@
                 </div>
             </div>
             
-            <button id="submit-btn" class="submit-btn">
-                <i class="fas fa-check-circle"></i> ثبت حضور
+            <button id="submit-btn" class="submit-btn" disabled>
+                <i class="fas fa-paper-plane"></i> ارسال به گوگل فرم
             </button>
             
             <div id="status-message" class="status-message"></div>
+            
+            <a href="https://docs.google.com/forms/d/1FAIpQLSfYq2n9p6f4b5kLkHXjZvX7wGt8J" target="_blank" class="form-link">
+                <i class="fas fa-external-link-alt"></i> مشاهده گوگل فرم مقصد
+            </a>
         </div>
     </div>
+
+    <!-- فرم پنهان برای ارسال به گوگل فرم -->
+    <form id="google-form" action="https://docs.google.com/forms/d/e/1UOFLCsAIiznWRVACmhQtCcEBFu_tggKW_dVeN_20x5g/formResponse" method="POST" target="hidden-iframe" style="display: none;">
+        <input type="text" name="entry.1228562108" id="form-marketing-code">
+        <input type="text" name="entry.2093256559" id="form-latitude">
+        <input type="text" name="entry.1314182104" id="form-longitude">
+        <input type="text" name="entry.1723693542" id="form-accuracy">
+        <input type="text" name="entry.1057639884" id="form-image-data">
+    </form>
+    <iframe name="hidden-iframe" style="display: none;"></iframe>
 
     <script>
         // عناصر DOM
@@ -356,12 +439,20 @@
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
         
+        // عناصر فرم پنهان
+        const googleForm = document.getElementById('google-form');
+        const formMarketingCode = document.getElementById('form-marketing-code');
+        const formLatitude = document.getElementById('form-latitude');
+        const formLongitude = document.getElementById('form-longitude');
+        const formAccuracy = document.getElementById('form-accuracy');
+        const formImageData = document.getElementById('form-image-data');
+        
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
         let snapshotData = null;
         
-        // فعال‌سازی دوربین (فقط دوربین عقب)
+        // فعال‌سازی دوربین عقب
         startCameraBtn.addEventListener('click', async () => {
             try {
                 // تنظیمات برای استفاده از دوربین عقب
@@ -401,11 +492,12 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
             
-            snapshotData = canvas.toDataURL('image/png');
+            snapshotData = canvas.toDataURL('image/jpeg', 0.8);
             snapshotImg.src = snapshotData;
             snapshotPreview.style.display = 'block';
             
             showStatus('عکس با موفقیت گرفته شد!', 'success');
+            submitBtn.disabled = false;
         });
         
         // دریافت موقعیت جغرافیایی
@@ -443,7 +535,7 @@
         // فراخوانی دریافت موقعیت هنگام لود صفحه
         window.addEventListener('load', getLocation);
         
-        // ثبت حضور
+        // ثبت حضور و ارسال به گوگل فرم
         submitBtn.addEventListener('click', () => {
             const marketingCode = marketingCodeInput.value.trim();
             
@@ -464,17 +556,22 @@
                 return;
             }
             
-            // در اینجا اطلاعات به سرور ارسال می‌شود
-            // برای نمونه فقط نمایش داده می‌شود
-            showStatus('اطلاعات با موفقیت ثبت شد!', 'success');
+            showStatus('در حال ارسال اطلاعات به گوگل فرم...', 'processing');
+            submitBtn.disabled = true;
             
-            // شبیه‌سازی ارسال به سرور
+            // تنظیم مقادیر برای فرم پنهان
+            formMarketingCode.value = marketingCode;
+            formLatitude.value = locationData.latitude;
+            formLongitude.value = locationData.longitude;
+            formAccuracy.value = locationData.accuracy;
+            formImageData.value = snapshotData.substring(0, 500) + '...'; // ارسال بخشی از تصویر به دلیل محدودیت گوگل فرم
+            
+            // ارسال فرم
+            googleForm.submit();
+            
+            // شبیه‌سازی ارسال به سرور (در محیط واقعی نیازی نیست)
             setTimeout(() => {
-                console.log('اطلاعات ارسال شد:', {
-                    marketingCode,
-                    location: locationData,
-                    snapshot: snapshotData.substring(0, 50) + '...' // نمایش بخشی از تصویر برای نمونه
-                });
+                showStatus('اطلاعات با موفقیت به گوگل فرم ارسال شد!', 'success');
                 
                 // ریست فرم
                 marketingCodeInput.value = '';
@@ -484,6 +581,7 @@
                 latitudeValue.textContent = '---';
                 longitudeValue.textContent = '---';
                 accuracyValue.textContent = '---';
+                submitBtn.disabled = true;
                 
                 // توقف دوربین
                 if (stream) {
@@ -491,10 +589,15 @@
                     cameraFeed.style.display = 'none';
                     document.querySelector('.camera-placeholder').style.display = 'block';
                     startCameraBtn.disabled = false;
-                    startCameraBtn.innerHTML = '<i class="fas fa-camera"></i> فعال‌سازی دوربین';
+                    startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                     captureBtn.disabled = true;
                 }
-            }, 1500);
+                
+                // بازگرداندن دکمه ارسال به حالت فعال بعد از 3 ثانیه
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                }, 3000);
+            }, 2000);
         });
         
         // نمایش پیام وضعیت
@@ -507,6 +610,15 @@
                 statusMessage.style.display = 'none';
             }, 5000);
         }
+        
+        // اعتبارسنجی فرم
+        marketingCodeInput.addEventListener('input', () => {
+            if (marketingCodeInput.value.trim() !== '' && snapshotData && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        });
     </script>
 </body>
 </html>
