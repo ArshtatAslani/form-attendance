@@ -67,13 +67,15 @@
             color: #2c3e50;
         }
         
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             padding: 15px 15px 15px 45px;
             border: 2px solid #ddd;
             border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s;
+            background-color: white;
+            appearance: none;
         }
         
         .input-group i {
@@ -84,10 +86,23 @@
             color: #1a2980;
         }
         
-        .input-group input:focus {
+        .input-group input:focus, .input-group select:focus {
             border-color: #1a2980;
             outline: none;
             box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.2);
+        }
+        
+        .input-group select {
+            cursor: pointer;
+        }
+        
+        .select-arrow {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            font-size: 16px;
+            color: #1a2980;
+            pointer-events: none;
         }
         
         .camera-section {
@@ -356,7 +371,6 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-camera"></i> سیستم ثبت حضور</h1>
-            <!-- حذف توضیح اضافه طبق درخواست -->
         </div>
         
         <div class="content">
@@ -364,6 +378,18 @@
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
                 <input type="text" id="marketing-code" placeholder="کد بازاریابی خود را وارد نمایید...">
+            </div>
+            
+            <!-- کشویی نوع درخواست -->
+            <div class="input-group">
+                <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
+                <i class="fas fa-list-alt"></i>
+                <select id="request-type">
+                    <option value="شروع شیفت">شروع شیفت</option>
+                    <option value="پایان شیفت">پایان شیفت</option>
+                    <option value="ثبت نام">ثبت نام</option>
+                </select>
+                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
             <div class="camera-section">
@@ -424,6 +450,7 @@
     <script>
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
+        const requestTypeSelect = document.getElementById('request-type');
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
         const cameraFeed = document.getElementById('camera-feed');
@@ -535,10 +562,16 @@
         // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
         submitBtn.addEventListener('click', async () => {
             const marketingCode = marketingCodeInput.value.trim();
+            const requestType = requestTypeSelect.value;
             
             // اعتبارسنجی ورودی‌ها
             if (!marketingCode) {
                 showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
+                return;
+            }
+            
+            if (!requestType) {
+                showStatus('لطفاً نوع درخواست را انتخاب کنید', 'error');
                 return;
             }
             
@@ -556,10 +589,10 @@
                 
                 // ساخت پارامترهای ارسالی
                 const params = new URLSearchParams();
-                params.append('entry.1228562108', marketingCode);
-                params.append('entry.2093256559', locationData.latitude);
-                params.append('entry.1314182104', locationData.longitude);
-                params.append('entry.1723693542', locationData.accuracy);
+                params.append('entry.1228562108', marketingCode); // کد بازاریابی
+                params.append('entry.2093256559', locationData.latitude); // عرض جغرافیایی
+                params.append('entry.1314182104', locationData.longitude); // طول جغرافیایی
+                params.append('entry.1723693542', requestType); // نوع درخواست (به جای دقت موقعیت)
                 
                 // ارسال درخواست POST
                 await fetch(formUrl, {
