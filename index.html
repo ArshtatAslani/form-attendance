@@ -369,10 +369,6 @@
                     <video id="camera-feed" autoplay playsinline></video>
                 </div>
                 
-                <div class="snapshot-preview">
-                    <img id="snapshot-img" alt="عکس گرفته شده">
-                </div>
-                
                 <div class="camera-controls">
                     <button id="start-camera" class="btn btn-primary">
                         <i class="fas fa-video"></i> فعال‌سازی دوربین
@@ -427,7 +423,6 @@
         <input type="text" name="entry.2093256559" id="form-latitude">
         <input type="text" name="entry.1314182104" id="form-longitude">
         <input type="text" name="entry.1723693542" id="form-accuracy">
-        <input type="text" name="entry.1057639884" id="form-image-data">
     </form>
     <iframe name="hidden-iframe" id="hidden-iframe" style="display: none;"></iframe>
 
@@ -437,8 +432,6 @@
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
         const cameraFeed = document.getElementById('camera-feed');
-        const snapshotImg = document.getElementById('snapshot-img');
-        const snapshotPreview = document.querySelector('.snapshot-preview');
         const submitBtn = document.getElementById('submit-btn');
         const statusMessage = document.getElementById('status-message');
         const latitudeValue = document.getElementById('latitude-value');
@@ -452,12 +445,10 @@
         const formLatitude = document.getElementById('form-latitude');
         const formLongitude = document.getElementById('form-longitude');
         const formAccuracy = document.getElementById('form-accuracy');
-        const formImageData = document.getElementById('form-image-data');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
-        let snapshotData = null;
         
         // فعال‌سازی دوربین عقب
         startCameraBtn.addEventListener('click', async () => {
@@ -479,32 +470,10 @@
                 captureBtn.disabled = false;
                 startCameraBtn.disabled = true;
                 startCameraBtn.innerHTML = '<i class="fas fa-check"></i> دوربین فعال شد';
-                
-                // مخفی کردن پیش‌نمایش عکس قبلی
-                snapshotPreview.style.display = 'none';
             } catch (err) {
                 showStatus(`خطا در دسترسی به دوربین: ${err.message}`, 'error');
                 console.error('خطای دوربین:', err);
             }
-        });
-        
-        // گرفتن عکس از دوربین
-        captureBtn.addEventListener('click', () => {
-            if (!stream) return;
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = cameraFeed.videoWidth;
-            canvas.height = cameraFeed.videoHeight;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
-            
-            snapshotData = canvas.toDataURL('image/jpeg', 0.8);
-            snapshotImg.src = snapshotData;
-            snapshotPreview.style.display = 'block';
-            
-            showStatus('عکس با موفقیت گرفته شد!', 'success');
-            submitBtn.disabled = false;
         });
         
         // دریافت موقعیت جغرافیایی
@@ -523,6 +492,11 @@
                         accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
                         
                         showStatus('موقعیت جغرافیایی دریافت شد', 'success');
+                        
+                        // فعال کردن دکمه ارسال
+                        if (marketingCodeInput.value.trim() !== '') {
+                            submitBtn.disabled = false;
+                        }
                     },
                     error => {
                         showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
@@ -552,11 +526,6 @@
                 return;
             }
             
-            if (!snapshotData) {
-                showStatus('لطفاً عکس سلفی بگیرید', 'error');
-                return;
-            }
-            
             if (!locationData) {
                 showStatus('در حال دریافت موقعیت جغرافیایی...', 'error');
                 getLocation();
@@ -572,9 +541,6 @@
             formLongitude.value = locationData.longitude;
             formAccuracy.value = locationData.accuracy;
             
-            // ارسال متن به جای تصویر برای جلوگیری از مشکل گوگل فرم
-            formImageData.value = "تصویر گرفته شده در " + new Date().toLocaleString('fa-IR');
-            
             // ارسال فرم
             googleForm.submit();
             
@@ -584,8 +550,6 @@
                 
                 // ریست فرم
                 marketingCodeInput.value = '';
-                snapshotPreview.style.display = 'none';
-                snapshotData = null;
                 submitBtn.disabled = true;
                 
                 // توقف دوربین
@@ -613,7 +577,7 @@
         
         // اعتبارسنجی فرم
         marketingCodeInput.addEventListener('input', () => {
-            if (marketingCodeInput.value.trim() !== '' && snapshotData && locationData) {
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
                 submitBtn.disabled = false;
             } else {
                 submitBtn.disabled = true;
