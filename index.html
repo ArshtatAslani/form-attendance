@@ -119,7 +119,7 @@
             height: 100%;
             object-fit: cover;
             display: none;
-            transform: scaleX(-1); /* Flip for selfie view */
+            transform: scaleX(-1);
         }
         
         .camera-placeholder {
@@ -409,14 +409,21 @@
             
             <div id="status-message" class="status-message"></div>
             
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/viewform" target="_blank" class="form-link">
-                <i class="fas fa-external-link-alt"></i> مشاهده گوگل فرم مقصد
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/viewform" 
+               target="_blank" 
+               class="form-link">
+               <i class="fas fa-external-link-alt"></i> مشاهده گوگل فرم مقصد
             </a>
         </div>
     </div>
 
     <!-- فرم پنهان برای ارسال به گوگل فرم -->
-    <form id="google-form" action="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse" method="POST" target="hidden-iframe" style="display: none;">
+    <form id="google-form" 
+          action="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse" 
+          method="POST" 
+          target="hidden-iframe" 
+          style="display: none;">
+        <!-- لطفاً شناسه‌های واقعی فرم خود را جایگزین کنید -->
         <input type="text" name="entry.1228562108" id="form-marketing-code">
         <input type="text" name="entry.2093256559" id="form-latitude">
         <input type="text" name="entry.1314182104" id="form-longitude">
@@ -564,7 +571,9 @@
             formLatitude.value = locationData.latitude;
             formLongitude.value = locationData.longitude;
             formAccuracy.value = locationData.accuracy;
-            formImageData.value = snapshotData.substring(0, 500) + '...'; // ارسال بخشی از تصویر به دلیل محدودیت گوگل فرم
+            
+            // ارسال متن به جای تصویر برای جلوگیری از مشکل گوگل فرم
+            formImageData.value = "تصویر گرفته شده در " + new Date().toLocaleString('fa-IR');
             
             // ارسال فرم
             googleForm.submit();
@@ -577,10 +586,6 @@
                 marketingCodeInput.value = '';
                 snapshotPreview.style.display = 'none';
                 snapshotData = null;
-                locationData = null;
-                latitudeValue.textContent = '---';
-                longitudeValue.textContent = '---';
-                accuracyValue.textContent = '---';
                 submitBtn.disabled = true;
                 
                 // توقف دوربین
@@ -592,11 +597,6 @@
                     startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                     captureBtn.disabled = true;
                 }
-                
-                // بازگرداندن دکمه ارسال به حالت فعال بعد از 3 ثانیه
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                }, 3000);
             }, 2000);
         });
         
