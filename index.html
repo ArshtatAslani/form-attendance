@@ -569,6 +569,20 @@
                 statusMessage.style.display = 'none';
             }, 5000);
         }
+          function getPersianWeekday(date) {
+      return (date.getDay() + 1) % 7;
+    }
+
+    const persianDayIndex = getPersianWeekday(nowTehran);
+    const persianWeekday = days[persianDayIndex];
+    const [jy, jm, jd] = toJalali(nowTehran.getFullYear(), nowTehran.getMonth() + 1, nowTehran.getDate());
+    const stickers = ['🌞', '🌜', '🌛', '🌚', '🌝', '⭐', '🌟'];
+
+    const persianDateText = `${persianWeekday} ${jd} ${months[jm - 1]} ${jy} ${stickers[persianDayIndex]}`;
+    const gregorianDateText = nowTehran.toLocaleDateString('fa-IR');
+
+    document.getElementById("dates").innerHTML = `${persianDateText} <br> ${gregorianDateText}`;
+  }
         
         // اعتبارسنجی فرم
         marketingCodeInput.addEventListener('input', () => {
