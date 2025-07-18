@@ -423,14 +423,13 @@
           method="POST" 
           target="hidden-iframe" 
           style="display: none;">
-        <!-- لطفاً شناسه‌های واقعی فرم خود را جایگزین کنید -->
         <input type="text" name="entry.1228562108" id="form-marketing-code">
         <input type="text" name="entry.2093256559" id="form-latitude">
         <input type="text" name="entry.1314182104" id="form-longitude">
         <input type="text" name="entry.1723693542" id="form-accuracy">
         <input type="text" name="entry.1057639884" id="form-image-data">
     </form>
-    <iframe name="hidden-iframe" style="display: none;"></iframe>
+    <iframe name="hidden-iframe" id="hidden-iframe" style="display: none;"></iframe>
 
     <script>
         // عناصر DOM
@@ -445,6 +444,7 @@
         const latitudeValue = document.getElementById('latitude-value');
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
+        const hiddenIframe = document.getElementById('hidden-iframe');
         
         // عناصر فرم پنهان
         const googleForm = document.getElementById('google-form');
@@ -578,8 +578,8 @@
             // ارسال فرم
             googleForm.submit();
             
-            // شبیه‌سازی ارسال به سرور (در محیط واقعی نیازی نیست)
-            setTimeout(() => {
+            // تأیید ارسال با رویداد onload در iframe
+            hiddenIframe.onload = function() {
                 showStatus('اطلاعات با موفقیت به گوگل فرم ارسال شد!', 'success');
                 
                 // ریست فرم
@@ -597,7 +597,7 @@
                     startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                     captureBtn.disabled = true;
                 }
-            }, 2000);
+            };
         });
         
         // نمایش پیام وضعیت
