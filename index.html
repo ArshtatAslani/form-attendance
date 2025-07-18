@@ -347,17 +347,31 @@
         }
         
         .dev-credit {
-            text-align: left; /* تغییر به چپ‌چین */
+            text-align: left; /* چپ چین کردن متن */
             direction: ltr; /* جهت متن انگلیسی */
-            font-size: 10px; /* فونت کوچکتر */
-            margin-top: 12px;
+            font-size: 12px; /* فونت کوچکتر */
+            margin-top: 15px;
+            padding: 6px 10px; /* اندازه داخلی کادر */
+            background: rgba(38, 208, 206, 0.1);
+            border-radius: 6px; /* انحنای گوشه‌ها */
             color: #1a2980;
             font-weight: 500;
-            border: 1px solid rgba(26, 41, 128, 0.1);
+            border: 1px solid rgba(26, 41, 128, 0.15); /* حاشیه کادر */
             display: inline-block; /* عرض متناسب با محتوا */
             float: left; /* قرارگیری در سمت چپ */
-            margin-left: 8px;
+            margin-left: 10px;
+            line-height: 1.4; /* ارتفاع خط */
+            width: auto; /* عرض اتوماتیک */
+            max-width: 90%; /* حداکثر عرض */
         }
+        
+        /* برای نمایش بهتر در موبایل */
+        @media (max-width: 480px) {
+            .dev-credit {
+                font-size: 11px;
+                padding: 5px 8px;
+                margin-top: 10px;
+            }
         
         .dev-credit span {
             display: inline-block;
