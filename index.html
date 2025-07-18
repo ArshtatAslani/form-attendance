@@ -31,6 +31,7 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
             overflow: hidden;
             animation: fadeIn 0.8s ease-out;
+            position: relative;
         }
         
         @keyframes fadeIn {
@@ -345,6 +346,30 @@
             z-index: 10;
         }
         
+        .dev-credit {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(38, 208, 206, 0.1);
+            border-radius: 10px;
+            color: #1a2980;
+            font-weight: 600;
+            animation: fadeIn 1s ease-out;
+            border: 1px solid rgba(26, 41, 128, 0.1);
+        }
+        
+        .dev-credit span {
+            display: inline-block;
+            margin-left: 5px;
+            animation: sparkle 1.5s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
         @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.5rem;
@@ -444,6 +469,11 @@
             </button>
             
             <div id="status-message" class="status-message"></div>
+            
+            <!-- متن توسعه‌دهنده -->
+            <div class="dev-credit">
+                Dev by: Snapp North Zone Sales HQ <span>💎💎</span>
+            </div>
         </div>
     </div>
 
@@ -580,7 +610,7 @@
                 return;
             }
             
-            showStatus('در حال ارسال اطلاعات به سرور...', 'processing');
+            showStatus('در حال ارسال اطلاعات به گوگل فرم...', 'processing');
             submitBtn.disabled = true;
             
             try {
@@ -608,7 +638,7 @@
                 showSuccessAnimation();
                 
                 // نمایش پیام موفقیت
-                showStatus('اطلاعات با موفقیت به سرور ارسال شد!', 'success');
+                showStatus('اطلاعات با موفقیت به گوگل فرم ارسال شد!', 'success');
                 
                 // ریست فرم
                 setTimeout(() => {
