@@ -413,19 +413,6 @@
         </div>
     </div>
 
-    <!-- فرم پنهان برای ارسال به گوگل فرم -->
-    <form id="google-form" 
-          action="https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse" 
-          method="POST" 
-          target="hidden-iframe" 
-          style="display: none;">
-        <input type="text" name="entry.1228562108" id="form-marketing-code">
-        <input type="text" name="entry.2093256559" id="form-latitude">
-        <input type="text" name="entry.1314182104" id="form-longitude">
-        <input type="text" name="entry.1723693542" id="form-accuracy">
-    </form>
-    <iframe name="hidden-iframe" id="hidden-iframe" style="display: none;"></iframe>
-
     <script>
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
@@ -437,14 +424,6 @@
         const latitudeValue = document.getElementById('latitude-value');
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
-        const hiddenIframe = document.getElementById('hidden-iframe');
-        
-        // عناصر فرم پنهان
-        const googleForm = document.getElementById('google-form');
-        const formMarketingCode = document.getElementById('form-marketing-code');
-        const formLatitude = document.getElementById('form-latitude');
-        const formLongitude = document.getElementById('form-longitude');
-        const formAccuracy = document.getElementById('form-accuracy');
         
         // متغیرهای وضعیت
         let stream = null;
@@ -516,8 +495,8 @@
         // فراخوانی دریافت موقعیت هنگام لود صفحه
         window.addEventListener('load', getLocation);
         
-        // ثبت حضور و ارسال به گوگل فرم
-        submitBtn.addEventListener('click', () => {
+        // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
+        submitBtn.addEventListener('click', async () => {
             const marketingCode = marketingCodeInput.value.trim();
             
             // اعتبارسنجی ورودی‌ها
@@ -535,17 +514,28 @@
             showStatus('در حال ارسال اطلاعات به گوگل فرم...', 'processing');
             submitBtn.disabled = true;
             
-            // تنظیم مقادیر برای فرم پنهان
-            formMarketingCode.value = marketingCode;
-            formLatitude.value = locationData.latitude;
-            formLongitude.value = locationData.longitude;
-            formAccuracy.value = locationData.accuracy;
-            
-            // ارسال فرم
-            googleForm.submit();
-            
-            // تأیید ارسال با رویداد onload در iframe
-            hiddenIframe.onload = function() {
+            try {
+                // ساخت URL برای ارسال به گوگل فرم
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
+                
+                // ساخت پارامترهای ارسالی
+                const params = new URLSearchParams();
+                params.append('entry.1228562108', marketingCode);
+                params.append('entry.2093256559', locationData.latitude);
+                params.append('entry.1314182104', locationData.longitude);
+                params.append('entry.1723693542', locationData.accuracy);
+                
+                // ارسال درخواست POST
+                const response = await fetch(formUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString(),
+                    mode: 'no-cors' // برای اجتناب از مشکلات CORS
+                });
+                
+                // گوگل فرم در حالت no-cors پاسخی برنمی‌گرداند، اما ارسال انجام می‌شود
                 showStatus('اطلاعات با موفقیت به گوگل فرم ارسال شد!', 'success');
                 
                 // ریست فرم
@@ -561,7 +551,12 @@
                     startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                     captureBtn.disabled = true;
                 }
-            };
+                
+            } catch (error) {
+                showStatus('خطا در ارسال اطلاعات: ' + error.message, 'error');
+                submitBtn.disabled = false;
+                console.error('خطای ارسال:', error);
+            }
         });
         
         // نمایش پیام وضعیت
