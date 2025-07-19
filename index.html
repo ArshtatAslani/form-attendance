@@ -68,7 +68,7 @@
             color: #2c3e50;
         }
         
-        .input-group input, .input-group select {
+        .input-group input {
             width: 100%;
             padding: 15px 15px 15px 45px;
             border: 2px solid #ddd;
@@ -76,7 +76,6 @@
             font-size: 16px;
             transition: all 0.3s;
             background-color: white;
-            appearance: none;
         }
         
         .input-group i {
@@ -87,23 +86,10 @@
             color: #1a2980;
         }
         
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus {
             border-color: #1a2980;
             outline: none;
             box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.2);
-        }
-        
-        .input-group select {
-            cursor: pointer;
-        }
-        
-        .select-arrow {
-            position: absolute;
-            right: 15px;
-            top: 42px;
-            font-size: 16px;
-            color: #1a2980;
-            pointer-events: none;
         }
         
         .camera-section {
@@ -379,6 +365,16 @@
             color: #1a2980;
         }
 
+        .cycle-timer {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+        }
+
         @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.5rem;
@@ -425,16 +421,10 @@
                 <input type="text" id="datetime" readonly placeholder="تاریخ و زمان">
             </div>
             
-            <!-- کشویی نوع درخواست -->
-            <div class="input-group">
-                <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
-                <i class="fas fa-list-alt"></i>
-                <select id="request-type">
-                    <option value="شروع شیفت">شروع شیفت</option>
-                    <option value="پایان شیفت">پایان شیفت</option>
-                    <option value="ثبت موقعیت شیفت">ثبت موقعیت شیفت</option>
-                </select>
-                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+            <!-- تایمر سیکل بعدی -->
+            <div class="cycle-timer" id="next-cycle-timer">
+                <i class="fas fa-clock"></i> زمان تا سیکل بعدی: 
+                <span id="countdown">00:00</span>
             </div>
             
             <div class="camera-section">
@@ -513,7 +503,6 @@
     <script>
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
-        const requestTypeSelect = document.getElementById('request-type');
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
         const cameraFeed = document.getElementById('camera-feed');
@@ -528,6 +517,8 @@
         const autoSubmitTimer = document.getElementById('auto-submit-timer');
         const datetimeInput = document.getElementById('datetime');
         const offlineStatus = document.getElementById('offline-status');
+        const nextCycleTimer = document.getElementById('next-cycle-timer');
+        const countdownElement = document.getElementById('countdown');
         
         // متغیرهای وضعیت
         let stream = null;
@@ -539,6 +530,8 @@
         let pendingSubmissions = [];
         let shiftActive = false;
         let currentMarketingCode = "";
+        let nextCycleInterval = null;
+        let countdown = 60; // زمان پیش‌فرض تا سیکل بعدی (60 ثانیه)
 
         // به‌روزرسانی تاریخ و زمان
         function updateDateTime() {
@@ -756,6 +749,44 @@
             }
         }
 
+        // شروع تایمر معکوس برای سیکل بعدی
+        function startNextCycleTimer() {
+            nextCycleTimer.style.display = 'block';
+            countdown = 60; // تنظیم تایمر به 60 ثانیه
+            
+            if (nextCycleInterval) clearInterval(nextCycleInterval);
+            
+            nextCycleInterval = setInterval(() => {
+                countdown--;
+                
+                // نمایش زمان به صورت دقیقه:ثانیه
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // تغییر رنگ در زمان‌های حساس
+                if (countdown <= 10) {
+                    countdownElement.style.color = '#ff6b6b';
+                    countdownElement.style.fontWeight = 'bold';
+                } else {
+                    countdownElement.style.color = 'white';
+                }
+                
+                // پایان تایمر و شروع سیکل جدید
+                if (countdown <= 0) {
+                    clearInterval(nextCycleInterval);
+                    countdownElement.textContent = '00:00';
+                    showStatus('سیکل جدید آغاز شد!', 'success');
+                    
+                    // شروع سیکل جدید بعد از 2 ثانیه
+                    setTimeout(() => {
+                        countdown = 60;
+                        startNextCycleTimer();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
         // شروع شیفت
         async function startShift() {
             const marketingCode = marketingCodeInput.value.trim();
@@ -780,6 +811,9 @@
                     endShiftBtn.disabled = false;
                     startShiftBtn.disabled = true;
                     shiftActive = true;
+                    
+                    // شروع تایمر سیکل بعدی
+                    startNextCycleTimer();
                     
                     // شروع ارسال خودکار هر 1 دقیقه
                     shiftInterval = setInterval(async () => {
@@ -831,6 +865,7 @@
                     endShiftBtn.disabled = false;
                     startShiftBtn.disabled = true;
                     shiftActive = true;
+                    startNextCycleTimer();
                 }
             } catch (error) {
                 showStatus('خطا در شروع شیفت: ' + error.message, 'error');
@@ -864,6 +899,7 @@
                 
                 // توقف ارسال خودکار
                 clearInterval(shiftInterval);
+                clearInterval(nextCycleInterval);
                 shiftInterval = null;
                 shiftActive = false;
                 
@@ -875,6 +911,7 @@
                 
                 // ریست تایمر
                 autoSubmitTimer.textContent = "ثبت خودکار: 00:00";
+                nextCycleTimer.style.display = 'none';
             } catch (error) {
                 showStatus('خطا در پایان شیفت: ' + error.message, 'error');
             }
