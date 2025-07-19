@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه حضور و غیاب | ارسال خودکار موقعیت</title>
+    <title>سامانه حضور و غیاب | دوربین و موقعیت‌یابی</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -106,6 +106,132 @@
             pointer-events: none;
         }
         
+        .camera-section {
+            margin-bottom: 25px;
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background-color: #0f172a;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            border: 3px solid #1a2980;
+        }
+        
+        #camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .camera-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .camera-placeholder i {
+            font-size: 64px;
+            margin-bottom: 15px;
+            color: #26d0ce;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .camera-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #1a2980, #26d0ce);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-secondary {
+            background-color: #f1f2f6;
+            color: #2f3542;
+            flex: 1;
+        }
+        
+        .btn-tertiary {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #dfe4ea;
+        }
+        
+        .btn-tertiary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(255, 126, 95, 0.4);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 176, 155, 0.4);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(255, 65, 108, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         .location-section {
             background-color: #f8f9fa;
             border-radius: 12px;
@@ -122,7 +248,6 @@
         .location-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             margin-bottom: 15px;
         }
         
@@ -157,22 +282,6 @@
         .location-value {
             color: #1a2980;
             font-weight: 500;
-        }
-        
-        .location-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-            background: rgba(38, 208, 206, 0.15);
-            border: 1px solid rgba(26, 41, 128, 0.2);
-        }
-        
-        .location-status i {
-            font-size: 22px;
-            color: #1a2980;
         }
         
         .submit-btn {
@@ -243,15 +352,38 @@
             display: none;
         }
         
-        .timer {
-            display: inline-block;
-            background: #1a2980;
+        .camera-rotation-control {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
             color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-            min-width: 40px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .shift-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .datetime-display {
+            background-color: #eef7ff;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #1a2980;
+            border: 2px solid #c2e0ff;
+            margin-bottom: 15px;
         }
         
         .dev-credit {
@@ -270,108 +402,6 @@
             max-width: 90%;
             letter-spacing: 0.5px;
         }
-        
-        .auto-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .auto-controls .btn {
-            flex: 1;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
-            color: white;
-        }
-        
-        .btn-tertiary {
-            background: linear-gradient(to right, #8e2de2, #4a00e0);
-            color: white;
-        }
-        
-        .btn {
-            padding: 14px 25px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .auto-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            background: rgba(38, 208, 206, 0.1);
-            border: 1px solid rgba(26, 41, 128, 0.1);
-        }
-        
-        .auto-status i {
-            color: #1a2980;
-            font-size: 20px;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: 8px;
-        }
-        
-        .status-active {
-            background-color: #00b09b;
-            box-shadow: 0 0 8px rgba(0, 176, 155, 0.7);
-            animation: pulse 1.5s infinite;
-        }
-        
-        .status-inactive {
-            background-color: #e74c3c;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 176, 155, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 176, 155, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 176, 155, 0); }
-        }
-        
-        .auto-info {
-            text-align: center;
-            padding: 10px;
-            background: rgba(26, 41, 128, 0.05);
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 14px;
-            color: #2c3e50;
-        }
 
         @media (max-width: 480px) {
             .dev-credit {
@@ -380,6 +410,19 @@
                 margin-top: 10px;
             }
         
+        .dev-credit span {
+            display: inline-block;
+            margin-left: 5px;
+            animation: sparkle 1.5s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.5rem;
             }
@@ -388,13 +431,13 @@
                 padding: 20px;
             }
             
+            .camera-container {
+                height: 220px;
+            }
+            
             .btn {
                 padding: 12px 15px;
                 font-size: 14px;
-            }
-            
-            .auto-controls {
-                flex-direction: column;
             }
         }
     </style>
@@ -404,11 +447,16 @@
     
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-map-marker-alt"></i> سامانه حضور و غیاب</h1>
-            <p>ارسال خودکار موقعیت هر 1 دقیقه</p>
+            <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
         </div>
         
         <div class="content">
+            <!-- نمایش تاریخ و ساعت -->
+            <div class="datetime-display">
+                <i class="fas fa-clock"></i>
+                <span id="datetime">--/--/---- --:--:--</span>
+            </div>
+            
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
@@ -427,37 +475,41 @@
                 <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
-            <!-- دکمه‌های کنترل ارسال خودکار -->
-            <div class="auto-controls">
-                <button id="start-auto" class="btn btn-primary">
-                    <i class="fas fa-play-circle"></i> شروع ارسال خودکار
+            <!-- دکمه‌های کنترل شیفت -->
+            <div class="shift-controls">
+                <button id="start-shift-btn" class="btn btn-success">
+                    <i class="fas fa-play"></i> شروع شیفت
                 </button>
-                <button id="stop-auto" class="btn btn-secondary" disabled>
-                    <i class="fas fa-stop-circle"></i> توقف ارسال
+                <button id="end-shift-btn" class="btn btn-danger" disabled>
+                    <i class="fas fa-stop"></i> پایان شیفت
                 </button>
             </div>
             
-            <!-- وضعیت ارسال خودکار -->
-            <div class="auto-status">
-                <i class="fas fa-info-circle"></i>
-                <span>وضعیت ارسال خودکار:</span>
-                <span id="auto-status-text">غیرفعال</span>
-                <span class="status-indicator status-inactive" id="status-indicator"></span>
-            </div>
-            
-            <!-- اطلاعات ارسال بعدی -->
-            <div class="auto-info">
-                <p>ارسال بعدی موقعیت در: <span class="timer" id="location-timer">--</span> ثانیه</p>
-                <p>آخرین ارسال: <span id="last-sent-time">--</span></p>
+            <div class="camera-section">
+                <div class="camera-container">
+                    <div class="camera-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p>دوربین عقب آماده است</p>
+                    </div>
+                    <video id="camera-feed" autoplay playsinline></video>
+                    <div class="camera-rotation-control" id="rotate-camera">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                </div>
+                
+                <div class="camera-controls">
+                    <button id="start-camera" class="btn btn-primary">
+                        <i class="fas fa-video"></i> فعال‌سازی دوربین
+                    </button>
+                    <button id="capture-btn" class="btn btn-secondary" disabled>
+                        <i class="fas fa-camera-retro"></i> عکس‌برداری
+                    </button>
+                </div>
             </div>
             
             <div class="location-section">
                 <div class="location-header">
                     <h3><i class="fas fa-map-marker-alt"></i> موقعیت جغرافیایی</h3>
-                    <div id="location-status">
-                        <span>موقعیت فعلی:</span>
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
                 </div>
                 <div class="location-data">
                     <div class="location-item">
@@ -473,28 +525,24 @@
                         <span id="accuracy-value" class="location-value">---</span>
                     </div>
                     <div class="location-item">
-                        <span class="location-label">زمان دریافت:</span>
-                        <span id="timestamp-value" class="location-value">---</span>
+                        <span class="location-label">آخرین ارسال:</span>
+                        <span id="last-submit-time" class="location-value">---</span>
                     </div>
-                </div>
-                
-                <!-- وضعیت موقعیت‌یابی خودکار -->
-                <div class="location-status">
-                    <i class="fas fa-info-circle"></i>
-                    <span>موقعیت‌یابی به صورت خودکار هر 1 دقیقه انجام می‌شود</span>
                 </div>
             </div>
             
             <button id="submit-btn" class="submit-btn" disabled>
-                <i class="fas fa-paper-plane"></i> ارسال دستی موقعیت
+                <i class="fas fa-paper-plane"></i> ارسال اطلاعات
             </button>
             
             <div id="status-message" class="status-message"></div>
             
             <!-- متن توسعه‌دهنده -->
             <div class="dev-credit">
-                Dev by: Snapp North Zone Sales HQ<br>
-                تیم فروش شمال کشور 💎
+                Dev by:<br>
+                Snapp North Zone Sales HQ<br>
+                تیم فروش شمال کشور<br>
+                💎</span>
             </div>
         </div>
     </div>
@@ -503,189 +551,131 @@
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
         const requestTypeSelect = document.getElementById('request-type');
+        const startCameraBtn = document.getElementById('start-camera');
+        const captureBtn = document.getElementById('capture-btn');
+        const cameraFeed = document.getElementById('camera-feed');
         const submitBtn = document.getElementById('submit-btn');
         const statusMessage = document.getElementById('status-message');
         const latitudeValue = document.getElementById('latitude-value');
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
-        const timestampValue = document.getElementById('timestamp-value');
         const confettiElement = document.getElementById('confetti');
-        const locationTimer = document.getElementById('location-timer');
-        const startAutoBtn = document.getElementById('start-auto');
-        const stopAutoBtn = document.getElementById('stop-auto');
-        const autoStatusText = document.getElementById('auto-status-text');
-        const statusIndicator = document.getElementById('status-indicator');
-        const lastSentTime = document.getElementById('last-sent-time');
+        const rotateCameraBtn = document.getElementById('rotate-camera');
+        const startShiftBtn = document.getElementById('start-shift-btn');
+        const endShiftBtn = document.getElementById('end-shift-btn');
+        const datetimeElement = document.getElementById('datetime');
+        const lastSubmitTime = document.getElementById('last-submit-time');
         
         // متغیرهای وضعیت
+        let stream = null;
         let locationData = null;
-        let locationInterval;
-        let autoSendInterval;
-        let timerValue = 60;
-        let autoSendActive = false;
-        let lastLocationTime = null;
+        let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
+        let shiftInterval = null; // تایمر ارسال خودکار
+        let shiftMarketingCode = null; // کد بازاریابی ذخیره شده برای شیفت
+        let shiftActive = false; // وضعیت فعال بودن شیفت
+        let offlineData = []; // داده‌های ذخیره شده آفلاین
         
-        // بارگذاری داده‌های ذخیره شده
-        function loadStoredData() {
-            const savedCode = localStorage.getItem('marketingCode');
-            if (savedCode) {
-                marketingCodeInput.value = savedCode;
-            }
+        // به‌روزرسانی تاریخ و ساعت
+        function updateDateTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
             
-            const savedRequestType = localStorage.getItem('requestType');
-            if (savedRequestType) {
-                requestTypeSelect.value = savedRequestType;
-            }
-            
-            const autoStatus = localStorage.getItem('autoSendActive');
-            if (autoStatus === 'true') {
-                startAutoSend();
-            }
+            datetimeElement.textContent = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
         }
         
-        // ذخیره داده‌ها
-        function saveData() {
-            localStorage.setItem('marketingCode', marketingCodeInput.value);
-            localStorage.setItem('requestType', requestTypeSelect.value);
-            localStorage.setItem('autoSendActive', autoSendActive.toString());
-        }
+        // به‌روزرسانی هر ثانیه
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
         
-        // شروع ارسال خودکار
-        function startAutoSend() {
-            if (marketingCodeInput.value.trim() === '') {
-                showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
-                return;
-            }
-            
-            // ذخیره داده‌ها
-            saveData();
-            
-            // فعال کردن ارسال خودکار
-            autoSendActive = true;
-            autoStatusText.textContent = 'فعال';
-            statusIndicator.className = 'status-indicator status-active';
-            startAutoBtn.disabled = true;
-            stopAutoBtn.disabled = false;
-            marketingCodeInput.disabled = true;
-            requestTypeSelect.disabled = true;
-            
-            // شروع تایمر موقعیت‌یابی
-            startLocationTracking();
-            
-            // ارسال اولیه
-            getLocation();
-            
-            // تنظیم تایمر برای ارسال خودکار هر 1 دقیقه
-            autoSendInterval = setInterval(() => {
-                getLocation();
-            }, 60000);
-            
-            // تایمر معکوس برای نمایش به کاربر
-            startCountdownTimer();
-            
-            showStatus('ارسال خودکار موقعیت فعال شد', 'success');
-        }
-        
-        // توقف ارسال خودکار
-        function stopAutoSend() {
-            autoSendActive = false;
-            autoStatusText.textContent = 'غیرفعال';
-            statusIndicator.className = 'status-indicator status-inactive';
-            startAutoBtn.disabled = false;
-            stopAutoBtn.disabled = true;
-            marketingCodeInput.disabled = false;
-            requestTypeSelect.disabled = false;
-            
-            // توقف تایمرها
-            clearInterval(locationInterval);
-            clearInterval(autoSendInterval);
-            
-            // ذخیره وضعیت
-            saveData();
-            
-            showStatus('ارسال خودکار موقعیت متوقف شد', 'success');
-        }
-        
-        // شروع تایمر معکوس
-        function startCountdownTimer() {
-            timerValue = 60;
-            
-            setInterval(() => {
-                timerValue--;
-                locationTimer.textContent = timerValue;
+        // فعال‌سازی دوربین
+        async function startCamera() {
+            try {
+                // تنظیمات برای استفاده از دوربین
+                const constraints = {
+                    video: {
+                        facingMode: currentCameraMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
                 
-                if (timerValue <= 10) {
-                    locationTimer.style.color = '#e74c3c';
-                    locationTimer.style.animation = 'pulse 1s infinite';
-                } else {
-                    locationTimer.style.color = '';
-                    locationTimer.style.animation = '';
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
                 }
                 
-                if (timerValue <= 0) {
-                    timerValue = 60;
-                }
-            }, 1000);
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                cameraFeed.srcObject = stream;
+                cameraFeed.style.display = 'block';
+                document.querySelector('.camera-placeholder').style.display = 'none';
+                captureBtn.disabled = false;
+                startCameraBtn.disabled = true;
+                startCameraBtn.innerHTML = '<i class="fas fa-check"></i> دوربین فعال شد';
+                
+                // تنظیم عنوان دوربین
+                const cameraType = currentCameraMode === "environment" ? "عقب" : "جلو";
+                document.querySelector('.camera-placeholder p').textContent = `دوربین ${cameraType} فعال است`;
+                
+            } catch (err) {
+                showStatus(`خطا در دسترسی به دوربین: ${err.message}`, 'error');
+                console.error('خطای دوربین:', err);
+            }
         }
         
-        // شروع موقعیت‌یابی خودکار
-        function startLocationTracking() {
-            // دریافت اولیه موقعیت
-            getLocation();
-            
-            // تنظیم تایمر برای موقعیت‌یابی هر 1 دقیقه
-            locationInterval = setInterval(() => {
-                getLocation();
-            }, 60000);
-        }
+        // دکمه شروع دوربین
+        startCameraBtn.addEventListener('click', startCamera);
+        
+        // دکمه چرخش دوربین
+        rotateCameraBtn.addEventListener('click', () => {
+            currentCameraMode = currentCameraMode === "environment" ? "user" : "environment";
+            startCamera();
+        });
         
         // دریافت موقعیت جغرافیایی
         function getLocation() {
-            if (navigator.geolocation) {
-                showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
-                
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy,
-                            timestamp: new Date(position.timestamp).toLocaleTimeString('fa-IR')
-                        };
-                        
-                        latitudeValue.textContent = locationData.latitude.toFixed(6);
-                        longitudeValue.textContent = locationData.longitude.toFixed(6);
-                        accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
-                        timestampValue.textContent = locationData.timestamp;
-                        
-                        showStatus('موقعیت جغرافیایی دریافت شد', 'success');
-                        
-                        // اگر ارسال خودکار فعال است، ارسال کن
-                        if (autoSendActive) {
-                            submitLocation();
-                        } else {
-                            // فعال کردن دکمه ارسال دستی
-                            submitBtn.disabled = false;
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            locationData = {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy
+                            };
+                            
+                            latitudeValue.textContent = locationData.latitude.toFixed(6);
+                            longitudeValue.textContent = locationData.longitude.toFixed(6);
+                            accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
+                            
+                            resolve(locationData);
+                        },
+                        error => {
+                            showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
+                            console.error('خطای موقعیت‌یابی:', error);
+                            reject(error);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
                         }
-                    },
-                    error => {
-                        showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
-                        console.error('خطای موقعیت‌یابی:', error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                showStatus('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند', 'error');
-            }
+                    );
+                } else {
+                    const error = new Error('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند');
+                    showStatus(error.message, 'error');
+                    reject(error);
+                }
+            });
         }
         
-        // ارسال موقعیت به سرور
-        function submitLocation() {
-            const marketingCode = marketingCodeInput.value.trim();
+        // ارسال اطلاعات به سرور
+        async function submitForm() {
+            const marketingCode = shiftMarketingCode || marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
             
             // اعتبارسنجی ورودی‌ها
@@ -694,12 +684,18 @@
                 return;
             }
             
+            if (!requestType) {
+                showStatus('لطفاً نوع درخواست را انتخاب کنید', 'error');
+                return;
+            }
+            
             if (!locationData) {
-                showStatus('لطفاً منتظر دریافت موقعیت جغرافیایی باشید', 'error');
+                showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
                 return;
             }
             
             showStatus('در حال ارسال اطلاعات به سرور...', 'processing');
+            submitBtn.disabled = true;
             
             try {
                 // ساخت URL برای ارسال به گوگل فرم
@@ -714,7 +710,7 @@
                 params.append('entry.1723693542', requestType); // نوع درخواست
                 
                 // ارسال درخواست POST
-                fetch(formUrl, {
+                await fetch(formUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -723,18 +719,183 @@
                     mode: 'no-cors'
                 });
                 
+                // نمایش انیمیشن موفقیت
+                showSuccessAnimation();
+                
                 // نمایش پیام موفقیت
                 showStatus('اطلاعات با موفقیت به سرور ارسال شد!', 'success');
                 
                 // به‌روزرسانی زمان آخرین ارسال
                 const now = new Date();
-                lastSentTime.textContent = now.toLocaleTimeString('fa-IR');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                lastSubmitTime.textContent = `${hours}:${minutes}:${seconds}`;
+                
+                // فعال کردن دکمه ارسال مجدد
+                submitBtn.disabled = false;
                 
             } catch (error) {
                 showStatus('خطا در ارسال اطلاعات: ' + error.message, 'error');
+                submitBtn.disabled = false;
                 console.error('خطای ارسال:', error);
             }
         }
+        
+        // ارسال خودکار اطلاعات هر 1 دقیقه
+        async function autoSubmit() {
+            try {
+                // دریافت موقعیت
+                await getLocation();
+                
+                // ارسال فرم
+                await submitForm();
+                
+                showStatus('ارسال خودکار اطلاعات با موفقیت انجام شد', 'success');
+            } catch (error) {
+                console.error('خطا در ارسال خودکار:', error);
+            }
+        }
+        
+        // شروع شیفت
+        startShiftBtn.addEventListener('click', async () => {
+            const marketingCode = marketingCodeInput.value.trim();
+            
+            if (!marketingCode) {
+                showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
+                return;
+            }
+            
+            // ذخیره کد بازاریابی برای کل شیفت
+            shiftMarketingCode = marketingCode;
+            
+            // تنظیم نوع درخواست به "شروع شیفت"
+            requestTypeSelect.value = 'شروع شیفت';
+            
+            showStatus('شیفت با موفقیت شروع شد. ارسال خودکار فعال گردید.', 'success');
+            
+            // غیرفعال کردن دکمه شروع شیفت و فعال کردن دکمه پایان شیفت
+            startShiftBtn.disabled = true;
+            endShiftBtn.disabled = false;
+            shiftActive = true;
+            
+            // اولین ارسال
+            await autoSubmit();
+            
+            // تنظیم تایمر برای ارسال خودکار هر 1 دقیقه
+            shiftInterval = setInterval(autoSubmit, 60000);
+        });
+        
+        // پایان شیفت
+        endShiftBtn.addEventListener('click', () => {
+            if (shiftInterval) {
+                clearInterval(shiftInterval);
+                shiftInterval = null;
+            }
+            
+            // تنظیم نوع درخواست به "پایان شیفت"
+            requestTypeSelect.value = 'پایان شیفت';
+            
+            // ارسال نهایی
+            submitForm();
+            
+            showStatus('شیفت با موفقیت به پایان رسید. ارسال خودکار غیرفعال شد.', 'success');
+            
+            // فعال کردن دکمه شروع شیفت و غیرفعال کردن دکمه پایان شیفت
+            startShiftBtn.disabled = false;
+            endShiftBtn.disabled = true;
+            shiftActive = false;
+            
+            // ریست کد بازاریابی ذخیره شده
+            shiftMarketingCode = null;
+        });
+        
+        // ذخیره داده‌ها به صورت آفلاین
+        function saveOfflineData() {
+            if (locationData) {
+                const data = {
+                    marketingCode: shiftMarketingCode || marketingCodeInput.value.trim(),
+                    requestType: requestTypeSelect.value,
+                    location: locationData,
+                    timestamp: new Date().toISOString()
+                };
+                
+                offlineData.push(data);
+                localStorage.setItem('offlineData', JSON.stringify(offlineData));
+                showStatus('اطلاعات به صورت آفلاین ذخیره شدند', 'processing');
+            }
+        }
+        
+        // ارسال داده‌های آفلاین
+        async function submitOfflineData() {
+            const storedData = localStorage.getItem('offlineData');
+            if (storedData) {
+                offlineData = JSON.parse(storedData);
+                
+                if (offlineData.length > 0) {
+                    showStatus('در حال ارسال داده‌های آفلاین...', 'processing');
+                    
+                    try {
+                        for (const data of offlineData) {
+                            // ارسال هر رکورد آفلاین
+                            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
+                            const params = new URLSearchParams();
+                            params.append('entry.1228562108', data.marketingCode);
+                            params.append('entry.2093256559', data.location.latitude);
+                            params.append('entry.1314182104', data.location.longitude);
+                            params.append('entry.1995166577', data.location.accuracy);
+                            params.append('entry.1723693542', data.requestType);
+                            
+                            await fetch(formUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: params.toString(),
+                                mode: 'no-cors'
+                            });
+                        }
+                        
+                        // پاک کردن داده‌های آفلاین پس از ارسال موفق
+                        offlineData = [];
+                        localStorage.removeItem('offlineData');
+                        showStatus('داده‌های آفلاین با موفقیت ارسال شدند', 'success');
+                    } catch (error) {
+                        showStatus('خطا در ارسال داده‌های آفلاین: ' + error.message, 'error');
+                    }
+                }
+            }
+        }
+        
+        // تشخیص تغییر وضعیت مرورگر
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                // ذخیره داده‌ها هنگام مینیمایز یا بسته شدن مرورگر
+                saveOfflineData();
+            } else {
+                // ارسال داده‌های آفلاین هنگام بازگشت به صفحه
+                submitOfflineData();
+            }
+        });
+        
+        // ارسال داده‌های آفلاین هنگام لود صفحه
+        window.addEventListener('load', () => {
+            submitOfflineData();
+            // دریافت موقعیت به صورت خودکار
+            getLocation();
+        });
+        
+        // دکمه ارسال دستی
+        submitBtn.addEventListener('click', submitForm);
+        
+        // اعتبارسنجی فرم
+        marketingCodeInput.addEventListener('input', () => {
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        });
         
         // نمایش پیام وضعیت
         function showStatus(message, type) {
@@ -747,25 +908,54 @@
             }, 5000);
         }
         
-        // رویدادهای دکمه
-        startAutoBtn.addEventListener('click', startAutoSend);
-        stopAutoBtn.addEventListener('click', stopAutoSend);
-        submitBtn.addEventListener('click', submitLocation);
+        // انیمیشن موفقیت
+        function showSuccessAnimation() {
+            // انیمیشن دکمه
+            submitBtn.classList.add('success-animation');
+            setTimeout(() => {
+                submitBtn.classList.remove('success-animation');
+            }, 2000);
+            
+            // ایجاد کنفتی
+            createConfetti();
+        }
         
-        // بارگذاری داده‌های ذخیره شده هنگام لود صفحه
-        window.addEventListener('DOMContentLoaded', () => {
-            loadStoredData();
+        // ایجاد کنفتی
+        function createConfetti() {
+            confettiElement.style.display = 'block';
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
             
-            // فعال‌سازی موقعیت‌یابی
-            getLocation();
-            
-            // تایمر برای به‌روزرسانی موقعیت هر 10 ثانیه
-            setInterval(() => {
-                if (!autoSendActive) {
-                    getLocation();
-                }
-            }, 10000);
-        });
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = '50%';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.opacity = Math.random() + 0.5;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confettiElement.appendChild(confetti);
+                
+                // انیمیشن سقوط
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0,0.8,1,0.2)'
+                });
+                
+                // حذف المان پس از پایان انیمیشن
+                animation.onfinish = () => {
+                    confetti.remove();
+                    if (confettiElement.children.length === 0) {
+                        confettiElement.style.display = 'none';
+                    }
+                };
+            }
+        }
     </script>
 </body>
 </html>
