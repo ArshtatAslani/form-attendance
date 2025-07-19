@@ -97,6 +97,15 @@
             cursor: pointer;
         }
         
+        .select-arrow {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            font-size: 16px;
+            color: #1a2980;
+            pointer-events: none;
+        }
+        
         .camera-section {
             margin-bottom: 25px;
         }
@@ -174,6 +183,12 @@
             flex: 1;
         }
         
+        .btn-tertiary {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            width: 100%;
+        }
+        
         .btn-success {
             background: linear-gradient(to right, #00b09b, #96c93d);
             color: white;
@@ -193,6 +208,11 @@
         
         .btn-secondary:hover {
             background-color: #dfe4ea;
+        }
+        
+        .btn-tertiary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(255, 126, 95, 0.4);
         }
         
         .btn-success:hover {
@@ -351,37 +371,12 @@
             display: none;
         }
         
-        .timer-container {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-            gap: 10px;
-        }
-        
-        .timer-box {
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            color: white;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            flex: 1;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        }
-        
-        .timer-label {
-            font-size: 14px;
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .timer-value {
-            font-size: 1.5rem;
+        .timer {
+            font-size: 1.2rem;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .countdown-timer {
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            text-align: center;
+            margin: 10px 0;
+            color: #1a2980;
         }
 
         @media (max-width: 480px) {
@@ -405,10 +400,6 @@
             .shift-controls {
                 flex-direction: column;
             }
-            
-            .timer-container {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -417,7 +408,7 @@
     
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-user-clock"></i> سامانه حضور و غیاب</h1>
+            <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
         </div>
         
         <div class="content">
@@ -432,6 +423,18 @@
                 <label for="datetime"><i class="fas fa-calendar-alt"></i> تاریخ و زمان فعلی</label>
                 <i class="fas fa-clock"></i>
                 <input type="text" id="datetime" readonly placeholder="تاریخ و زمان">
+            </div>
+            
+            <!-- کشویی نوع درخواست -->
+            <div class="input-group">
+                <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
+                <i class="fas fa-list-alt"></i>
+                <select id="request-type">
+                    <option value="شروع شیفت">شروع شیفت</option>
+                    <option value="پایان شیفت">پایان شیفت</option>
+                    <option value="ثبت موقعیت شیفت">ثبت موقعیت شیفت</option>
+                </select>
+                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
             <div class="camera-section">
@@ -475,16 +478,9 @@
                     </div>
                 </div>
                 
-                <!-- تایمرهای زمان سپری شده و ارسال بعدی -->
-                <div class="timer-container">
-                    <div class="timer-box">
-                        <span class="timer-label">مدت زمان شیفت</span>
-                        <span id="shift-timer" class="timer-value">00:00:00</span>
-                    </div>
-                    <div class="timer-box countdown-timer">
-                        <span class="timer-label">ارسال بعدی در</span>
-                        <span id="countdown-timer" class="timer-value">00:60</span>
-                    </div>
+                <!-- تایمر ثبت خودکار موقعیت -->
+                <div class="timer" id="auto-submit-timer">
+                    ثبت خودکار: 00:00
                 </div>
             </div>
             
@@ -506,8 +502,10 @@
             
             <!-- متن توسعه‌دهنده -->
             <div class="dev-credit">
-                Dev by: تیم فروش شمال کشور
-                <span style="color: #ff416c;">&#10084;</span>
+                Dev by:<br>
+                Snapp North Zone Sales HQ<br>
+                تیم فروش شمال کشور<br>
+                💎
             </div>
         </div>
     </div>
@@ -515,6 +513,7 @@
     <script>
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
+        const requestTypeSelect = document.getElementById('request-type');
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
         const cameraFeed = document.getElementById('camera-feed');
@@ -526,8 +525,7 @@
         const rotateCameraBtn = document.getElementById('rotate-camera');
         const startShiftBtn = document.getElementById('start-shift');
         const endShiftBtn = document.getElementById('end-shift');
-        const shiftTimerElement = document.getElementById('shift-timer');
-        const countdownTimerElement = document.getElementById('countdown-timer');
+        const autoSubmitTimer = document.getElementById('auto-submit-timer');
         const datetimeInput = document.getElementById('datetime');
         const offlineStatus = document.getElementById('offline-status');
         
@@ -536,9 +534,7 @@
         let locationData = null;
         let currentCameraMode = "environment";
         let shiftInterval = null;
-        let countdownInterval = null;
-        let shiftActiveTime = 0;
-        let countdownTime = 60;
+        let shiftTimer = 0;
         let isOnline = navigator.onLine;
         let pendingSubmissions = [];
         let shiftActive = false;
@@ -647,7 +643,7 @@
         async function submitData(requestType = "ثبت موقعیت شیفت") {
             if (!marketingCodeInput.value.trim() && !currentMarketingCode) {
                 showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
-                return false;
+                return;
             }
             
             if (!locationData) {
@@ -655,7 +651,7 @@
                 try {
                     await getLocation();
                 } catch (error) {
-                    return false;
+                    return;
                 }
             }
             
@@ -685,6 +681,7 @@
             params.append('entry.2093256559', formData.locationData.latitude); // عرض جغرافیایی
             params.append('entry.1314182104', formData.locationData.longitude); // طول جغرافیایی
             params.append('entry.1995166577', formData.locationData.accuracy); // دقت
+            params.append('entry.1723693542', formData.requestType); // نوع درخواست
             params.append('entry.577523416', formData.dateTime); // تاریخ و زمان
             
             try {
@@ -728,6 +725,7 @@
                 params.append('entry.2093256559', data.locationData.latitude);
                 params.append('entry.1314182104', data.locationData.longitude);
                 params.append('entry.1995166577', data.locationData.accuracy);
+                params.append('entry.1723693542', data.requestType);
                 params.append('entry.577523416', data.dateTime);
                 
                 try {
@@ -783,37 +781,43 @@
                     startShiftBtn.disabled = true;
                     shiftActive = true;
                     
-                    // ریست تایمرها
-                    shiftActiveTime = 0;
-                    countdownTime = 60;
-                    updateTimers();
-                    
-                    // شروع تایمر زمان شیفت
-                    clearInterval(shiftInterval);
-                    shiftInterval = setInterval(() => {
-                        if (shiftActive) {
-                            shiftActiveTime++;
-                            updateTimers();
+                    // شروع ارسال خودکار هر 1 دقیقه
+                    shiftInterval = setInterval(async () => {
+                        try {
+                            await getLocation();
+                            const success = await submitData();
+                            
+                            if (!success) {
+                                const data = {
+                                    marketingCode: currentMarketingCode,
+                                    requestType: "ثبت موقعیت شیفت",
+                                    dateTime: updateDateTime(),
+                                    locationData,
+                                    formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
+                                };
+                                saveOfflineData(data);
+                            }
+                        } catch (error) {
+                            console.error('خطا در ارسال خودکار:', error);
                         }
-                    }, 1000);
+                    }, 60000); // هر 1 دقیقه
                     
-                    // شروع تایمر معکوس
-                    clearInterval(countdownInterval);
-                    countdownInterval = setInterval(() => {
+                    // شروع تایمر
+                    shiftTimer = 0;
+                    const timerInterval = setInterval(() => {
                         if (!shiftActive) {
-                            clearInterval(countdownInterval);
+                            clearInterval(timerInterval);
                             return;
                         }
                         
-                        countdownTime--;
-                        updateTimers();
-                        
-                        if (countdownTime <= 0) {
-                            // ارسال خودکار موقعیت
-                            submitLocation();
-                            countdownTime = 60;
-                        }
+                        shiftTimer++;
+                        const minutes = Math.floor(shiftTimer / 60).toString().padStart(2, '0');
+                        const seconds = (shiftTimer % 60).toString().padStart(2, '0');
+                        autoSubmitTimer.textContent = `ثبت خودکار: ${minutes}:${seconds}`;
                     }, 1000);
+                    
+                    // نمایش اولین تایمر
+                    autoSubmitTimer.textContent = `ثبت خودکار: 00:00`;
                 } else {
                     const data = {
                         marketingCode,
@@ -827,76 +831,9 @@
                     endShiftBtn.disabled = false;
                     startShiftBtn.disabled = true;
                     shiftActive = true;
-                    
-                    // شروع تایمرها برای حالت آفلاین
-                    shiftActiveTime = 0;
-                    countdownTime = 60;
-                    updateTimers();
-                    
-                    clearInterval(shiftInterval);
-                    shiftInterval = setInterval(() => {
-                        if (shiftActive) {
-                            shiftActiveTime++;
-                            updateTimers();
-                        }
-                    }, 1000);
-                    
-                    clearInterval(countdownInterval);
-                    countdownInterval = setInterval(() => {
-                        if (!shiftActive) {
-                            clearInterval(countdownInterval);
-                            return;
-                        }
-                        
-                        countdownTime--;
-                        updateTimers();
-                        
-                        if (countdownTime <= 0) {
-                            // ذخیره آفلاین موقعیت
-                            const locationDataCopy = {...locationData};
-                            const data = {
-                                marketingCode: currentMarketingCode || marketingCode,
-                                requestType: "ثبت موقعیت شیفت",
-                                dateTime: updateDateTime(),
-                                locationData: locationDataCopy,
-                                formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
-                            };
-                            saveOfflineData(data);
-                            countdownTime = 60;
-                        }
-                    }, 1000);
                 }
             } catch (error) {
                 showStatus('خطا در شروع شیفت: ' + error.message, 'error');
-            }
-        }
-
-        // ارسال موقعیت
-        async function submitLocation() {
-            try {
-                showStatus('در حال ارسال موقعیت...', 'processing');
-                
-                // دریافت آخرین موقعیت
-                await getLocation();
-                
-                // ارسال درخواست ثبت موقعیت
-                const success = await submitData();
-                
-                if (success) {
-                    showStatus('موقعیت با موفقیت ثبت شد', 'success');
-                } else {
-                    const data = {
-                        marketingCode: currentMarketingCode,
-                        requestType: "ثبت موقعیت شیفت",
-                        dateTime: updateDateTime(),
-                        locationData,
-                        formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
-                    };
-                    saveOfflineData(data);
-                    showStatus('اطلاعات موقعیت به صورت آفلاین ذخیره شد', 'processing');
-                }
-            } catch (error) {
-                showStatus('خطا در ثبت موقعیت: ' + error.message, 'error');
             }
         }
 
@@ -927,7 +864,7 @@
                 
                 // توقف ارسال خودکار
                 clearInterval(shiftInterval);
-                clearInterval(countdownInterval);
+                shiftInterval = null;
                 shiftActive = false;
                 
                 // غیرفعال کردن دکمه پایان شیفت
@@ -935,31 +872,11 @@
                 startShiftBtn.disabled = false;
                 marketingCodeInput.disabled = false;
                 currentMarketingCode = "";
+                
+                // ریست تایمر
+                autoSubmitTimer.textContent = "ثبت خودکار: 00:00";
             } catch (error) {
                 showStatus('خطا در پایان شیفت: ' + error.message, 'error');
-            }
-        }
-
-        // به‌روزرسانی تایمرها
-        function updateTimers() {
-            // تایمر زمان شیفت
-            const hours = Math.floor(shiftActiveTime / 3600).toString().padStart(2, '0');
-            const minutes = Math.floor((shiftActiveTime % 3600) / 60).toString().padStart(2, '0');
-            const seconds = (shiftActiveTime % 60).toString().padStart(2, '0');
-            shiftTimerElement.textContent = `${hours}:${minutes}:${seconds}`;
-            
-            // تایمر معکوس
-            const countdownMinutes = Math.floor(countdownTime / 60).toString().padStart(2, '0');
-            const countdownSeconds = (countdownTime % 60).toString().padStart(2, '0');
-            countdownTimerElement.textContent = `${countdownMinutes}:${countdownSeconds}`;
-            
-            // تغییر رنگ تایمر معکوس در 10 ثانیه پایانی
-            if (countdownTime <= 10) {
-                countdownTimerElement.parentElement.style.background = 'linear-gradient(135deg, #ff416c, #ff4b2b)';
-                countdownTimerElement.style.animation = 'pulse 0.5s infinite';
-            } else {
-                countdownTimerElement.parentElement.style.background = 'linear-gradient(135deg, #ff7e5f, #feb47b)';
-                countdownTimerElement.style.animation = 'none';
             }
         }
 
