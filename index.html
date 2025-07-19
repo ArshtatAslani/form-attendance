@@ -357,22 +357,35 @@
             display: none;
         }
         
-        .timer {
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 10px 0;
-            color: #1a2980;
-        }
-
         .cycle-timer {
             background: linear-gradient(to right, #1a2980, #26d0ce);
             color: white;
-            padding: 10px;
+            padding: 12px;
             border-radius: 12px;
             text-align: center;
             margin: 15px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             display: none;
+        }
+        
+        .cycle-timer i {
+            margin-left: 8px;
+        }
+        
+        .cycle-timer span {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .critical {
+            animation: pulseCritical 1s infinite;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+        
+        @keyframes pulseCritical {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
 
         @media (max-width: 480px) {
@@ -467,11 +480,6 @@
                         <span id="accuracy-value" class="location-value">---</span>
                     </div>
                 </div>
-                
-                <!-- تایمر ثبت خودکار موقعیت -->
-                <div class="timer" id="auto-submit-timer">
-                    ثبت خودکار: 00:00
-                </div>
             </div>
             
             <!-- دکمه‌های شروع و پایان شیفت -->
@@ -514,7 +522,6 @@
         const rotateCameraBtn = document.getElementById('rotate-camera');
         const startShiftBtn = document.getElementById('start-shift');
         const endShiftBtn = document.getElementById('end-shift');
-        const autoSubmitTimer = document.getElementById('auto-submit-timer');
         const datetimeInput = document.getElementById('datetime');
         const offlineStatus = document.getElementById('offline-status');
         const nextCycleTimer = document.getElementById('next-cycle-timer');
@@ -532,6 +539,7 @@
         let currentMarketingCode = "";
         let nextCycleInterval = null;
         let countdown = 60; // زمان پیش‌فرض تا سیکل بعدی (60 ثانیه)
+        let isPageVisible = true;
 
         // به‌روزرسانی تاریخ و زمان
         function updateDateTime() {
@@ -604,7 +612,8 @@
                             locationData = {
                                 latitude: position.coords.latitude,
                                 longitude: position.coords.longitude,
-                                accuracy: position.coords.accuracy
+                                accuracy: position.coords.accuracy,
+                                timestamp: position.timestamp
                             };
                             
                             latitudeValue.textContent = locationData.latitude.toFixed(6);
@@ -697,6 +706,9 @@
 
         // ذخیره داده‌ها در حافظه آفلاین
         function saveOfflineData(data) {
+            // اضافه کردن زمان دقیق ثبت داده
+            data.timestamp = new Date().toISOString();
+            
             pendingSubmissions.push(data);
             localStorage.setItem('pendingSubmissions', JSON.stringify(pendingSubmissions));
             offlineStatus.style.display = 'block';
@@ -719,7 +731,7 @@
                 params.append('entry.1314182104', data.locationData.longitude);
                 params.append('entry.1995166577', data.locationData.accuracy);
                 params.append('entry.1723693542', data.requestType);
-                params.append('entry.577523416', data.dateTime);
+                params.append('entry.577523416', data.timestamp); // استفاده از زمان دقیق ثبت
                 
                 try {
                     await fetch(data.formUrl, {
@@ -768,8 +780,10 @@
                 if (countdown <= 10) {
                     countdownElement.style.color = '#ff6b6b';
                     countdownElement.style.fontWeight = 'bold';
+                    nextCycleTimer.classList.add('critical');
                 } else {
                     countdownElement.style.color = 'white';
+                    nextCycleTimer.classList.remove('critical');
                 }
                 
                 // پایان تایمر و شروع سیکل جدید
@@ -825,7 +839,6 @@
                                 const data = {
                                     marketingCode: currentMarketingCode,
                                     requestType: "ثبت موقعیت شیفت",
-                                    dateTime: updateDateTime(),
                                     locationData,
                                     formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
                                 };
@@ -835,28 +848,10 @@
                             console.error('خطا در ارسال خودکار:', error);
                         }
                     }, 60000); // هر 1 دقیقه
-                    
-                    // شروع تایمر
-                    shiftTimer = 0;
-                    const timerInterval = setInterval(() => {
-                        if (!shiftActive) {
-                            clearInterval(timerInterval);
-                            return;
-                        }
-                        
-                        shiftTimer++;
-                        const minutes = Math.floor(shiftTimer / 60).toString().padStart(2, '0');
-                        const seconds = (shiftTimer % 60).toString().padStart(2, '0');
-                        autoSubmitTimer.textContent = `ثبت خودکار: ${minutes}:${seconds}`;
-                    }, 1000);
-                    
-                    // نمایش اولین تایمر
-                    autoSubmitTimer.textContent = `ثبت خودکار: 00:00`;
                 } else {
                     const data = {
                         marketingCode,
                         requestType: "شروع شیفت",
-                        dateTime: updateDateTime(),
                         locationData,
                         formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
                     };
@@ -889,7 +884,6 @@
                     const data = {
                         marketingCode: currentMarketingCode,
                         requestType: "پایان شیفت",
-                        dateTime: updateDateTime(),
                         locationData,
                         formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
                     };
@@ -909,8 +903,7 @@
                 marketingCodeInput.disabled = false;
                 currentMarketingCode = "";
                 
-                // ریست تایمر
-                autoSubmitTimer.textContent = "ثبت خودکار: 00:00";
+                // مخفی کردن تایمر
                 nextCycleTimer.style.display = 'none';
             } catch (error) {
                 showStatus('خطا در پایان شیفت: ' + error.message, 'error');
@@ -960,11 +953,61 @@
             }
         });
 
+        // مدیریت تغییر وضعیت دیداری صفحه
+        document.addEventListener('visibilitychange', () => {
+            isPageVisible = document.visibilityState === 'visible';
+            
+            if (!isPageVisible) {
+                // صفحه مخفی شده، ذخیره وضعیت فعلی
+                localStorage.setItem('shiftActive', shiftActive);
+                localStorage.setItem('currentMarketingCode', currentMarketingCode);
+                localStorage.setItem('nextCycleTimer', countdown);
+            } else {
+                // صفحه دوباره قابل مشاهده است
+                if (localStorage.getItem('shiftActive') === 'true') {
+                    shiftActive = true;
+                    startShiftBtn.disabled = true;
+                    endShiftBtn.disabled = false;
+                    marketingCodeInput.disabled = true;
+                    currentMarketingCode = localStorage.getItem('currentMarketingCode');
+                    
+                    // شروع تایمر از زمان ذخیره شده
+                    countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
+                    startNextCycleTimer();
+                    
+                    // ارسال داده‌های آفلاین
+                    if (isOnline && pendingSubmissions.length > 0) {
+                        submitPendingData();
+                    }
+                }
+            }
+        });
+
         // ذخیره داده‌ها هنگام بسته شدن صفحه
         window.addEventListener('beforeunload', (event) => {
+            // ذخیره وضعیت فعلی
+            localStorage.setItem('shiftActive', shiftActive);
+            localStorage.setItem('currentMarketingCode', currentMarketingCode);
+            localStorage.setItem('nextCycleTimer', countdown);
+            
             if (pendingSubmissions.length > 0) {
                 event.preventDefault();
                 event.returnValue = '';
+            }
+        });
+        
+        // بازیابی وضعیت هنگام بارگذاری صفحه
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('shiftActive') === 'true') {
+                shiftActive = true;
+                startShiftBtn.disabled = true;
+                endShiftBtn.disabled = false;
+                marketingCodeInput.disabled = true;
+                currentMarketingCode = localStorage.getItem('currentMarketingCode');
+                
+                // شروع تایمر از زمان ذخیره شده
+                countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
+                startNextCycleTimer();
             }
         });
     </script>
