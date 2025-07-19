@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه حضور و غیاب | دوربین و موقعیت‌یابی</title>
+    <title>سامانه حضور و غیاب | دوربین و موقعیت‌یابی خودکار</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -226,6 +226,7 @@
         .location-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             margin-bottom: 15px;
         }
         
@@ -260,6 +261,22 @@
         .location-value {
             color: #1a2980;
             font-weight: 500;
+        }
+        
+        .location-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(38, 208, 206, 0.15);
+            border: 1px solid rgba(26, 41, 128, 0.2);
+        }
+        
+        .location-status i {
+            font-size: 22px;
+            color: #1a2980;
         }
         
         .submit-btn {
@@ -346,51 +363,15 @@
             z-index: 10;
         }
         
-        .auto-location-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .btn-auto {
-            flex: 1;
-            padding: 12px;
-            font-size: 14px;
-        }
-        
-        .btn-active {
-            background: linear-gradient(to right, #00b09b, #96c93d);
+        .timer {
+            display: inline-block;
+            background: #1a2980;
             color: white;
-        }
-        
-        .auto-send-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(38, 208, 206, 0.1);
-            border-radius: 8px;
-            font-weight: 600;
-            color: #1a2980;
-            border: 1px dashed #1a2980;
-        }
-        
-        .auto-send-indicator i {
-            animation: pulse 1.5s infinite;
-        }
-        
-        .timer-display {
-            font-weight: 700;
-            font-size: 18px;
-            color: #1a2980;
-            background: rgba(255, 255, 255, 0.8);
             padding: 5px 10px;
-            border-radius: 8px;
-            min-width: 90px;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 40px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .dev-credit {
@@ -409,14 +390,14 @@
             max-width: 90%;
             letter-spacing: 0.5px;
         }
-        
+
         @media (max-width: 480px) {
             .dev-credit {
                 font-size: 11px;
                 padding: 5px 8px;
                 margin-top: 10px;
             }
-            
+        
             .header h1 {
                 font-size: 1.5rem;
             }
@@ -433,11 +414,6 @@
                 padding: 12px 15px;
                 font-size: 14px;
             }
-            
-            .timer-display {
-                font-size: 14px;
-                min-width: 70px;
-            }
         }
     </style>
 </head>
@@ -447,7 +423,7 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
-            <p>با قابلیت ارسال خودکار موقعیت هر 15 دقیقه</p>
+            <p>موقعیت‌یابی خودکار هر 1 دقیقه</p>
         </div>
         
         <div class="content">
@@ -494,6 +470,11 @@
             <div class="location-section">
                 <div class="location-header">
                     <h3><i class="fas fa-map-marker-alt"></i> موقعیت جغرافیایی</h3>
+                    <div id="location-status">
+                        <span>موقعیت‌یابی بعدی:</span>
+                        <span class="timer" id="location-timer">60</span>
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
                 </div>
                 <div class="location-data">
                     <div class="location-item">
@@ -510,26 +491,10 @@
                     </div>
                 </div>
                 
-                <!-- دکمه دریافت موقعیت جغرافیایی -->
-                <button id="get-location-btn" class="btn btn-tertiary">
-                    <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
-                </button>
-                
-                <!-- کنترل‌های ارسال خودکار -->
-                <div class="auto-location-controls">
-                    <button id="start-auto-location" class="btn btn-secondary btn-auto">
-                        <i class="fas fa-play-circle"></i> شروع ارسال خودکار
-                    </button>
-                    <button id="stop-auto-location" class="btn btn-secondary btn-auto" disabled>
-                        <i class="fas fa-stop-circle"></i> توقف ارسال
-                    </button>
-                </div>
-                
-                <!-- نمایش وضعیت ارسال خودکار -->
-                <div id="auto-send-indicator" class="auto-send-indicator" style="display: none;">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>ارسال خودکار فعال - زمان باقی‌مانده:</span>
-                    <span class="timer-display" id="timer-display">15:00</span>
+                <!-- وضعیت موقعیت‌یابی خودکار -->
+                <div class="location-status">
+                    <i class="fas fa-info-circle"></i>
+                    <span>موقعیت‌یابی به صورت خودکار هر 1 دقیقه انجام می‌شود</span>
                 </div>
             </div>
             
@@ -541,10 +506,8 @@
             
             <!-- متن توسعه‌دهنده -->
             <div class="dev-credit">
-                Dev by:<br>
-                Snapp North Zone Sales HQ<br>
-                تیم فروش شمال کشور<br>
-                💎
+                Dev by: Snapp North Zone Sales HQ<br>
+                تیم فروش شمال کشور 💎
             </div>
         </div>
     </div>
@@ -563,22 +526,15 @@
         const accuracyValue = document.getElementById('accuracy-value');
         const confettiElement = document.getElementById('confetti');
         const rotateCameraBtn = document.getElementById('rotate-camera');
-        const getLocationBtn = document.getElementById('get-location-btn');
-        const startAutoBtn = document.getElementById('start-auto-location');
-        const stopAutoBtn = document.getElementById('stop-auto-location');
-        const autoSendIndicator = document.getElementById('auto-send-indicator');
-        const timerDisplay = document.getElementById('timer-display');
+        const locationTimer = document.getElementById('location-timer');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
         let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
-        let autoLocationInterval = null;
-        const AUTO_INTERVAL = 15 * 60 * 1000; // 15 دقیقه
-        let timerInterval = null;
-        let timeRemaining = AUTO_INTERVAL;
-        const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
-
+        let locationInterval;
+        let timerValue = 60;
+        
         // فعال‌سازی دوربین
         async function startCamera() {
             try {
@@ -623,16 +579,37 @@
             startCamera();
         });
         
-        // دریافت موقعیت جغرافیایی با دکمه
-        getLocationBtn.addEventListener('click', () => {
-            showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
-            getLocationBtn.disabled = true;
+        // دریافت موقعیت جغرافیایی خودکار
+        function startLocationTracking() {
+            // دریافت اولیه موقعیت
             getLocation();
-        });
+            
+            // تنظیم تایمر برای موقعیت‌یابی هر 1 دقیقه
+            locationInterval = setInterval(() => {
+                getLocation();
+                timerValue = 60; // ریست تایمر به 60 ثانیه
+            }, 60000);
+            
+            // تایمر معکوس برای نمایش به کاربر
+            setInterval(() => {
+                timerValue--;
+                locationTimer.textContent = timerValue;
+                
+                if (timerValue <= 10) {
+                    locationTimer.style.color = '#e74c3c';
+                    locationTimer.style.animation = 'pulse 1s infinite';
+                } else {
+                    locationTimer.style.color = '';
+                    locationTimer.style.animation = '';
+                }
+            }, 1000);
+        }
         
         // دریافت موقعیت جغرافیایی
         function getLocation() {
             if (navigator.geolocation) {
+                showStatus('در حال دریافت موقعیت جغرافیایی به صورت خودکار...', 'processing');
+                
                 navigator.geolocation.getCurrentPosition(
                     position => {
                         locationData = {
@@ -645,10 +622,9 @@
                         longitudeValue.textContent = locationData.longitude.toFixed(6);
                         accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
                         
-                        showStatus('موقعیت جغرافیایی دریافت شد', 'success');
-                        getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
+                        showStatus('موقعیت جغرافیایی به صورت خودکار دریافت شد', 'success');
                         
-                        // فعال کردن دکمه ارسال
+                        // فعال کردن دکمه ارسال اگر کد بازاریابی وارد شده باشد
                         if (marketingCodeInput.value.trim() !== '') {
                             submitBtn.disabled = false;
                         }
@@ -656,7 +632,6 @@
                     error => {
                         showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
                         console.error('خطای موقعیت‌یابی:', error);
-                        getLocationBtn.disabled = false;
                     },
                     {
                         enableHighAccuracy: true,
@@ -666,119 +641,7 @@
                 );
             } else {
                 showStatus('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند', 'error');
-                getLocationBtn.disabled = false;
             }
-        }
-        
-        // تابع ارسال خودکار موقعیت
-        async function sendAutoLocation() {
-            if (!locationData) {
-                showStatus('موقعیت جغرافیایی برای ارسال خودکار موجود نیست', 'error');
-                return;
-            }
-            
-            try {
-                const params = new URLSearchParams();
-                params.append('entry.1228562108', 'AUTO_UPDATE'); // شناسه اتوماتیک
-                params.append('entry.2093256559', locationData.latitude);
-                params.append('entry.1314182104', locationData.longitude);
-                params.append('entry.1995166577', locationData.accuracy);
-                params.append('entry.1723693542', 'بروزرسانی خودکار موقعیت');
-                
-                await fetch(FORM_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: params.toString(),
-                    mode: 'no-cors'
-                });
-                
-                showStatus('موقعیت به صورت خودکار ارسال شد', 'success');
-                console.log('موقعیت خودکار ارسال شد:', new Date().toLocaleTimeString());
-                
-                // ریست تایمر
-                timeRemaining = AUTO_INTERVAL;
-                updateTimerDisplay();
-                
-            } catch (error) {
-                showStatus('خطا در ارسال خودکار موقعیت', 'error');
-                console.error('خطای ارسال خودکار:', error);
-            }
-        }
-        
-        // تابع شروع ارسال خودکار
-        function startAutoLocation() {
-            if (autoLocationInterval) return;
-            
-            // فعال کردن نشانگر
-            autoSendIndicator.style.display = 'flex';
-            startAutoBtn.disabled = true;
-            stopAutoBtn.disabled = false;
-            startAutoBtn.classList.remove('btn-secondary');
-            startAutoBtn.classList.add('btn-active');
-            
-            // ارسال اولیه
-            sendAutoLocation();
-            
-            // تنظیم تایمر
-            autoLocationInterval = setInterval(sendAutoLocation, AUTO_INTERVAL);
-            
-            // شروع تایمر
-            startTimer();
-            
-            showStatus('سیستم ارسال خودکار موقعیت فعال شد', 'success');
-        }
-        
-        // تابع توقف ارسال خودکار
-        function stopAutoLocation() {
-            if (autoLocationInterval) {
-                clearInterval(autoLocationInterval);
-                autoLocationInterval = null;
-            }
-            
-            // غیرفعال کردن نشانگر
-            autoSendIndicator.style.display = 'none';
-            startAutoBtn.disabled = false;
-            stopAutoBtn.disabled = true;
-            startAutoBtn.classList.add('btn-secondary');
-            startAutoBtn.classList.remove('btn-active');
-            
-            // توقف تایمر
-            stopTimer();
-            
-            showStatus('سیستم ارسال خودکار موقعیت متوقف شد', 'success');
-        }
-        
-        // رویدادهای دکمه‌های ارسال خودکار
-        startAutoBtn.addEventListener('click', startAutoLocation);
-        stopAutoBtn.addEventListener('click', stopAutoLocation);
-        
-        // تابع شروع تایمر
-        function startTimer() {
-            stopTimer(); // توقف تایمر قبلی
-            updateTimerDisplay();
-            
-            timerInterval = setInterval(() => {
-                timeRemaining -= 1000;
-                if (timeRemaining <= 0) {
-                    timeRemaining = AUTO_INTERVAL;
-                }
-                updateTimerDisplay();
-            }, 1000);
-        }
-        
-        // تابع توقف تایمر
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-        
-        // تابع به‌روزرسانی نمایش تایمر
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60000);
-            const seconds = Math.floor((timeRemaining % 60000) / 1000);
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
         
         // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
@@ -798,7 +661,7 @@
             }
             
             if (!locationData) {
-                showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
+                showStatus('لطفاً منتظر دریافت موقعیت جغرافیایی باشید', 'error');
                 return;
             }
             
@@ -806,6 +669,9 @@
             submitBtn.disabled = true;
             
             try {
+                // ساخت URL برای ارسال به گوگل فرم
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
+                
                 // ساخت پارامترهای ارسالی
                 const params = new URLSearchParams();
                 params.append('entry.1228562108', marketingCode); // کد بازاریابی
@@ -815,7 +681,7 @@
                 params.append('entry.1723693542', requestType); // نوع درخواست (به جای دقت موقعیت)
                 
                 // ارسال درخواست POST
-                await fetch(FORM_URL, {
+                await fetch(formUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -834,8 +700,6 @@
                 setTimeout(() => {
                     marketingCodeInput.value = '';
                     submitBtn.disabled = true;
-                    getLocationBtn.disabled = false;
-                    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
                     
                     // توقف دوربین
                     if (stream) {
@@ -846,12 +710,6 @@
                         startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
                         captureBtn.disabled = true;
                     }
-                    
-                    // ریست موقعیت
-                    locationData = null;
-                    latitudeValue.textContent = '---';
-                    longitudeValue.textContent = '---';
-                    accuracyValue.textContent = '---';
                 }, 2000);
                 
             } catch (error) {
@@ -930,11 +788,9 @@
             }
         }
         
-        // توقف ارسال خودکار هنگام بسته شدن صفحه
-        window.addEventListener('beforeunload', () => {
-            if (autoLocationInterval) {
-                stopAutoLocation();
-            }
+        // شروع موقعیت‌یابی خودکار هنگام لود صفحه
+        window.addEventListener('DOMContentLoaded', () => {
+            startLocationTracking();
         });
     </script>
 </body>
