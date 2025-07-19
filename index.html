@@ -68,7 +68,7 @@
             color: #2c3e50;
         }
         
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             padding: 15px 15px 15px 45px;
             border: 2px solid #ddd;
@@ -76,6 +76,7 @@
             font-size: 16px;
             transition: all 0.3s;
             background-color: white;
+            appearance: none;
         }
         
         .input-group i {
@@ -86,10 +87,23 @@
             color: #1a2980;
         }
         
-        .input-group input:focus {
+        .input-group input:focus, .input-group select:focus {
             border-color: #1a2980;
             outline: none;
             box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.2);
+        }
+        
+        .input-group select {
+            cursor: pointer;
+        }
+        
+        .select-arrow {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            font-size: 16px;
+            color: #1a2980;
+            pointer-events: none;
         }
         
         .camera-section {
@@ -175,26 +189,6 @@
             width: 100%;
         }
         
-        .btn-success {
-            background: linear-gradient(to right, #00b09b, #96c93d);
-            color: white;
-            flex: 1;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-            color: white;
-            flex: 1;
-        }
-        
-        .btn-offline {
-            background: linear-gradient(to right, #8e2de2, #4a00e0);
-            color: white;
-            width: 100%;
-            margin-top: 15px;
-            display: none;
-        }
-        
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
@@ -207,16 +201,6 @@
         .btn-tertiary:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 14px rgba(255, 126, 95, 0.4);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(0, 176, 155, 0.4);
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(255, 65, 108, 0.4);
         }
         
         .btn:disabled {
@@ -278,6 +262,36 @@
             font-weight: 500;
         }
         
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 176, 155, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: linear-gradient(to right, #cccccc, #999999);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
         .status-message {
             padding: 15px;
             border-radius: 12px;
@@ -332,115 +346,44 @@
             z-index: 10;
         }
         
-        .shift-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
+/* استایل جدید برای کادر توسعه‌دهنده تک خطی و مرکزی */
         .dev-credit {
-            text-align: center;
-            direction: ltr;
-            font-size: 14px;
-            margin: 15px auto 0;
-            padding: 10px 20px;
+            text-align: center; /* متن وسط چین */
+            direction: ltr; /* جهت متن انگلیسی */
+            font-size: 14px; /* اندازه فونت */
+            margin: 15px auto 0; /* فاصله بالا و مرکز چین */
+            padding: 10px 20px; /* اندازه داخلی کادر */
             background: rgba(38, 208, 206, 0.15);
-            border-radius: 10px;
+            border-radius: 10px; /* انحنای گوشه‌ها */
             color: #1a2980;
             font-weight: 600;
             border: 1px solid rgba(26, 41, 128, 0.2);
-            display: block;
-            width: fit-content;
-            max-width: 90%;
+            display: block; /* عرض کامل */
+            width: fit-content; /* عرض متناسب با محتوا */
+            max-width: 90%; /* حداکثر عرض */
             letter-spacing: 0.5px;
         }
 
-        .offline-status {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 15px;
-            display: none;
+        /* برای نمایش بهتر در موبایل */
+        @media (max-width: 480px) {
+            .dev-credit {
+                font-size: 11px;
+                padding: 5px 8px;
+                margin-top: 10px;
+            }
+        
+        .dev-credit span {
+            display: inline-block;
+            margin-left: 5px;
+            animation: sparkle 1.5s infinite;
         }
         
-        .cycle-timer {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
-            color: white;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 15px 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: none;
-        }
-        
-        .cycle-timer i {
-            margin-left: 8px;
-        }
-        
-        .cycle-timer span {
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .critical {
-            animation: pulseCritical 1s infinite;
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-        }
-        
-        @keyframes pulseCritical {
+        @keyframes sparkle {
             0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
         
-        .offline-panel {
-            background-color: #f1f2f6;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-            border: 1px solid #ddd;
-        }
-        
-        .offline-panel h3 {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .offline-panel h3 i {
-            margin-left: 8px;
-        }
-        
-        .offline-item {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid #4a00e0;
-        }
-        
-        .offline-item-header {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #1a2980;
-        }
-        
-        .offline-item-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-            color: #666;
-        }
-
         @media (max-width: 480px) {
             .header h1 {
                 font-size: 1.5rem;
@@ -457,10 +400,6 @@
             .btn {
                 padding: 12px 15px;
                 font-size: 14px;
-            }
-            
-            .shift-controls {
-                flex-direction: column;
             }
         }
     </style>
@@ -480,17 +419,16 @@
                 <input type="text" id="marketing-code" placeholder="کد بازاریابی خود را وارد نمایید...">
             </div>
             
-            <!-- فیلد تاریخ و زمان -->
+            <!-- کشویی نوع درخواست -->
             <div class="input-group">
-                <label for="datetime"><i class="fas fa-calendar-alt"></i> تاریخ و زمان فعلی</label>
-                <i class="fas fa-clock"></i>
-                <input type="text" id="datetime" readonly placeholder="تاریخ و زمان">
-            </div>
-            
-            <!-- تایمر سیکل بعدی -->
-            <div class="cycle-timer" id="next-cycle-timer">
-                <i class="fas fa-clock"></i> زمان تا سیکل بعدی: 
-                <span id="countdown">00:00</span>
+                <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
+                <i class="fas fa-list-alt"></i>
+                <select id="request-type">
+                    <option value="شروع شیفت">شروع شیفت</option>
+                    <option value="پایان شیفت">پایان شیفت</option>
+                    <option value="ثبت نام">ثبت نام</option>
+                </select>
+                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
             <div class="camera-section">
@@ -533,31 +471,15 @@
                         <span id="accuracy-value" class="location-value">---</span>
                     </div>
                 </div>
-            </div>
-            
-            <!-- دکمه‌های شروع و پایان شیفت -->
-            <div class="shift-controls">
-                <button id="start-shift" class="btn btn-success">
-                    <i class="fas fa-play-circle"></i> شروع شیفت
-                </button>
-                <button id="end-shift" class="btn btn-danger" disabled>
-                    <i class="fas fa-stop-circle"></i> پایان شیفت
+                
+                <!-- دکمه دریافت موقعیت جغرافیایی -->
+                <button id="get-location-btn" class="btn btn-tertiary">
+                    <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
                 </button>
             </div>
             
-            <div id="offline-status" class="offline-status">
-                <i class="fas fa-exclamation-triangle"></i> حالت آفلاین - اطلاعات ذخیره شدند
-            </div>
-            
-            <!-- پنل نمایش داده‌های آفلاین -->
-            <div class="offline-panel" id="offline-panel">
-                <h3><i class="fas fa-database"></i> اطلاعات ذخیره شده آفلاین</h3>
-                <div id="offline-data-list"></div>
-            </div>
-            
-            <!-- دکمه ارسال اطلاعات آفلاین -->
-            <button id="submit-offline-btn" class="btn btn-offline">
-                <i class="fas fa-cloud-upload-alt"></i> ارسال اطلاعات آفلاین
+            <button id="submit-btn" class="submit-btn" disabled>
+                <i class="fas fa-paper-plane"></i> ارسال اطلاعات
             </button>
             
             <div id="status-message" class="status-message"></div>
@@ -567,7 +489,8 @@
                 Dev by:<br>
                 Snapp North Zone Sales HQ<br>
                 تیم فروش شمال کشور<br>
-                💎
+                💎</span>
+                
             </div>
         </div>
     </div>
@@ -575,57 +498,24 @@
     <script>
         // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
+        const requestTypeSelect = document.getElementById('request-type');
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
         const cameraFeed = document.getElementById('camera-feed');
+        const submitBtn = document.getElementById('submit-btn');
         const statusMessage = document.getElementById('status-message');
         const latitudeValue = document.getElementById('latitude-value');
         const longitudeValue = document.getElementById('longitude-value');
         const accuracyValue = document.getElementById('accuracy-value');
         const confettiElement = document.getElementById('confetti');
         const rotateCameraBtn = document.getElementById('rotate-camera');
-        const startShiftBtn = document.getElementById('start-shift');
-        const endShiftBtn = document.getElementById('end-shift');
-        const datetimeInput = document.getElementById('datetime');
-        const offlineStatus = document.getElementById('offline-status');
-        const nextCycleTimer = document.getElementById('next-cycle-timer');
-        const countdownElement = document.getElementById('countdown');
-        const offlinePanel = document.getElementById('offline-panel');
-        const offlineDataList = document.getElementById('offline-data-list');
-        const submitOfflineBtn = document.getElementById('submit-offline-btn');
+        const getLocationBtn = document.getElementById('get-location-btn');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
-        let currentCameraMode = "environment";
-        let shiftInterval = null;
-        let shiftTimer = 0;
-        let isOnline = navigator.onLine;
-        let pendingSubmissions = [];
-        let shiftActive = false;
-        let currentMarketingCode = "";
-        let nextCycleInterval = null;
-        let countdown = 60; // زمان پیش‌فرض تا سیکل بعدی (60 ثانیه)
-        let isPageVisible = true;
-
-        // به‌روزرسانی تاریخ و زمان
-        function updateDateTime() {
-            const now = new Date();
-            const date = now.getDate().toString().padStart(2, '0');
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            
-            datetimeInput.value = `${date}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-            return datetimeInput.value;
-        }
+        let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
         
-        // به‌روزرسانی هر ثانیه
-        setInterval(updateDateTime, 1000);
-        updateDateTime(); // مقداردهی اولیه
-
         // فعال‌سازی دوربین
         async function startCamera() {
             try {
@@ -670,92 +560,89 @@
             startCamera();
         });
         
+        // دریافت موقعیت جغرافیایی با دکمه
+        getLocationBtn.addEventListener('click', () => {
+            showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
+            getLocationBtn.disabled = true;
+            getLocation();
+        });
+        
         // دریافت موقعیت جغرافیایی
         function getLocation() {
-            return new Promise((resolve, reject) => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        position => {
-                            locationData = {
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude,
-                                accuracy: position.coords.accuracy,
-                                timestamp: position.timestamp
-                            };
-                            
-                            latitudeValue.textContent = locationData.latitude.toFixed(6);
-                            longitudeValue.textContent = locationData.longitude.toFixed(6);
-                            accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
-                            
-                            resolve(locationData);
-                        },
-                        error => {
-                            showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
-                            console.error('خطای موقعیت‌یابی:', error);
-                            reject(error);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        locationData = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        
+                        latitudeValue.textContent = locationData.latitude.toFixed(6);
+                        longitudeValue.textContent = locationData.longitude.toFixed(6);
+                        accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
+                        
+                        showStatus('موقعیت جغرافیایی دریافت شد', 'success');
+                        getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
+                        
+                        // فعال کردن دکمه ارسال
+                        if (marketingCodeInput.value.trim() !== '') {
+                            submitBtn.disabled = false;
                         }
-                    );
-                } else {
-                    const errorMsg = 'مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند';
-                    showStatus(errorMsg, 'error');
-                    reject(new Error(errorMsg));
-                }
-            });
+                    },
+                    error => {
+                        showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
+                        console.error('خطای موقعیت‌یابی:', error);
+                        getLocationBtn.disabled = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                showStatus('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند', 'error');
+                getLocationBtn.disabled = false;
+            }
         }
-
-        // ارسال داده‌ها به سرور
-        async function submitData(requestType = "ثبت موقعیت شیفت", eventTime = null) {
-            if (!marketingCodeInput.value.trim() && !currentMarketingCode) {
+        
+        // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
+        submitBtn.addEventListener('click', async () => {
+            const marketingCode = marketingCodeInput.value.trim();
+            const requestType = requestTypeSelect.value;
+            
+            // اعتبارسنجی ورودی‌ها
+            if (!marketingCode) {
                 showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
                 return;
             }
             
+            if (!requestType) {
+                showStatus('لطفاً نوع درخواست را انتخاب کنید', 'error');
+                return;
+            }
+            
             if (!locationData) {
-                showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
-                try {
-                    await getLocation();
-                } catch (error) {
-                    return;
-                }
+                showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
+                return;
             }
             
-            const marketingCode = currentMarketingCode || marketingCodeInput.value.trim();
-            
-            // استفاده از زمان دقیق رویداد به جای زمان فعلی
-            const dateTimeStr = eventTime ? formatDateTime(new Date(eventTime)) : updateDateTime();
-            
-            // ذخیره کد بازاریابی فقط برای اولین بار
-            if (!currentMarketingCode) {
-                currentMarketingCode = marketingCode;
-                marketingCodeInput.disabled = true;
-            }
-            
-            // ساخت داده‌ها برای ارسال
-            const formData = {
-                marketingCode,
-                requestType,
-                dateTime: dateTimeStr,
-                locationData
-            };
-            
-            // ساخت URL برای ارسال به گوگل فرم
-            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
-            
-            // ساخت پارامترهای ارسالی
-            const params = new URLSearchParams();
-            params.append('entry.1228562108', formData.marketingCode); // کد بازاریابی
-            params.append('entry.2093256559', formData.locationData.latitude); // عرض جغرافیایی
-            params.append('entry.1314182104', formData.locationData.longitude); // طول جغرافیایی
-            params.append('entry.1995166577', formData.locationData.accuracy); // دقت
-            params.append('entry.1723693542', formData.requestType); // نوع درخواست
-            params.append('entry.577523416', formData.dateTime); // تاریخ و زمان
+            showStatus('در حال ارسال اطلاعات به سرور...', 'processing');
+            submitBtn.disabled = true;
             
             try {
+                // ساخت URL برای ارسال به گوگل فرم
+                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
+                
+                // ساخت پارامترهای ارسالی
+                const params = new URLSearchParams();
+                params.append('entry.1228562108', marketingCode); // کد بازاریابی
+                params.append('entry.2093256559', locationData.latitude); // عرض جغرافیایی
+                params.append('entry.1314182104', locationData.longitude); // طول جغرافیایی
+                params.append('entry.1995166577', locationData.accuracy); // دقت
+                params.append('entry.1723693542', requestType); // نوع درخواست (به جای دقت موقعیت)
+                
                 // ارسال درخواست POST
                 await fetch(formUrl, {
                     method: 'POST',
@@ -766,252 +653,43 @@
                     mode: 'no-cors'
                 });
                 
-                return true;
+                // نمایش انیمیشن موفقیت
+                showSuccessAnimation();
+                
+                // نمایش پیام موفقیت
+                showStatus('اطلاعات با موفقیت به سرور ارسال شد!', 'success');
+                
+                // ریست فرم
+                setTimeout(() => {
+                    marketingCodeInput.value = '';
+                    submitBtn.disabled = true;
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
+                    
+                    // توقف دوربین
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                        cameraFeed.style.display = 'none';
+                        document.querySelector('.camera-placeholder').style.display = 'block';
+                        startCameraBtn.disabled = false;
+                        startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
+                        captureBtn.disabled = true;
+                    }
+                    
+                    // ریست موقعیت
+                    locationData = null;
+                    latitudeValue.textContent = '---';
+                    longitudeValue.textContent = '---';
+                    accuracyValue.textContent = '---';
+                }, 2000);
+                
             } catch (error) {
+                showStatus('خطا در ارسال اطلاعات: ' + error.message, 'error');
+                submitBtn.disabled = false;
                 console.error('خطای ارسال:', error);
-                return false;
             }
-        }
-
-        // فرمت‌دهی تاریخ و زمان
-        function formatDateTime(date) {
-            const dateStr = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const seconds = date.getSeconds().toString().padStart(2, '0');
-            
-            return `${dateStr}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-        }
-
-        // ذخیره داده‌ها در حافظه آفلاین
-        function saveOfflineData(data) {
-            // ذخیره زمان دقیق رویداد
-            data.timestamp = new Date().toISOString();
-            
-            pendingSubmissions.push(data);
-            localStorage.setItem('pendingSubmissions', JSON.stringify(pendingSubmissions));
-            offlineStatus.style.display = 'block';
-            updateOfflinePanel();
-        }
-
-        // ارسال داده‌های آفلاین
-        async function submitPendingData() {
-            if (pendingSubmissions.length === 0) return;
-            
-            showStatus('ارسال اطلاعات ذخیره شده آفلاین...', 'processing');
-            
-            const successIndexes = [];
-            for (let i = 0; i < pendingSubmissions.length; i++) {
-                const data = pendingSubmissions[i];
-                
-                // ارسال داده با زمان دقیق رویداد
-                const success = await submitData(data.requestType, data.timestamp);
-                
-                if (success) {
-                    successIndexes.push(i);
-                } else {
-                    console.error(`خطا در ارسال داده آفلاین ${i}`);
-                }
-            }
-            
-            // حذف داده‌های ارسال شده
-            pendingSubmissions = pendingSubmissions.filter((_, index) => !successIndexes.includes(index));
-            localStorage.setItem('pendingSubmissions', JSON.stringify(pendingSubmissions));
-            
-            if (pendingSubmissions.length === 0) {
-                offlineStatus.style.display = 'none';
-                submitOfflineBtn.style.display = 'none';
-                offlinePanel.style.display = 'none';
-                showStatus('تمامی اطلاعات آفلاین با موفقیت ارسال شدند', 'success');
-            } else {
-                showStatus(`تعداد ${successIndexes.length} از ${pendingSubmissions.length + successIndexes.length} اطلاعات آفلاین ارسال شدند`, pendingSubmissions.length > 0 ? 'error' : 'success');
-                updateOfflinePanel();
-            }
-        }
-
-        // به‌روزرسانی پنل داده‌های آفلاین
-        function updateOfflinePanel() {
-            if (pendingSubmissions.length === 0) {
-                offlinePanel.style.display = 'none';
-                submitOfflineBtn.style.display = 'none';
-                return;
-            }
-            
-            offlineDataList.innerHTML = '';
-            pendingSubmissions.forEach((data, index) => {
-                const eventDate = new Date(data.timestamp);
-                const formattedDate = formatDateTime(eventDate);
-                
-                const item = document.createElement('div');
-                item.className = 'offline-item';
-                item.innerHTML = `
-                    <div class="offline-item-header">
-                        <span>${data.requestType}</span>
-                        <span>${formattedDate}</span>
-                    </div>
-                    <div class="offline-item-details">
-                        <span>عرض: ${data.locationData.latitude.toFixed(6)}</span>
-                        <span>طول: ${data.locationData.longitude.toFixed(6)}</span>
-                    </div>
-                `;
-                offlineDataList.appendChild(item);
-            });
-            
-            offlinePanel.style.display = 'block';
-            submitOfflineBtn.style.display = 'block';
-        }
-
-        // شروع تایمر معکوس برای سیکل بعدی
-        function startNextCycleTimer() {
-            nextCycleTimer.style.display = 'block';
-            countdown = 60; // تنظیم تایمر به 60 ثانیه
-            
-            if (nextCycleInterval) clearInterval(nextCycleInterval);
-            
-            nextCycleInterval = setInterval(() => {
-                countdown--;
-                
-                // نمایش زمان به صورت دقیقه:ثانیه
-                const minutes = Math.floor(countdown / 60);
-                const seconds = countdown % 60;
-                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                // تغییر رنگ در زمان‌های حساس
-                if (countdown <= 10) {
-                    countdownElement.style.color = '#ff6b6b';
-                    countdownElement.style.fontWeight = 'bold';
-                    nextCycleTimer.classList.add('critical');
-                } else {
-                    countdownElement.style.color = 'white';
-                    nextCycleTimer.classList.remove('critical');
-                }
-                
-                // پایان تایمر و شروع سیکل جدید
-                if (countdown <= 0) {
-                    clearInterval(nextCycleInterval);
-                    countdownElement.textContent = '00:00';
-                    showStatus('سیکل جدید آغاز شد!', 'success');
-                    
-                    // شروع سیکل جدید بعد از 2 ثانیه
-                    setTimeout(() => {
-                        countdown = 60;
-                        startNextCycleTimer();
-                    }, 2000);
-                }
-            }, 1000);
-        }
-
-        // شروع شیفت
-        async function startShift() {
-            const marketingCode = marketingCodeInput.value.trim();
-            if (!marketingCode) {
-                showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
-                return;
-            }
-            
-            try {
-                showStatus('در حال شروع شیفت...', 'processing');
-                
-                // دریافت موقعیت
-                await getLocation();
-                
-                // ارسال درخواست شروع شیفت
-                const success = await submitData("شروع شیفت");
-                
-                if (success) {
-                    showStatus('شیفت با موفقیت شروع شد!', 'success');
-                    
-                    // فعال کردن دکمه پایان شیفت
-                    endShiftBtn.disabled = false;
-                    startShiftBtn.disabled = true;
-                    shiftActive = true;
-                    
-                    // شروع تایمر سیکل بعدی
-                    startNextCycleTimer();
-                    
-                    // شروع ارسال خودکار هر 1 دقیقه
-                    shiftInterval = setInterval(async () => {
-                        try {
-                            await getLocation();
-                            const success = await submitData();
-                            
-                            if (!success) {
-                                const data = {
-                                    marketingCode: currentMarketingCode,
-                                    requestType: "ثبت موقعیت شیفت",
-                                    locationData,
-                                    formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
-                                };
-                                saveOfflineData(data);
-                            }
-                        } catch (error) {
-                            console.error('خطا در ارسال خودکار:', error);
-                        }
-                    }, 60000); // هر 1 دقیقه
-                } else {
-                    const data = {
-                        marketingCode,
-                        requestType: "شروع شیفت",
-                        locationData,
-                        formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
-                    };
-                    saveOfflineData(data);
-                    showStatus('اطلاعات شروع شیفت به صورت آفلاین ذخیره شد', 'processing');
-                    endShiftBtn.disabled = false;
-                    startShiftBtn.disabled = true;
-                    shiftActive = true;
-                    startNextCycleTimer();
-                }
-            } catch (error) {
-                showStatus('خطا در شروع شیفت: ' + error.message, 'error');
-            }
-        }
-
-        // پایان شیفت
-        async function endShift() {
-            try {
-                showStatus('در حال پایان دادن به شیفت...', 'processing');
-                
-                // دریافت آخرین موقعیت
-                await getLocation();
-                
-                // ارسال درخواست پایان شیفت
-                const success = await submitData("پایان شیفت");
-                
-                if (success) {
-                    showStatus('شیفت با موفقیت پایان یافت!', 'success');
-                } else {
-                    const data = {
-                        marketingCode: currentMarketingCode,
-                        requestType: "پایان شیفت",
-                        locationData,
-                        formUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse'
-                    };
-                    saveOfflineData(data);
-                    showStatus('اطلاعات پایان شیفت به صورت آفلاین ذخیره شد', 'processing');
-                }
-                
-                // توقف ارسال خودکار
-                clearInterval(shiftInterval);
-                clearInterval(nextCycleInterval);
-                shiftInterval = null;
-                shiftActive = false;
-                
-                // غیرفعال کردن دکمه پایان شیفت
-                endShiftBtn.disabled = true;
-                startShiftBtn.disabled = false;
-                marketingCodeInput.disabled = false;
-                currentMarketingCode = "";
-                
-                // مخفی کردن تایمر
-                nextCycleTimer.style.display = 'none';
-            } catch (error) {
-                showStatus('خطا در پایان شیفت: ' + error.message, 'error');
-            }
-        }
-
+        });
+        
         // نمایش پیام وضعیت
         function showStatus(message, type) {
             statusMessage.textContent = message;
@@ -1022,65 +700,64 @@
                 statusMessage.style.display = 'none';
             }, 5000);
         }
-
-        // رویدادهای دکمه‌های شروع و پایان شیفت
-        startShiftBtn.addEventListener('click', startShift);
-        endShiftBtn.addEventListener('click', endShift);
         
-        // دکمه ارسال اطلاعات آفلاین
-        submitOfflineBtn.addEventListener('click', submitPendingData);
-
-        // بررسی وضعیت آنلاین/آفلاین
-        function updateOnlineStatus() {
-            isOnline = navigator.onLine;
-            if (isOnline && pendingSubmissions.length > 0) {
-                // به‌روزرسانی وضعیت دکمه
-                submitOfflineBtn.style.display = 'block';
-                offlinePanel.style.display = 'block';
+        // اعتبارسنجی فرم
+        marketingCodeInput.addEventListener('input', () => {
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        });
+        
+        // انیمیشن موفقیت
+        function showSuccessAnimation() {
+            // انیمیشن دکمه
+            submitBtn.classList.add('success-animation');
+            setTimeout(() => {
+                submitBtn.classList.remove('success-animation');
+            }, 2000);
+            
+            // ایجاد کنفتی
+            createConfetti();
+        }
+        
+        // ایجاد کنفتی
+        function createConfetti() {
+            confettiElement.style.display = 'block';
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = '50%';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.opacity = Math.random() + 0.5;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confettiElement.appendChild(confetti);
+                
+                // انیمیشن سقوط
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0,0.8,1,0.2)'
+                });
+                
+                // حذف المان پس از پایان انیمیشن
+                animation.onfinish = () => {
+                    confetti.remove();
+                    if (confettiElement.children.length === 0) {
+                        confettiElement.style.display = 'none';
+                    }
+                };
             }
         }
-
-        // رویدادهای تغییر وضعیت شبکه
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-
-        // بارگذاری داده‌های آفلاین از localStorage
-        window.addEventListener('load', () => {
-            const savedData = localStorage.getItem('pendingSubmissions');
-            if (savedData) {
-                pendingSubmissions = JSON.parse(savedData);
-                if (pendingSubmissions.length > 0) {
-                    offlineStatus.style.display = 'block';
-                    updateOfflinePanel();
-                }
-            }
-            
-            // بازیابی وضعیت شیفت
-            if (localStorage.getItem('shiftActive') === 'true') {
-                shiftActive = true;
-                startShiftBtn.disabled = true;
-                endShiftBtn.disabled = false;
-                marketingCodeInput.disabled = true;
-                currentMarketingCode = localStorage.getItem('currentMarketingCode');
-                
-                // شروع تایمر از زمان ذخیره شده
-                countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
-                startNextCycleTimer();
-            }
-        });
-
-        // ذخیره داده‌ها هنگام بسته شدن صفحه
-        window.addEventListener('beforeunload', (event) => {
-            // ذخیره وضعیت فعلی
-            localStorage.setItem('shiftActive', shiftActive);
-            localStorage.setItem('currentMarketingCode', currentMarketingCode);
-            localStorage.setItem('nextCycleTimer', countdown);
-            
-            if (pendingSubmissions.length > 0) {
-                event.preventDefault();
-                event.returnValue = '';
-            }
-        });
     </script>
 </body>
 </html>
