@@ -187,6 +187,14 @@
             flex: 1;
         }
         
+        .btn-offline {
+            background: linear-gradient(to right, #8e2de2, #4a00e0);
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+            display: none;
+        }
+        
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
@@ -387,6 +395,51 @@
             50% { transform: scale(1.03); }
             100% { transform: scale(1); }
         }
+        
+        .offline-panel {
+            background-color: #f1f2f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid #ddd;
+        }
+        
+        .offline-panel h3 {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .offline-panel h3 i {
+            margin-left: 8px;
+        }
+        
+        .offline-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4a00e0;
+        }
+        
+        .offline-item-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1a2980;
+        }
+        
+        .offline-item-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #666;
+        }
 
         @media (max-width: 480px) {
             .header h1 {
@@ -496,6 +549,17 @@
                 <i class="fas fa-exclamation-triangle"></i> حالت آفلاین - اطلاعات ذخیره شدند
             </div>
             
+            <!-- پنل نمایش داده‌های آفلاین -->
+            <div class="offline-panel" id="offline-panel">
+                <h3><i class="fas fa-database"></i> اطلاعات ذخیره شده آفلاین</h3>
+                <div id="offline-data-list"></div>
+            </div>
+            
+            <!-- دکمه ارسال اطلاعات آفلاین -->
+            <button id="submit-offline-btn" class="btn btn-offline">
+                <i class="fas fa-cloud-upload-alt"></i> ارسال اطلاعات آفلاین
+            </button>
+            
             <div id="status-message" class="status-message"></div>
             
             <!-- متن توسعه‌دهنده -->
@@ -526,6 +590,9 @@
         const offlineStatus = document.getElementById('offline-status');
         const nextCycleTimer = document.getElementById('next-cycle-timer');
         const countdownElement = document.getElementById('countdown');
+        const offlinePanel = document.getElementById('offline-panel');
+        const offlineDataList = document.getElementById('offline-data-list');
+        const submitOfflineBtn = document.getElementById('submit-offline-btn');
         
         // متغیرهای وضعیت
         let stream = null;
@@ -642,7 +709,7 @@
         }
 
         // ارسال داده‌ها به سرور
-        async function submitData(requestType = "ثبت موقعیت شیفت") {
+        async function submitData(requestType = "ثبت موقعیت شیفت", eventTime = null) {
             if (!marketingCodeInput.value.trim() && !currentMarketingCode) {
                 showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
                 return;
@@ -658,7 +725,9 @@
             }
             
             const marketingCode = currentMarketingCode || marketingCodeInput.value.trim();
-            const dateTimeStr = updateDateTime();
+            
+            // استفاده از زمان دقیق رویداد به جای زمان فعلی
+            const dateTimeStr = eventTime ? formatDateTime(new Date(eventTime)) : updateDateTime();
             
             // ذخیره کد بازاریابی فقط برای اولین بار
             if (!currentMarketingCode) {
@@ -704,14 +773,27 @@
             }
         }
 
+        // فرمت‌دهی تاریخ و زمان
+        function formatDateTime(date) {
+            const dateStr = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            
+            return `${dateStr}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        }
+
         // ذخیره داده‌ها در حافظه آفلاین
         function saveOfflineData(data) {
-            // اضافه کردن زمان دقیق ثبت داده
+            // ذخیره زمان دقیق رویداد
             data.timestamp = new Date().toISOString();
             
             pendingSubmissions.push(data);
             localStorage.setItem('pendingSubmissions', JSON.stringify(pendingSubmissions));
             offlineStatus.style.display = 'block';
+            updateOfflinePanel();
         }
 
         // ارسال داده‌های آفلاین
@@ -724,28 +806,13 @@
             for (let i = 0; i < pendingSubmissions.length; i++) {
                 const data = pendingSubmissions[i];
                 
-                // ساخت پارامترهای ارسالی
-                const params = new URLSearchParams();
-                params.append('entry.1228562108', data.marketingCode);
-                params.append('entry.2093256559', data.locationData.latitude);
-                params.append('entry.1314182104', data.locationData.longitude);
-                params.append('entry.1995166577', data.locationData.accuracy);
-                params.append('entry.1723693542', data.requestType);
-                params.append('entry.577523416', data.timestamp); // استفاده از زمان دقیق ثبت
+                // ارسال داده با زمان دقیق رویداد
+                const success = await submitData(data.requestType, data.timestamp);
                 
-                try {
-                    await fetch(data.formUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: params.toString(),
-                        mode: 'no-cors'
-                    });
-                    
+                if (success) {
                     successIndexes.push(i);
-                } catch (error) {
-                    console.error(`خطا در ارسال داده آفلاین ${i}:`, error);
+                } else {
+                    console.error(`خطا در ارسال داده آفلاین ${i}`);
                 }
             }
             
@@ -755,10 +822,45 @@
             
             if (pendingSubmissions.length === 0) {
                 offlineStatus.style.display = 'none';
+                submitOfflineBtn.style.display = 'none';
+                offlinePanel.style.display = 'none';
                 showStatus('تمامی اطلاعات آفلاین با موفقیت ارسال شدند', 'success');
             } else {
                 showStatus(`تعداد ${successIndexes.length} از ${pendingSubmissions.length + successIndexes.length} اطلاعات آفلاین ارسال شدند`, pendingSubmissions.length > 0 ? 'error' : 'success');
+                updateOfflinePanel();
             }
+        }
+
+        // به‌روزرسانی پنل داده‌های آفلاین
+        function updateOfflinePanel() {
+            if (pendingSubmissions.length === 0) {
+                offlinePanel.style.display = 'none';
+                submitOfflineBtn.style.display = 'none';
+                return;
+            }
+            
+            offlineDataList.innerHTML = '';
+            pendingSubmissions.forEach((data, index) => {
+                const eventDate = new Date(data.timestamp);
+                const formattedDate = formatDateTime(eventDate);
+                
+                const item = document.createElement('div');
+                item.className = 'offline-item';
+                item.innerHTML = `
+                    <div class="offline-item-header">
+                        <span>${data.requestType}</span>
+                        <span>${formattedDate}</span>
+                    </div>
+                    <div class="offline-item-details">
+                        <span>عرض: ${data.locationData.latitude.toFixed(6)}</span>
+                        <span>طول: ${data.locationData.longitude.toFixed(6)}</span>
+                    </div>
+                `;
+                offlineDataList.appendChild(item);
+            });
+            
+            offlinePanel.style.display = 'block';
+            submitOfflineBtn.style.display = 'block';
         }
 
         // شروع تایمر معکوس برای سیکل بعدی
@@ -924,12 +1026,17 @@
         // رویدادهای دکمه‌های شروع و پایان شیفت
         startShiftBtn.addEventListener('click', startShift);
         endShiftBtn.addEventListener('click', endShift);
+        
+        // دکمه ارسال اطلاعات آفلاین
+        submitOfflineBtn.addEventListener('click', submitPendingData);
 
         // بررسی وضعیت آنلاین/آفلاین
         function updateOnlineStatus() {
             isOnline = navigator.onLine;
             if (isOnline && pendingSubmissions.length > 0) {
-                submitPendingData();
+                // به‌روزرسانی وضعیت دکمه
+                submitOfflineBtn.style.display = 'block';
+                offlinePanel.style.display = 'block';
             }
         }
 
@@ -944,42 +1051,21 @@
                 pendingSubmissions = JSON.parse(savedData);
                 if (pendingSubmissions.length > 0) {
                     offlineStatus.style.display = 'block';
+                    updateOfflinePanel();
                 }
             }
             
-            // اگر آنلاین هستیم، داده‌های آفلاین را ارسال کنیم
-            if (navigator.onLine && pendingSubmissions.length > 0) {
-                submitPendingData();
-            }
-        });
-
-        // مدیریت تغییر وضعیت دیداری صفحه
-        document.addEventListener('visibilitychange', () => {
-            isPageVisible = document.visibilityState === 'visible';
-            
-            if (!isPageVisible) {
-                // صفحه مخفی شده، ذخیره وضعیت فعلی
-                localStorage.setItem('shiftActive', shiftActive);
-                localStorage.setItem('currentMarketingCode', currentMarketingCode);
-                localStorage.setItem('nextCycleTimer', countdown);
-            } else {
-                // صفحه دوباره قابل مشاهده است
-                if (localStorage.getItem('shiftActive') === 'true') {
-                    shiftActive = true;
-                    startShiftBtn.disabled = true;
-                    endShiftBtn.disabled = false;
-                    marketingCodeInput.disabled = true;
-                    currentMarketingCode = localStorage.getItem('currentMarketingCode');
-                    
-                    // شروع تایمر از زمان ذخیره شده
-                    countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
-                    startNextCycleTimer();
-                    
-                    // ارسال داده‌های آفلاین
-                    if (isOnline && pendingSubmissions.length > 0) {
-                        submitPendingData();
-                    }
-                }
+            // بازیابی وضعیت شیفت
+            if (localStorage.getItem('shiftActive') === 'true') {
+                shiftActive = true;
+                startShiftBtn.disabled = true;
+                endShiftBtn.disabled = false;
+                marketingCodeInput.disabled = true;
+                currentMarketingCode = localStorage.getItem('currentMarketingCode');
+                
+                // شروع تایمر از زمان ذخیره شده
+                countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
+                startNextCycleTimer();
             }
         });
 
@@ -993,21 +1079,6 @@
             if (pendingSubmissions.length > 0) {
                 event.preventDefault();
                 event.returnValue = '';
-            }
-        });
-        
-        // بازیابی وضعیت هنگام بارگذاری صفحه
-        window.addEventListener('load', () => {
-            if (localStorage.getItem('shiftActive') === 'true') {
-                shiftActive = true;
-                startShiftBtn.disabled = true;
-                endShiftBtn.disabled = false;
-                marketingCodeInput.disabled = true;
-                currentMarketingCode = localStorage.getItem('currentMarketingCode');
-                
-                // شروع تایمر از زمان ذخیره شده
-                countdown = parseInt(localStorage.getItem('nextCycleTimer') || 60);
-                startNextCycleTimer();
             }
         });
     </script>
