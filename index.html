@@ -346,21 +346,21 @@
             z-index: 10;
         }
         
-/* استایل جدید برای کادر توسعه‌دهنده تک خطی و مرکزی */
+        /* استایل جدید برای کادر توسعه‌دهنده تک خطی و مرکزی */
         .dev-credit {
-            text-align: center; /* متن وسط چین */
-            direction: ltr; /* جهت متن انگلیسی */
-            font-size: 14px; /* اندازه فونت */
-            margin: 15px auto 0; /* فاصله بالا و مرکز چین */
-            padding: 10px 20px; /* اندازه داخلی کادر */
+            text-align: center;
+            direction: ltr;
+            font-size: 14px;
+            margin: 15px auto 0;
+            padding: 10px 20px;
             background: rgba(38, 208, 206, 0.15);
-            border-radius: 10px; /* انحنای گوشه‌ها */
+            border-radius: 10px;
             color: #1a2980;
             font-weight: 600;
             border: 1px solid rgba(26, 41, 128, 0.2);
-            display: block; /* عرض کامل */
-            width: fit-content; /* عرض متناسب با محتوا */
-            max-width: 90%; /* حداکثر عرض */
+            display: block;
+            width: fit-content;
+            max-width: 90%;
             letter-spacing: 0.5px;
         }
 
@@ -371,6 +371,7 @@
                 padding: 5px 8px;
                 margin-top: 10px;
             }
+        }
         
         .dev-credit span {
             display: inline-block;
@@ -402,6 +403,36 @@
                 font-size: 14px;
             }
         }
+        
+        /* استایل برای نمایش محدوده زمانی ثبت حضور */
+        .time-restriction-info {
+            background-color: #fff9db;
+            border-left: 4px solid #f59f00;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .time-restriction-info.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .time-restriction-info i {
+            margin-left: 5px;
+            color: #f59f00;
+        }
+        
+        .time-restriction-info ul {
+            margin: 10px 0 0 20px;
+            list-style-type: disc;
+        }
+        
+        .time-restriction-info li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -416,7 +447,7 @@
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
-                <input type="text" id="marketing-code" placeholder="کد بازاریابی خود را وارد نمایید...">
+                <input type="text" id="marketing-code" placeholder="کد 5 رقمی خود را وارد نمایید...">
             </div>
             
             <!-- کشویی نوع درخواست -->
@@ -429,6 +460,23 @@
                     <option value="ثبت حضور">ثبت حضور</option>
                 </select>
                 <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            
+            <!-- اطلاعات محدودیت زمانی ثبت حضور -->
+            <div id="time-restriction" class="time-restriction-info">
+                <p><i class="fas fa-info-circle"></i> ثبت حضور فقط در بازه‌های زمانی زیر فعال است:</p>
+                <ul>
+                    <li>6:00 - 6:30</li>
+                    <li>8:00 - 8:30</li>
+                    <li>10:00 - 10:30</li>
+                    <li>12:00 - 12:30</li>
+                    <li>14:00 - 14:30</li>
+                    <li>16:00 - 16:30</li>
+                    <li>18:00 - 18:30</li>
+                    <li>20:00 - 20:30</li>
+                    <li>22:00 - 22:30</li>
+                    <li>00:00 - 00:30</li>
+                </ul>
             </div>
             
             <div class="camera-section">
@@ -490,7 +538,6 @@
                 Snapp North Zone Sales HQ<br>
                 تیم فروش شمال کشور<br>
                 💎</span>
-                
             </div>
         </div>
     </div>
@@ -510,11 +557,26 @@
         const confettiElement = document.getElementById('confetti');
         const rotateCameraBtn = document.getElementById('rotate-camera');
         const getLocationBtn = document.getElementById('get-location-btn');
+        const timeRestrictionInfo = document.getElementById('time-restriction');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
         let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
+        
+        // بازه‌های زمانی مجاز برای ثبت حضور
+        const allowedTimeSlots = [
+            { start: { hour: 6, minute: 0 }, end: { hour: 6, minute: 30 } },
+            { start: { hour: 8, minute: 0 }, end: { hour: 8, minute: 30 } },
+            { start: { hour: 10, minute: 0 }, end: { hour: 10, minute: 30 } },
+            { start: { hour: 12, minute: 0 }, end: { hour: 12, minute: 30 } },
+            { start: { hour: 14, minute: 0 }, end: { hour: 14, minute: 30 } },
+            { start: { hour: 16, minute: 0 }, end: { hour: 16, minute: 30 } },
+            { start: { hour: 18, minute: 0 }, end: { hour: 18, minute: 30 } },
+            { start: { hour: 20, minute: 0 }, end: { hour: 20, minute: 30 } },
+            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } },
+            { start: { hour: 0, minute: 0 }, end: { hour: 0, minute: 30 } }
+        ];
         
         // فعال‌سازی دوربین
         async function startCamera() {
@@ -607,14 +669,61 @@
             }
         }
         
+        // تابع برای بررسی محدودیت زمانی ثبت حضور
+        function isWithinAllowedTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            
+            // تبدیل زمان فعلی به دقیقه برای مقایسه آسان
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+            
+            for (const slot of allowedTimeSlots) {
+                const startTotalMinutes = slot.start.hour * 60 + slot.start.minute;
+                const endTotalMinutes = slot.end.hour * 60 + slot.end.minute;
+                
+                // برای نیمه شب (بازه 00:00 تا 00:30)
+                if (slot.start.hour === 0) {
+                    // اگر ساعت فعلی بین 0 تا 0:30 باشد
+                    if (currentHour === 0 && currentMinute >= 0 && currentMinute <= 30) {
+                        return true;
+                    }
+                } else {
+                    if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // اعتبارسنجی کد بازاریابی (5 رقمی بودن)
+        function validateMarketingCode(code) {
+            // کد باید دقیقاً 5 رقم باشد
+            const regex = /^\d{5}$/;
+            return regex.test(code);
+        }
+        
+        // نمایش اطلاعات محدودیت زمانی برای ثبت حضور
+        requestTypeSelect.addEventListener('change', function() {
+            if (this.value === 'ثبت حضور') {
+                timeRestrictionInfo.classList.add('show');
+            } else {
+                timeRestrictionInfo.classList.remove('show');
+            }
+        });
+        
         // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
         submitBtn.addEventListener('click', async () => {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
             
-            // اعتبارسنجی ورودی‌ها
-            if (!marketingCode) {
-                showStatus('لطفاً کد بازاریابی را وارد کنید', 'error');
+            // اعتبارسنجی کد بازاریابی
+            if (!validateMarketingCode(marketingCode)) {
+                showStatus('کد بازاریابی باید دقیقاً 5 رقم عددی باشد', 'error');
+                marketingCodeInput.focus();
                 return;
             }
             
@@ -625,6 +734,15 @@
             
             if (!locationData) {
                 showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
+                return;
+            }
+            
+            // اعتبارسنجی زمان ثبت حضور
+            if (requestType === 'ثبت حضور' && !isWithinAllowedTime()) {
+                const now = new Date();
+                const currentTime = now.toLocaleTimeString('fa-IR');
+                
+                showStatus(`ثبت حضور فقط در بازه‌های زمانی مشخص امکان‌پذیر است. زمان فعلی: ${currentTime}`, 'error');
                 return;
             }
             
