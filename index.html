@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه حضور و غیاب | دوربین و موقعیت‌یابی</title>
+    <title>سامانه حضور و غیاب | شمارنده معکوس زمانی</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -54,6 +54,55 @@
         
         .content {
             padding: 30px;
+        }
+        
+        /* استایل شمارنده معکوس */
+        .countdown-container {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .countdown-label {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .countdown-unit {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px 5px;
+            min-width: 70px;
+        }
+        
+        .countdown-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(to bottom, #fff, #ddd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .countdown-label-text {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0.8;
         }
         
         .input-group {
@@ -346,7 +395,7 @@
             z-index: 10;
         }
         
-        /* استایل جدید برای کادر توسعه‌دهنده تک خطی و مرکزی */
+        /* استایل جدید برای کادر توسعه‌دهنده */
         .dev-credit {
             text-align: center;
             direction: ltr;
@@ -370,6 +419,19 @@
                 font-size: 11px;
                 padding: 5px 8px;
                 margin-top: 10px;
+            }
+            
+            .countdown-unit {
+                min-width: 60px;
+                padding: 8px 3px;
+            }
+            
+            .countdown-value {
+                font-size: 1.8rem;
+            }
+            
+            .countdown-label-text {
+                font-size: 0.8rem;
             }
         }
         
@@ -433,17 +495,78 @@
         .time-restriction-info li {
             margin-bottom: 5px;
         }
+        
+        /* استایل برای حالت غیرفعال کل سیستم */
+        .system-disabled-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 20px;
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .system-disabled-overlay i {
+            font-size: 48px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .system-disabled-overlay p {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            max-width: 80%;
+        }
     </style>
 </head>
 <body>
     <div class="confetti" id="confetti"></div>
     
     <div class="container">
+        <!-- لایه غیرفعال سازی سیستم در ساعات تعطیل -->
+        <div class="system-disabled-overlay" id="system-disabled-overlay">
+            <i class="fas fa-power-off"></i>
+            <p>سامانه از ساعت 00:30 تا 5:30 صبح غیرفعال می‌باشد.</p>
+            <p id="disabled-countdown" class="countdown-label">زمان تا فعال‌سازی: <span id="disabled-timer">00:00:00</span></p>
+        </div>
+        
         <div class="header">
             <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
         </div>
         
         <div class="content">
+            <!-- شمارنده معکوس زمانی -->
+            <div class="countdown-container">
+                <div class="countdown-label">
+                    <i class="fas fa-clock"></i>
+                    <span id="countdown-text">زمان تا پایان بازه فعلی</span>
+                </div>
+                <div class="countdown-timer">
+                    <div class="countdown-unit">
+                        <div class="countdown-value" id="countdown-hours">00</div>
+                        <div class="countdown-label-text">ساعت</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-value" id="countdown-minutes">00</div>
+                        <div class="countdown-label-text">دقیقه</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-value" id="countdown-seconds">00</div>
+                        <div class="countdown-label-text">ثانیه</div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
@@ -558,11 +681,20 @@
         const rotateCameraBtn = document.getElementById('rotate-camera');
         const getLocationBtn = document.getElementById('get-location-btn');
         const timeRestrictionInfo = document.getElementById('time-restriction');
+        const systemDisabledOverlay = document.getElementById('system-disabled-overlay');
+        const disabledTimer = document.getElementById('disabled-timer');
+        
+        // عناصر شمارنده معکوس
+        const countdownHours = document.getElementById('countdown-hours');
+        const countdownMinutes = document.getElementById('countdown-minutes');
+        const countdownSeconds = document.getElementById('countdown-seconds');
+        const countdownText = document.getElementById('countdown-text');
         
         // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
-        let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
+        let currentCameraMode = "environment";
+        let countdownInterval = null;
         
         // بازه‌های زمانی مجاز برای ثبت حضور
         const allowedTimeSlots = [
@@ -674,7 +806,6 @@
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
-            const currentSecond = now.getSeconds();
             
             // تبدیل زمان فعلی به دقیقه برای مقایسه آسان
             const currentTotalMinutes = currentHour * 60 + currentMinute;
@@ -699,6 +830,24 @@
             return false;
         }
         
+        // تابع برای بررسی زمان غیرفعال (00:30 تا 5:30)
+        function isInDisabledTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+            
+            // بازه غیرفعال: از 00:30 تا 5:30
+            const disableStart = 0 * 60 + 30; // 00:30 (30 دقیقه)
+            const disableEnd = 5 * 60 + 30;   // 5:30 (330 دقیقه)
+            
+            // اگر زمان فعلی بین 00:30 تا 5:30 باشد
+            if (currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd) {
+                return true;
+            }
+            return false;
+        }
+        
         // اعتبارسنجی کد بازاریابی (5 رقمی بودن)
         function validateMarketingCode(code) {
             // کد باید دقیقاً 5 رقم باشد
@@ -714,6 +863,166 @@
                 timeRestrictionInfo.classList.remove('show');
             }
         });
+        
+        // تابع برای غیرفعال کردن کل سیستم در ساعات تعطیل
+        function toggleSystemState() {
+            const isDisabled = isInDisabledTime();
+            
+            if (isDisabled) {
+                systemDisabledOverlay.style.display = 'flex';
+                
+                // غیرفعال کردن تمام دکمه‌ها و عناصر ورودی
+                marketingCodeInput.disabled = true;
+                requestTypeSelect.disabled = true;
+                startCameraBtn.disabled = true;
+                captureBtn.disabled = true;
+                getLocationBtn.disabled = true;
+                submitBtn.disabled = true;
+                rotateCameraBtn.disabled = true;
+                
+                // توقف دوربین اگر فعال باشد
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    cameraFeed.style.display = 'none';
+                    document.querySelector('.camera-placeholder').style.display = 'block';
+                }
+            } else {
+                systemDisabledOverlay.style.display = 'none';
+                
+                // فعال کردن دوباره عناصر
+                marketingCodeInput.disabled = false;
+                requestTypeSelect.disabled = false;
+                startCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                getLocationBtn.disabled = false;
+                submitBtn.disabled = false;
+                rotateCameraBtn.disabled = false;
+                
+                // به‌روزرسانی وضعیت دکمه‌ها
+                updateButtonStates();
+            }
+        }
+        
+        // تابع برای به‌روزرسانی وضعیت دکمه‌ها
+        function updateButtonStates() {
+            // وضعیت دکمه شروع دوربین
+            if (stream) {
+                startCameraBtn.disabled = true;
+                captureBtn.disabled = false;
+            } else {
+                startCameraBtn.disabled = false;
+                captureBtn.disabled = true;
+            }
+            
+            // وضعیت دکمه ارسال
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+            
+            // وضعیت دکمه دریافت موقعیت
+            if (locationData) {
+                getLocationBtn.disabled = true;
+            } else {
+                getLocationBtn.disabled = false;
+            }
+        }
+        
+        // تابع برای به‌روزرسانی شمارنده معکوس
+        function updateCountdown() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            const currentTotalMinutes = currentHour * 60 + currentMinute;
+            
+            // اگر در زمان غیرفعال هستیم
+            if (isInDisabledTime()) {
+                // زمان پایان بازه غیرفعال (5:30)
+                const endTime = new Date(now);
+                endTime.setHours(5, 30, 0, 0);
+                
+                // اگر زمان فعلی بعد از 5:30 است، به روز بعد برو
+                if (now > endTime) {
+                    endTime.setDate(endTime.getDate() + 1);
+                }
+                
+                // محاسبه زمان باقیمانده
+                const diff = endTime - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                // به‌روزرسانی شمارنده
+                countdownHours.textContent = hours.toString().padStart(2, '0');
+                countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+                countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+                countdownText.innerHTML = '<i class="fas fa-ban"></i> زمان تا پایان تعطیلی سیستم';
+                return;
+            }
+            
+            // بررسی بازه‌های زمانی مجاز
+            for (const slot of allowedTimeSlots) {
+                const startTotalMinutes = slot.start.hour * 60 + slot.start.minute;
+                const endTotalMinutes = slot.end.hour * 60 + slot.end.minute;
+                
+                // اگر در بازه زمانی مجاز هستیم
+                if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes) {
+                    // زمان پایان این بازه
+                    const endTime = new Date(now);
+                    endTime.setHours(slot.end.hour, slot.end.minute, 0, 0);
+                    
+                    // محاسبه زمان باقیمانده
+                    const diff = endTime - now;
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    // به‌روزرسانی شمارنده
+                    countdownHours.textContent = hours.toString().padStart(2, '0');
+                    countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+                    countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+                    countdownText.innerHTML = `<i class="fas fa-clock"></i> زمان تا پایان بازه ${slot.start.hour}:${slot.start.minute.toString().padStart(2, '0')} - ${slot.end.hour}:${slot.end.minute.toString().padStart(2, '0')}`;
+                    return;
+                }
+            }
+            
+            // اگر در هیچ بازه‌ای نیستیم، به بازه بعدی برو
+            let nextSlot = null;
+            for (const slot of allowedTimeSlots) {
+                const startTotalMinutes = slot.start.hour * 60 + slot.start.minute;
+                if (startTotalMinutes > currentTotalMinutes) {
+                    nextSlot = slot;
+                    break;
+                }
+            }
+            
+            // اگر بازه‌ای در امروز باقی نمانده، اولین بازه فردا را در نظر بگیر
+            if (!nextSlot) {
+                nextSlot = allowedTimeSlots[0];
+            }
+            
+            // زمان شروع بازه بعدی
+            const nextTime = new Date(now);
+            if (nextSlot.start.hour < currentHour || 
+                (nextSlot.start.hour === currentHour && nextSlot.start.minute <= currentMinute)) {
+                nextTime.setDate(nextTime.getDate() + 1);
+            }
+            nextTime.setHours(nextSlot.start.hour, nextSlot.start.minute, 0, 0);
+            
+            // محاسبه زمان باقیمانده
+            const diff = nextTime - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            // به‌روزرسانی شمارنده
+            countdownHours.textContent = hours.toString().padStart(2, '0');
+            countdownMinutes.textContent = minutes.toString().padStart(2, '0');
+            countdownSeconds.textContent = seconds.toString().padStart(2, '0');
+            countdownText.innerHTML = `<i class="fas fa-hourglass-start"></i> زمان تا شروع بازه ${nextSlot.start.hour}:${nextSlot.start.minute.toString().padStart(2, '0')} - ${nextSlot.end.hour}:${nextSlot.end.minute.toString().padStart(2, '0')}`;
+        }
         
         // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
         submitBtn.addEventListener('click', async () => {
@@ -876,6 +1185,18 @@
                 };
             }
         }
+        
+        // اجرای تابع toggleSystemState در هنگام لود و هر دقیقه
+        window.addEventListener('load', () => {
+            toggleSystemState();
+            updateCountdown();
+            
+            // به‌روزرسانی شمارنده هر ثانیه
+            countdownInterval = setInterval(updateCountdown, 1000);
+            
+            // بررسی وضعیت سیستم هر دقیقه
+            setInterval(toggleSystemState, 60000);
+        });
     </script>
 </body>
 </html>
