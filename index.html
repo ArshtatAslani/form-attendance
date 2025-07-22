@@ -513,7 +513,6 @@
                     <li>18:00 - 18:30</li>
                     <li>20:00 - 20:30</li>
                     <li>22:00 - 22:30</li>
-                    <li>00:00 - 00:30</li>
                 </ul>
             </div>
             
@@ -613,8 +612,7 @@
             { start: { hour: 16, minute: 0 }, end: { hour: 16, minute: 30 } },
             { start: { hour: 18, minute: 0 }, end: { hour: 18, minute: 30 } },
             { start: { hour: 20, minute: 0 }, end: { hour: 20, minute: 30 } },
-            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } },
-            { start: { hour: 0, minute: 0 }, end: { hour: 0, minute: 30 } }
+            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } }
         ];
         
         // فعال‌سازی دوربین
@@ -882,7 +880,7 @@
                 params.append('entry.2093256559', locationData.latitude); // عرض جغرافیایی
                 params.append('entry.1314182104', locationData.longitude); // طول جغرافیایی
                 params.append('entry.1995166577', locationData.accuracy); // دقت
-                params.append('entry.1723693542', requestType); // نوع درخواست (به جای دقت موقعیت)
+                params.append('entry.1723693542', requestType); // نوع درخواست
                 
                 // ارسال درخواست POST
                 await fetch(formUrl, {
