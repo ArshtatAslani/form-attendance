@@ -756,6 +756,7 @@
         let isFeasibilityAllowed = false;
         let feasibilityData = {};
         let clockInterval;
+        let selectedRequestType = null; // برای ذخیره نوع درخواست انتخاب شده
         
         // URL اسکریپت گوگل
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc74Jvlo4eQ0zc3O43lw1J2-gseWezICETl8ApAPl7EdT7s6vmuZtE8fxn_MY1fDrL/exec";
@@ -925,8 +926,8 @@
             const currentMinute = now.getMinutes();
             const currentTotalMinutes = currentHour * 60 + currentMinute;
             
-            const disableStart = 2 * 60 + 30;
-            const disableEnd = 5 * 60 + 30;
+            const disableStart = 0 * 60 + 30; // 00:30
+            const disableEnd = 5 * 60 + 30;   // 05:30
             
             if (currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd) {
                 return true;
@@ -959,8 +960,9 @@
             validateForm();
         }
         
-        // تابع برای فراخوانی اطلاعات با JSONP از Google Apps Script
-        function fetchRequestInfo() {
+        // تابع برای فراخوانی اطلاعات با JSONP از Google Apps Script با کش
+        let requestCache = {};
+        async function fetchRequestInfo() {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
             
@@ -969,6 +971,17 @@
                 lastRequestTime.innerHTML = '<span style="color:#6c757d">کد بازاریابی نامعتبر</span>';
                 requestFeasibility.innerHTML = '<span style="color:#6c757d">کد بازاریابی نامعتبر</span>';
                 return;
+            }
+            
+            // بررسی کش
+            const cacheKey = `${marketingCode}_${requestType}`;
+            if (requestCache[cacheKey]) {
+                const { timestamp, data } = requestCache[cacheKey];
+                // اگر کش کمتر از 30 ثانیه پیش باشد، از کش استفاده کن
+                if (Date.now() - timestamp < 30000) {
+                    processRequestInfo(data);
+                    return;
+                }
             }
             
             // نمایش حالت لودینگ
@@ -992,49 +1005,13 @@
                 // حذف اسکریپت
                 document.getElementById('jsonp-script-' + callbackName)?.remove();
                 
-                if (data.success) {
-                    if (data.exists) {
-                        // نمایش زمان آخرین درخواست
-                        const requestDate = new Date(data.lastRecord.timestamp);
-                        const formattedTime = requestDate.toLocaleTimeString('fa-IR', {
-                            hour12: false,
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                        lastRequestTime.textContent = formattedTime;
-                        
-                        // ذخیره اطلاعات امکان‌سنجی
-                        feasibilityData[requestType] = { status: data.lastRecord.status };
-                        isFeasibilityAllowed = data.lastRecord.status;
-                        
-                        // نمایش امکان سنجی درخواست مجدد
-                        requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
-                        requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
-                        requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
-                        
-                        // فعال کردن بخش‌ها فقط اگر امکان‌سنجی مجاز باشد
-                        toggleSections(isFeasibilityAllowed);
-                    } else {
-                        lastRequestTime.textContent = 'اطلاعاتی موجود نیست';
-                        requestFeasibility.textContent = 'مجاز';
-                        requestFeasibility.classList.add('feasibility-allowed');
-                        requestFeasibility.classList.remove('feasibility-denied');
-                        isFeasibilityAllowed = true;
-                        feasibilityData[requestType] = { status: true };
-                        
-                        // فعال کردن بخش‌ها
-                        toggleSections(true);
-                    }
-                } else {
-                    lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                    requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                    isFeasibilityAllowed = false;
-                    feasibilityData[requestType] = { status: false };
-                    console.error('خطا در دریافت اطلاعات:', data.error);
-                }
+                // ذخیره در کش
+                requestCache[cacheKey] = {
+                    timestamp: Date.now(),
+                    data: data
+                };
                 
-                // اعتبارسنجی مجدد فرم پس از دریافت اطلاعات
-                validateForm();
+                processRequestInfo(data);
             };
             
             // ایجاد اسکریپت برای درخواست JSONP
@@ -1050,6 +1027,7 @@
                 feasibilityData[requestType] = { status: false };
                 delete window[callbackName];
                 document.getElementById('jsonp-script-' + callbackName)?.remove();
+                toggleSections(false);
                 validateForm();
             };
             
@@ -1057,8 +1035,61 @@
             document.body.appendChild(script);
         }
         
+        // تابع برای پردازش اطلاعات دریافت شده
+        function processRequestInfo(data) {
+            const requestType = requestTypeSelect.value;
+            
+            if (data.success) {
+                if (data.exists) {
+                    // نمایش زمان آخرین درخواست
+                    const requestDate = new Date(data.lastRecord.timestamp);
+                    const formattedTime = requestDate.toLocaleTimeString('fa-IR', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    lastRequestTime.textContent = formattedTime;
+                    
+                    // ذخیره اطلاعات امکان‌سنجی
+                    feasibilityData[requestType] = { status: data.lastRecord.status };
+                    isFeasibilityAllowed = data.lastRecord.status;
+                    
+                    // نمایش امکان سنجی درخواست مجدد
+                    requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
+                    requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
+                    requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
+                    
+                    // فعال کردن بخش‌ها فقط اگر امکان‌سنجی مجاز باشد
+                    toggleSections(isFeasibilityAllowed);
+                } else {
+                    lastRequestTime.textContent = 'اطلاعاتی موجود نیست';
+                    requestFeasibility.textContent = 'مجاز';
+                    requestFeasibility.classList.add('feasibility-allowed');
+                    requestFeasibility.classList.remove('feasibility-denied');
+                    isFeasibilityAllowed = true;
+                    feasibilityData[requestType] = { status: true };
+                    
+                    // فعال کردن بخش‌ها
+                    toggleSections(true);
+                }
+            } else {
+                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                isFeasibilityAllowed = false;
+                feasibilityData[requestType] = { status: false };
+                toggleSections(false);
+                console.error('خطا در دریافت اطلاعات:', data.error);
+            }
+            
+            // اعتبارسنجی مجدد فرم پس از دریافت اطلاعات
+            validateForm();
+        }
+        
         // تغییرات در اسکریپت برای مدیریت انتخاب نوع درخواست
         requestTypeSelect.addEventListener('change', function() {
+            // ذخیره نوع درخواست انتخاب شده
+            selectedRequestType = this.value;
+            
             // نمایش محدودیت زمانی فقط برای ثبت حضور
             if (this.value === 'ثبت حضور') {
                 timeRestrictionInfo.classList.add('show');
@@ -1089,6 +1120,7 @@
             const isValidCode = validateMarketingCode(marketingCode);
             const hasLocation = !!locationData;
             const hasRequestType = requestTypeSelect.value !== '';
+            const isRequestTypeValid = requestTypeSelect.value === selectedRequestType;
             
             // اعتبارسنجی کد بازاریابی
             if (marketingCode !== '') {
@@ -1103,7 +1135,7 @@
             }
             
             // بررسی امکان سنجی درخواست مجدد
-            const isFeasible = isFeasibilityAllowed;
+            const isFeasible = isFeasibilityAllowed && isRequestTypeValid;
             
             const isValid = isValidCode && hasLocation && hasRequestType && isFeasible;
             submitBtn.disabled = !isValid;
@@ -1190,6 +1222,11 @@
                 return;
             }
             
+            if (requestType !== selectedRequestType) {
+                showStatus('نوع درخواست تغییر کرده است. لطفاً موقعیت جغرافیایی را مجدداً دریافت کنید.', 'error');
+                return;
+            }
+            
             if (!locationData) {
                 showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
                 return;
@@ -1267,6 +1304,8 @@
                     requestFeasibility.innerHTML = '';
                     isFeasibilityAllowed = false;
                     feasibilityData = {};
+                    selectedRequestType = null;
+                    requestCache = {};
                     
                     // غیرفعال کردن بخش‌ها پس از ارسال موفق
                     toggleSections(false);
