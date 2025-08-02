@@ -456,16 +456,10 @@
         
         /* استایل فیلدهای زمان آخرین درخواست و امکان‌سنجی */
         .request-info-container {
-            display: grid;
+            display: none;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
-            animation: slideDown 0.3s ease-out;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         .request-info-box {
@@ -511,28 +505,10 @@
         }
         
         /* استایل لودینگ */
-        .loading-dots {
-            display: inline-block;
-        }
-        
-        .loading-dots span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #1a2980;
-            margin: 0 2px;
-            opacity: 0;
-            animation: loading-dots 1.0s infinite;
-        }
-        
-        .loading-dots span:nth-child(1) { animation-delay: 0s; }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes loading-dots {
-            0%, 100% { opacity: 0; transform: scale(0.7); }
-            50% { opacity: 1; transform: scale(1); }
+        .loading-indicator {
+            font-size: 14px;
+            color: #1a2980;
+            text-align: center;
         }
         
         /* استایل وضعیت سیستم */
@@ -652,26 +628,14 @@
             </div>
             
             <!-- نمایش زمان آخرین درخواست و امکان‌سنجی -->
-            <div id="request-info-container" class="request-info-container" style="display: none;">
+            <div id="request-info-container" class="request-info-container">
                 <div class="request-info-box">
                     <h4><i class="fas fa-clock"></i>زمان آخرین درخواست</h4>
-                    <div id="last-request-time" class="request-info-value">
-                        <div class="loading-dots">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
+                    <div id="last-request-time" class="request-info-value"></div>
                 </div>
                 <div class="request-info-box">
                     <h4><i class="fas fa-check-circle"></i>امکان سنجی درخواست</h4>
-                    <div id="request-feasibility" class="request-info-value">
-                        <div class="loading-dots">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
+                    <div id="request-feasibility" class="request-info-value"></div>
                 </div>
             </div>
             
@@ -833,15 +797,11 @@
         // تابع فعال/غیرفعال کردن بخش‌های دوربین و موقعیت
         function toggleSections(enable) {
             if (enable && !isFetchingFeasibility) {
-                cameraSection.classList.remove('section-disabled');
-                locationSection.classList.remove('section-disabled');
                 cameraOverlay.classList.remove('show');
                 locationOverlay.classList.remove('show');
                 startCameraBtn.disabled = false;
                 getLocationBtn.disabled = false;
             } else {
-                cameraSection.classList.add('section-disabled');
-                locationSection.classList.add('section-disabled');
                 cameraOverlay.classList.add('show');
                 locationOverlay.classList.add('show');
                 startCameraBtn.disabled = true;
@@ -969,7 +929,7 @@
             const currentMinute = now.getMinutes();
             const currentTotalMinutes = currentHour * 60 + currentMinute;
             
-            const disableStart = 2 * 60 + 30;
+            const disableStart = 0 * 60 + 30;
             const disableEnd = 5 * 60 + 30;
             
             return currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd;
@@ -998,8 +958,35 @@
             validateForm();
         }
         
+        // تابع مدیریت کش با localStorage
+        function getCachedData(cacheKey) {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const { timestamp, data } = JSON.parse(cached);
+                if (Date.now() - timestamp < 60000) { // کش برای 60 ثانیه معتبر است
+                    return data;
+                }
+            }
+            return null;
+        }
+        
+        function setCachedData(cacheKey, data) {
+            localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                data: data
+            }));
+        }
+        
+        // تابع debouncing برای کاهش درخواست‌های مکرر
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
         // تابع دریافت اطلاعات امکان‌سنجی با کش
-        let requestCache = {};
         async function fetchRequestInfo() {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
@@ -1012,19 +999,17 @@
             }
             
             const cacheKey = `${marketingCode}_${requestType}`;
-            if (requestCache[cacheKey]) {
-                const { timestamp, data } = requestCache[cacheKey];
-                if (Date.now() - timestamp < 30000) {
-                    processRequestInfo(data);
-                    return;
-                }
+            const cachedData = getCachedData(cacheKey);
+            if (cachedData) {
+                processRequestInfo(cachedData);
+                return;
             }
             
             isFetchingFeasibility = true;
             toggleSections(false);
             
-            lastRequestTime.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-            requestFeasibility.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+            lastRequestTime.innerHTML = '<div class="loading-indicator">در حال بارگذاری...</div>';
+            requestFeasibility.innerHTML = '<div class="loading-indicator">در حال بررسی...</div>';
             
             const callbackName = 'jsonpCallback_' + (requestInfoCallbackCounter++);
             const url = `${GOOGLE_SCRIPT_URL}?code=${marketingCode}&type=${encodeURIComponent(requestType)}&callback=${callbackName}`;
@@ -1033,11 +1018,7 @@
                 delete window[callbackName];
                 document.getElementById('jsonp-script-' + callbackName)?.remove();
                 
-                requestCache[cacheKey] = {
-                    timestamp: Date.now(),
-                    data: data
-                };
-                
+                setCachedData(cacheKey, data);
                 isFetchingFeasibility = false;
                 processRequestInfo(data);
             };
@@ -1061,8 +1042,12 @@
             document.body.appendChild(script);
         }
         
+        // استفاده از debouncing برای درخواست‌ها
+        const debouncedFetchRequestInfo = debounce(fetchRequestInfo, 500);
+        
         // تابع پردازش اطلاعات دریافتی
         function processRequestInfo(data) {
+            const fragment = document.createDocumentFragment();
             const requestType = requestTypeSelect.value;
             
             if (data.success) {
@@ -1073,29 +1058,51 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     });
-                    lastRequestTime.textContent = formattedTime;
+                    const timeDiv = document.createElement('div');
+                    timeDiv.textContent = formattedTime;
+                    fragment.appendChild(timeDiv);
+                    lastRequestTime.innerHTML = '';
+                    lastRequestTime.appendChild(fragment);
                     
                     feasibilityData[requestType] = { status: data.lastRecord.status };
                     isFeasibilityAllowed = data.lastRecord.status;
                     
-                    requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
-                    requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
-                    requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
+                    const feasibilityDiv = document.createElement('div');
+                    feasibilityDiv.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
+                    feasibilityDiv.className = isFeasibilityAllowed ? 'request-info-value feasibility-allowed' : 'request-info-value feasibility-denied';
+                    requestFeasibility.innerHTML = '';
+                    requestFeasibility.appendChild(feasibilityDiv);
                     
                     toggleSections(isFeasibilityAllowed);
                 } else {
-                    lastRequestTime.textContent = 'اطلاعاتی موجود نیست';
-                    requestFeasibility.textContent = 'مجاز';
-                    requestFeasibility.classList.add('feasibility-allowed');
-                    requestFeasibility.classList.remove('feasibility-denied');
+                    const timeDiv = document.createElement('div');
+                    timeDiv.textContent = 'اطلاعاتی موجود نیست';
+                    fragment.appendChild(timeDiv);
+                    lastRequestTime.innerHTML = '';
+                    lastRequestTime.appendChild(fragment);
+                    
+                    const feasibilityDiv = document.createElement('div');
+                    feasibilityDiv.textContent = 'مجاز';
+                    feasibilityDiv.className = 'request-info-value feasibility-allowed';
+                    requestFeasibility.innerHTML = '';
+                    requestFeasibility.appendChild(feasibilityDiv);
+                    
                     isFeasibilityAllowed = true;
                     feasibilityData[requestType] = { status: true };
-                    
                     toggleSections(true);
                 }
             } else {
-                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                const errorDiv1 = document.createElement('div');
+                errorDiv1.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                fragment.appendChild(errorDiv1);
+                lastRequestTime.innerHTML = '';
+                lastRequestTime.appendChild(fragment);
+                
+                const errorDiv2 = document.createElement('div');
+                errorDiv2.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                requestFeasibility.innerHTML = '';
+                requestFeasibility.appendChild(errorDiv2);
+                
                 isFeasibilityAllowed = false;
                 feasibilityData[requestType] = { status: false };
                 toggleSections(false);
@@ -1126,7 +1133,7 @@
                 if (validateMarketingCode(marketingCodeInput.value.trim())) {
                     isFetchingFeasibility = true;
                     toggleSections(false);
-                    fetchRequestInfo();
+                    debouncedFetchRequestInfo();
                 }
             } else {
                 requestInfoContainer.style.display = 'none';
@@ -1311,7 +1318,7 @@
                     isFeasibilityAllowed = false;
                     feasibilityData = {};
                     selectedRequestType = null;
-                    requestCache = {};
+                    localStorage.clear();
                     isFetchingFeasibility = false;
                     
                     toggleSections(false);
@@ -1342,7 +1349,7 @@
             if (requestInfoContainer.style.display === 'grid') {
                 isFetchingFeasibility = true;
                 toggleSections(false);
-                fetchRequestInfo();
+                debouncedFetchRequestInfo();
             }
             
             validateForm();
@@ -1403,5 +1410,3 @@
     </script>
 </body>
 </html>
-
-
