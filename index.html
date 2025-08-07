@@ -6,7 +6,6 @@
     <title>سامانه حضور و غیاب</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تنظیمات پایه و استایل کلی */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +23,6 @@
             color: #333;
         }
         
-        /* استایل کانتینر اصلی */
         .container {
             background-color: rgba(255, 255, 255, 0.95);
             width: 100%;
@@ -41,7 +39,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* استایل هدر */
         .header {
             background: linear-gradient(to right, #1a2980, #26d0ce);
             color: white;
@@ -55,13 +52,11 @@
             margin-bottom: 5px;
         }
         
-        /* استایل محتوای اصلی */
         .content {
             padding: 30px;
             position: relative;
         }
         
-        /* استایل گروه‌های ورودی */
         .input-group {
             margin-bottom: 25px;
             position: relative;
@@ -112,7 +107,6 @@
             pointer-events: none;
         }
         
-        /* استایل بخش دوربین */
         .camera-section {
             margin-bottom: 25px;
             position: relative;
@@ -165,7 +159,6 @@
             margin-bottom: 15px;
         }
         
-        /* استایل دکمه‌ها */
         .btn {
             padding: 14px 25px;
             border: none;
@@ -219,7 +212,6 @@
             box-shadow: none;
         }
         
-        /* استایل بخش موقعیت جغرافیایی */
         .location-section {
             background-color: #f8f9fa;
             border-radius: 12px;
@@ -273,7 +265,6 @@
             font-weight: 500;
         }
         
-        /* استایل دکمه ارسال */
         .submit-btn {
             width: 100%;
             padding: 16px;
@@ -304,7 +295,6 @@
             cursor: not-allowed;
         }
         
-        /* استایل پیام‌های وضعیت */
         .status-message {
             padding: 15px;
             border-radius: 12px;
@@ -332,7 +322,6 @@
             border: 1px solid #b8daff;
         }
         
-        /* استایل انیمیشن کنفتی */
         .confetti {
             position: fixed;
             top: 0;
@@ -344,7 +333,6 @@
             display: none;
         }
         
-        /* استایل کنترل چرخش دوربین */
         .camera-rotation-control {
             position: absolute;
             bottom: 10px;
@@ -361,7 +349,6 @@
             z-index: 10;
         }
         
-        /* استایل متن توسعه‌دهنده */
         .dev-credit {
             text-align: center;
             direction: ltr;
@@ -406,7 +393,6 @@
             }
         }
         
-        /* استایل اطلاعات محدودیت زمانی */
         .time-restriction-info {
             background-color: #fff9db;
             border-left: 4px solid #f59f00;
@@ -422,7 +408,6 @@
             animation: fadeIn 0.5s;
         }
         
-        /* استایل لایه غیرفعال سیستم */
         .system-disabled-overlay {
             position: absolute;
             top: 0;
@@ -454,12 +439,12 @@
             max-width: 80%;
         }
         
-        /* استایل فیلدهای زمان آخرین درخواست و امکان‌سنجی */
         .request-info-container {
-            display: none;
+            display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
         }
         
         .request-info-box {
@@ -504,14 +489,21 @@
             background: #ffebee;
         }
         
-        /* استایل لودینگ */
-        .loading-indicator {
-            font-size: 14px;
-            color: #1a2980;
-            text-align: center;
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #1a2980;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        /* استایل وضعیت سیستم */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .system-status {
             padding: 10px;
             border-radius: 10px;
@@ -545,7 +537,6 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* استایل خطای کد بازاریابی */
         .marketing-code-error {
             color: #dc3545;
             font-size: 14px;
@@ -553,7 +544,6 @@
             display: none;
         }
         
-        /* استایل لایه غیرفعال برای بخش‌ها */
         .section-overlay {
             position: absolute;
             top: 0;
@@ -581,32 +571,25 @@
     </style>
 </head>
 <body>
-    <!-- کانتینر کنفتی برای انیمیشن موفقیت -->
     <div class="confetti" id="confetti"></div>
     
-    <!-- کانتینر اصلی -->
     <div class="container">
-        <!-- لایه غیرفعال‌سازی سیستم در ساعات تعطیل -->
         <div class="system-disabled-overlay" id="system-disabled-overlay">
             <i class="fas fa-power-off"></i>
             <p>سامانه از ساعت 00:30 تا 5:30 صبح غیرفعال می‌باشد.</p>
         </div>
         
-        <!-- هدر صفحه -->
         <div class="header">
             <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
         </div>
         
-        <!-- محتوای اصلی -->
         <div class="content">
-            <!-- نمایش وضعیت سیستم و ساعت زنده -->
             <div class="system-status active" id="system-status">
                 <i class="fas fa-clock" id="status-icon"></i>
                 <span id="status-text">ساعت سیستم: </span>
                 <span id="system-clock" class="system-clock">00:00:00</span>
             </div>
             
-            <!-- فیلد ورود کد بازاریابی -->
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
@@ -614,7 +597,6 @@
                 <div id="marketing-code-error" class="marketing-code-error"></div>
             </div>
             
-            <!-- کشویی انتخاب نوع درخواست -->
             <div class="input-group">
                 <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
                 <i class="fas fa-list-alt"></i>
@@ -627,19 +609,21 @@
                 <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
-            <!-- نمایش زمان آخرین درخواست و امکان‌سنجی -->
-            <div id="request-info-container" class="request-info-container">
+            <div id="request-info-container" class="request-info-container" style="display: none;">
                 <div class="request-info-box">
-                    <h4><i class="fas fa-clock"></i>زمان آخرین درخواست</h4>
-                    <div id="last-request-time" class="request-info-value"></div>
+                    <h4><i class="fas fa-clock"></i> ساعت آخرین درخواست</h4>
+                    <div id="last-request-time" class="request-info-value">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
                 <div class="request-info-box">
-                    <h4><i class="fas fa-check-circle"></i>امکان سنجی درخواست</h4>
-                    <div id="request-feasibility" class="request-info-value"></div>
+                    <h4><i class="fas fa-check-circle"></i> امکان سنجی درخواست مجدد</h4>
+                    <div id="request-feasibility" class="request-info-value">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
             
-            <!-- اطلاعات محدودیت زمانی ثبت حضور -->
             <div id="time-restriction" class="time-restriction-info">
                 <p><i class="fas fa-info-circle"></i> ثبت حضور فقط در بازه‌های زمانی زیر فعال است:</p>
                 <ul>
@@ -655,9 +639,7 @@
                 </ul>
             </div>
             
-            <!-- بخش دوربین -->
             <div id="camera-section" class="camera-section">
-                <!-- لایه غیرفعال در انتظار امکان‌سنجی -->
                 <div class="section-overlay" id="camera-overlay">
                     <p>در انتظار امکان‌سنجی...</p>
                 </div>
@@ -682,9 +664,7 @@
                 </div>
             </div>
             
-            <!-- بخش موقعیت جغرافیایی -->
             <div id="location-section" class="location-section">
-                <!-- لایه غیرفعال در انتظار امکان‌سنجی -->
                 <div class="section-overlay" id="location-overlay">
                     <p>در انتظار امکان‌سنجی...</p>
                 </div>
@@ -706,21 +686,17 @@
                     </div>
                 </div>
                 
-                <!-- دکمه دریافت موقعیت جغرافیایی -->
                 <button id="get-location-btn" class="btn btn-tertiary">
                     <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
                 </button>
             </div>
             
-            <!-- دکمه ارسال اطلاعات -->
             <button id="submit-btn" class="submit-btn" disabled>
                 <i class="fas fa-paper-plane"></i> ارسال اطلاعات
             </button>
             
-            <!-- پیام‌های وضعیت -->
             <div id="status-message" class="status-message"></div>
             
-            <!-- متن توسعه‌دهنده -->
             <div class="dev-credit">
                 Dev by: Snapp North Zone Sales HQ<br>
                 تیم فروش شمال کشور 💎
@@ -729,7 +705,6 @@
     </div>
 
     <script>
-        // تعریف عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
         const marketingCodeError = document.getElementById('marketing-code-error');
         const requestTypeSelect = document.getElementById('request-type');
@@ -758,7 +733,6 @@
         const cameraOverlay = document.getElementById('camera-overlay');
         const locationOverlay = document.getElementById('location-overlay');
         
-        // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
         let currentCameraMode = "environment";
@@ -768,11 +742,11 @@
         let clockInterval;
         let selectedRequestType = null;
         let isFetchingFeasibility = false;
+        let requestCache = {};
+        let debounceTimeout;
         
-        // URL گوگل اسکریپت برای بررسی امکان‌سنجی
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzc74Jvlo4eQ0zc3O43lw1J2-gseWezICETl8ApAPl7EdT7s6vmuZtE8fxn_MY1fDrL/exec";
         
-        // بازه‌های زمانی مجاز برای ثبت حضور
         const allowedTimeSlots = [
             { start: { hour: 6, minute: 0 }, end: { hour: 6, minute: 30 } },
             { start: { hour: 8, minute: 0 }, end: { hour: 8, minute: 30 } },
@@ -785,7 +759,6 @@
             { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } }
         ];
         
-        // تابع به‌روزرسانی ساعت زنده
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -794,14 +767,17 @@
             systemClock.textContent = `${hours}:${minutes}:${seconds}`;
         }
         
-        // تابع فعال/غیرفعال کردن بخش‌های دوربین و موقعیت
         function toggleSections(enable) {
             if (enable && !isFetchingFeasibility) {
+                cameraSection.classList.remove('section-disabled');
+                locationSection.classList.remove('section-disabled');
                 cameraOverlay.classList.remove('show');
                 locationOverlay.classList.remove('show');
                 startCameraBtn.disabled = false;
                 getLocationBtn.disabled = false;
             } else {
+                cameraSection.classList.add('section-disabled');
+                locationSection.classList.add('section-disabled');
                 cameraOverlay.classList.add('show');
                 locationOverlay.classList.add('show');
                 startCameraBtn.disabled = true;
@@ -810,7 +786,6 @@
             }
         }
         
-        // تابع فعال‌سازی دوربین
         async function startCamera() {
             try {
                 const constraints = {
@@ -843,23 +818,19 @@
             }
         }
         
-        // رویداد کلیک برای دکمه شروع دوربین
         startCameraBtn.addEventListener('click', startCamera);
         
-        // رویداد کلیک برای چرخش دوربین
         rotateCameraBtn.addEventListener('click', () => {
             currentCameraMode = currentCameraMode === "environment" ? "user" : "environment";
             startCamera();
         });
         
-        // رویداد کلیک برای دریافت موقعیت
         getLocationBtn.addEventListener('click', () => {
             showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
             getLocationBtn.disabled = true;
             getLocation();
         });
         
-        // تابع دریافت موقعیت جغرافیایی
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -897,7 +868,6 @@
             }
         }
         
-        // تابع بررسی محدودیت زمانی ثبت حضور
         function isWithinAllowedTime() {
             const now = new Date();
             const currentHour = now.getHours();
@@ -922,7 +892,6 @@
             return false;
         }
         
-        // تابع بررسی زمان غیرفعال سیستم
         function isInDisabledTime() {
             const now = new Date();
             const currentHour = now.getHours();
@@ -935,13 +904,11 @@
             return currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd;
         }
         
-        // تابع اعتبارسنجی کد بازاریابی
         function validateMarketingCode(code) {
             const regex = /^\d{5}$/;
             return regex.test(code);
         }
         
-        // تابع به‌روزرسانی امکان‌سنجی
         function updateFeasibility() {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
@@ -958,35 +925,6 @@
             validateForm();
         }
         
-        // تابع مدیریت کش با localStorage
-        function getCachedData(cacheKey) {
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-                const { timestamp, data } = JSON.parse(cached);
-                if (Date.now() - timestamp < 60000) { // کش برای 60 ثانیه معتبر است
-                    return data;
-                }
-            }
-            return null;
-        }
-        
-        function setCachedData(cacheKey, data) {
-            localStorage.setItem(cacheKey, JSON.stringify({
-                timestamp: Date.now(),
-                data: data
-            }));
-        }
-        
-        // تابع debouncing برای کاهش درخواست‌های مکرر
-        function debounce(func, wait) {
-            let timeout;
-            return function (...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-        
-        // تابع دریافت اطلاعات امکان‌سنجی با کش
         async function fetchRequestInfo() {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
@@ -999,17 +937,19 @@
             }
             
             const cacheKey = `${marketingCode}_${requestType}`;
-            const cachedData = getCachedData(cacheKey);
-            if (cachedData) {
-                processRequestInfo(cachedData);
-                return;
+            if (requestCache[cacheKey]) {
+                const { timestamp, data } = requestCache[cacheKey];
+                if (Date.now() - timestamp < 300000) {
+                    processRequestInfo(data);
+                    return;
+                }
             }
             
             isFetchingFeasibility = true;
             toggleSections(false);
             
-            lastRequestTime.innerHTML = '<div class="loading-indicator">در حال بارگذاری...</div>';
-            requestFeasibility.innerHTML = '<div class="loading-indicator">در حال بررسی...</div>';
+            lastRequestTime.innerHTML = '<div class="loading-spinner"></div>';
+            requestFeasibility.innerHTML = '<div class="loading-spinner"></div>';
             
             const callbackName = 'jsonpCallback_' + (requestInfoCallbackCounter++);
             const url = `${GOOGLE_SCRIPT_URL}?code=${marketingCode}&type=${encodeURIComponent(requestType)}&callback=${callbackName}`;
@@ -1018,7 +958,11 @@
                 delete window[callbackName];
                 document.getElementById('jsonp-script-' + callbackName)?.remove();
                 
-                setCachedData(cacheKey, data);
+                requestCache[cacheKey] = {
+                    timestamp: Date.now(),
+                    data: data
+                };
+                
                 isFetchingFeasibility = false;
                 processRequestInfo(data);
             };
@@ -1028,7 +972,7 @@
             script.src = url;
             
             script.onerror = function() {
-                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در اتصال به سرور</span>';
+                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در اتصال به سرور. <button onclick="fetchRequestInfo()" style="color:#1a2980; text-decoration:underline; background:none; border:none; cursor:pointer;">تلاش مجدد</button></span>';
                 requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در اتصال به سرور</span>';
                 isFeasibilityAllowed = false;
                 feasibilityData[requestType] = { status: false };
@@ -1042,12 +986,7 @@
             document.body.appendChild(script);
         }
         
-        // استفاده از debouncing برای درخواست‌ها
-        const debouncedFetchRequestInfo = debounce(fetchRequestInfo, 500);
-        
-        // تابع پردازش اطلاعات دریافتی
         function processRequestInfo(data) {
-            const fragment = document.createDocumentFragment();
             const requestType = requestTypeSelect.value;
             
             if (data.success) {
@@ -1058,51 +997,29 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     });
-                    const timeDiv = document.createElement('div');
-                    timeDiv.textContent = formattedTime;
-                    fragment.appendChild(timeDiv);
-                    lastRequestTime.innerHTML = '';
-                    lastRequestTime.appendChild(fragment);
+                    lastRequestTime.textContent = formattedTime;
                     
                     feasibilityData[requestType] = { status: data.lastRecord.status };
                     isFeasibilityAllowed = data.lastRecord.status;
                     
-                    const feasibilityDiv = document.createElement('div');
-                    feasibilityDiv.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
-                    feasibilityDiv.className = isFeasibilityAllowed ? 'request-info-value feasibility-allowed' : 'request-info-value feasibility-denied';
-                    requestFeasibility.innerHTML = '';
-                    requestFeasibility.appendChild(feasibilityDiv);
+                    requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
+                    requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
+                    requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
                     
                     toggleSections(isFeasibilityAllowed);
                 } else {
-                    const timeDiv = document.createElement('div');
-                    timeDiv.textContent = 'اطلاعاتی موجود نیست';
-                    fragment.appendChild(timeDiv);
-                    lastRequestTime.innerHTML = '';
-                    lastRequestTime.appendChild(fragment);
-                    
-                    const feasibilityDiv = document.createElement('div');
-                    feasibilityDiv.textContent = 'مجاز';
-                    feasibilityDiv.className = 'request-info-value feasibility-allowed';
-                    requestFeasibility.innerHTML = '';
-                    requestFeasibility.appendChild(feasibilityDiv);
-                    
+                    lastRequestTime.textContent = 'اطلاعاتی موجود نیست';
+                    requestFeasibility.textContent = 'مجاز';
+                    requestFeasibility.classList.add('feasibility-allowed');
+                    requestFeasibility.classList.remove('feasibility-denied');
                     isFeasibilityAllowed = true;
                     feasibilityData[requestType] = { status: true };
+                    
                     toggleSections(true);
                 }
             } else {
-                const errorDiv1 = document.createElement('div');
-                errorDiv1.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                fragment.appendChild(errorDiv1);
-                lastRequestTime.innerHTML = '';
-                lastRequestTime.appendChild(fragment);
-                
-                const errorDiv2 = document.createElement('div');
-                errorDiv2.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                requestFeasibility.innerHTML = '';
-                requestFeasibility.appendChild(errorDiv2);
-                
+                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
+                requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
                 isFeasibilityAllowed = false;
                 feasibilityData[requestType] = { status: false };
                 toggleSections(false);
@@ -1112,39 +1029,40 @@
             validateForm();
         }
         
-        // رویداد تغییر نوع درخواست
         requestTypeSelect.addEventListener('change', function() {
-            selectedRequestType = this.value;
-            locationData = null;
-            latitudeValue.textContent = '---';
-            longitudeValue.textContent = '---';
-            accuracyValue.textContent = '---';
-            getLocationBtn.disabled = false;
-            getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
-            
-            if (this.value === 'ثبت حضور') {
-                timeRestrictionInfo.classList.add('show');
-            } else {
-                timeRestrictionInfo.classList.remove('show');
-            }
-            
-            if (this.value !== '') {
-                requestInfoContainer.style.display = 'grid';
-                if (validateMarketingCode(marketingCodeInput.value.trim())) {
-                    isFetchingFeasibility = true;
-                    toggleSections(false);
-                    debouncedFetchRequestInfo();
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                selectedRequestType = this.value;
+                locationData = null;
+                latitudeValue.textContent = '---';
+                longitudeValue.textContent = '---';
+                accuracyValue.textContent = '---';
+                getLocationBtn.disabled = false;
+                getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
+                
+                if (this.value === 'ثبت حضور') {
+                    timeRestrictionInfo.classList.add('show');
+                } else {
+                    timeRestrictionInfo.classList.remove('show');
                 }
-            } else {
-                requestInfoContainer.style.display = 'none';
-                toggleSections(false);
-            }
-            
-            updateFeasibility();
-            validateForm();
+                
+                if (this.value !== '') {
+                    requestInfoContainer.style.display = 'grid';
+                    if (validateMarketingCode(marketingCodeInput.value.trim())) {
+                        isFetchingFeasibility = true;
+                        toggleSections(false);
+                        fetchRequestInfo();
+                    }
+                } else {
+                    requestInfoContainer.style.display = 'none';
+                    toggleSections(false);
+                }
+                
+                updateFeasibility();
+                validateForm();
+            }, 500);
         });
-
-        // تابع اعتبارسنجی فرم
+        
         function validateForm() {
             const marketingCode = marketingCodeInput.value.trim();
             const isValidCode = validateMarketingCode(marketingCode);
@@ -1170,7 +1088,6 @@
             return isValid;
         }
         
-        // تابع فعال/غیرفعال کردن سیستم
         function toggleSystemState() {
             const isDisabled = isInDisabledTime();
             
@@ -1212,7 +1129,6 @@
             }
         }
         
-        // تابع به‌روزرسانی وضعیت دکمه‌ها
         function updateButtonStates() {
             if (stream) {
                 startCameraBtn.disabled = true;
@@ -1231,7 +1147,6 @@
             }
         }
         
-        // رویداد ارسال اطلاعات
         submitBtn.addEventListener('click', async () => {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
@@ -1318,7 +1233,7 @@
                     isFeasibilityAllowed = false;
                     feasibilityData = {};
                     selectedRequestType = null;
-                    localStorage.clear();
+                    requestCache = {};
                     isFetchingFeasibility = false;
                     
                     toggleSections(false);
@@ -1331,7 +1246,6 @@
             }
         });
         
-        // تابع نمایش پیام وضعیت
         function showStatus(message, type) {
             statusMessage.textContent = message;
             statusMessage.className = 'status-message ' + type;
@@ -1342,20 +1256,21 @@
             }, 5000);
         }
         
-        // رویداد ورودی کد بازاریابی
         marketingCodeInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').slice(0, 5);
-            
-            if (requestInfoContainer.style.display === 'grid') {
-                isFetchingFeasibility = true;
-                toggleSections(false);
-                debouncedFetchRequestInfo();
-            }
-            
-            validateForm();
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                this.value = this.value.replace(/\D/g, '').slice(0, 5);
+                
+                if (requestInfoContainer.style.display === 'grid') {
+                    isFetchingFeasibility = true;
+                    toggleSections(false);
+                    fetchRequestInfo();
+                }
+                
+                validateForm();
+            }, 500);
         });
         
-        // تابع انیمیشن موفقیت
         function showSuccessAnimation() {
             submitBtn.classList.add('success-animation');
             setTimeout(() => {
@@ -1365,7 +1280,6 @@
             createConfetti();
         }
         
-        // تابع ایجاد کنفتی
         function createConfetti() {
             confettiElement.style.display = 'block';
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
@@ -1400,7 +1314,6 @@
             }
         }
         
-        // رویداد لود صفحه
         window.addEventListener('load', () => {
             updateClock();
             clockInterval = setInterval(updateClock, 1000);
