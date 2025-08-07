@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه حضور و غیاب</title>
+    <title>سامانه حضور و غیاب | دوربین و موقعیت‌یابی</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -54,7 +54,6 @@
         
         .content {
             padding: 30px;
-            position: relative;
         }
         
         .input-group {
@@ -109,7 +108,6 @@
         
         .camera-section {
             margin-bottom: 25px;
-            position: relative;
         }
         
         .camera-container {
@@ -218,7 +216,6 @@
             padding: 20px;
             margin-bottom: 25px;
             animation: slideIn 0.5s ease-out;
-            position: relative;
         }
         
         @keyframes slideIn {
@@ -349,6 +346,7 @@
             z-index: 10;
         }
         
+        /* استایل جدید برای کادر توسعه‌دهنده تک خطی و مرکزی */
         .dev-credit {
             text-align: center;
             direction: ltr;
@@ -366,12 +364,25 @@
             letter-spacing: 0.5px;
         }
 
+        /* برای نمایش بهتر در موبایل */
         @media (max-width: 480px) {
             .dev-credit {
                 font-size: 11px;
                 padding: 5px 8px;
                 margin-top: 10px;
             }
+        }
+        
+        .dev-credit span {
+            display: inline-block;
+            margin-left: 5px;
+            animation: sparkle 1.5s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
         @media (max-width: 480px) {
@@ -393,6 +404,7 @@
             }
         }
         
+        /* استایل برای نمایش محدوده زمانی ثبت حضور */
         .time-restriction-info {
             background-color: #fff9db;
             border-left: 4px solid #f59f00;
@@ -408,6 +420,21 @@
             animation: fadeIn 0.5s;
         }
         
+        .time-restriction-info i {
+            margin-left: 5px;
+            color: #f59f00;
+        }
+        
+        .time-restriction-info ul {
+            margin: 10px 0 0 20px;
+            list-style-type: disc;
+        }
+        
+        .time-restriction-info li {
+            margin-bottom: 5px;
+        }
+        
+        /* استایل برای حالت غیرفعال کل سیستم */
         .system-disabled-overlay {
             position: absolute;
             top: 0;
@@ -438,142 +465,13 @@
             color: #2c3e50;
             max-width: 80%;
         }
-        
-        .request-info-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .request-info-box {
-            background: #f0f8ff;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #d1e7ff;
-        }
-        
-        .request-info-box h4 {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #1a2980;
-            font-size: 14px;
-            margin-bottom: 8px;
-            justify-content: center;
-            text-align: center;
-        }
-        
-        .request-info-value {
-            font-size: 16px;
-            font-weight: 700;
-            text-align: center;
-            padding: 5px;
-            border-radius: 8px;
-            background: #e6f7ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 40px;
-        }
-        
-        .feasibility-allowed {
-            color: #28a745;
-            background: #e8f5e9;
-        }
-        
-        .feasibility-denied {
-            color: #dc3545;
-            background: #ffebee;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid #1a2980;
-            border-top: 3px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .system-status {
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: center;
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .system-status.active {
-            background: #e8f5e9;
-            border-color: #c8e6c9;
-        }
-        
-        .system-status.inactive {
-            background: #ffebee;
-            border-color: #ffcdd2;
-        }
-        
-        .system-clock {
-            color: #ff0000;
-            font-family: Arial;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .marketing-code-error {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .section-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.7);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 12px;
-            display: none;
-        }
-        
-        .section-overlay.show {
-            display: flex;
-        }
-        
-        .section-overlay p {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
     </style>
 </head>
 <body>
     <div class="confetti" id="confetti"></div>
     
     <div class="container">
+        <!-- لایه غیرفعال سازی سیستم در ساعات تعطیل -->
         <div class="system-disabled-overlay" id="system-disabled-overlay">
             <i class="fas fa-power-off"></i>
             <p>سامانه از ساعت 00:30 تا 5:30 صبح غیرفعال می‌باشد.</p>
@@ -584,24 +482,17 @@
         </div>
         
         <div class="content">
-            <div class="system-status active" id="system-status">
-                <i class="fas fa-clock" id="status-icon"></i>
-                <span id="status-text">ساعت سیستم: </span>
-                <span id="system-clock" class="system-clock">00:00:00</span>
-            </div>
-            
             <div class="input-group">
                 <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
                 <i class="fas fa-tag"></i>
-                <input type="text" id="marketing-code" maxlength="5" placeholder="کد 5 رقمی خود را وارد نمایید...">
-                <div id="marketing-code-error" class="marketing-code-error"></div>
+                <input type="text" id="marketing-code" placeholder="کد 5 رقمی خود را وارد نمایید...">
             </div>
             
+            <!-- کشویی نوع درخواست -->
             <div class="input-group">
                 <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
                 <i class="fas fa-list-alt"></i>
-                <select id="request-type" required>
-                    <option value="" disabled selected hidden>نوع درخواست را انتخاب نمایید</option>
+                <select id="request-type">
                     <option value="شروع شیفت">شروع شیفت</option>
                     <option value="پایان شیفت">پایان شیفت</option>
                     <option value="ثبت حضور">ثبت حضور</option>
@@ -609,21 +500,7 @@
                 <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
             </div>
             
-            <div id="request-info-container" class="request-info-container" style="display: none;">
-                <div class="request-info-box">
-                    <h4><i class="fas fa-clock"></i> ساعت آخرین درخواست</h4>
-                    <div id="last-request-time" class="request-info-value">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
-                <div class="request-info-box">
-                    <h4><i class="fas fa-check-circle"></i> امکان سنجی درخواست مجدد</h4>
-                    <div id="request-feasibility" class="request-info-value">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </div>
-            </div>
-            
+            <!-- اطلاعات محدودیت زمانی ثبت حضور -->
             <div id="time-restriction" class="time-restriction-info">
                 <p><i class="fas fa-info-circle"></i> ثبت حضور فقط در بازه‌های زمانی زیر فعال است:</p>
                 <ul>
@@ -636,13 +513,11 @@
                     <li>18:00 - 18:30</li>
                     <li>20:00 - 20:30</li>
                     <li>22:00 - 22:30</li>
+                    <li>00:00 - 00:30</li>
                 </ul>
             </div>
             
-            <div id="camera-section" class="camera-section">
-                <div class="section-overlay" id="camera-overlay">
-                    <p>در انتظار امکان‌سنجی...</p>
-                </div>
+            <div class="camera-section">
                 <div class="camera-container">
                     <div class="camera-placeholder">
                         <i class="fas fa-camera"></i>
@@ -664,10 +539,7 @@
                 </div>
             </div>
             
-            <div id="location-section" class="location-section">
-                <div class="section-overlay" id="location-overlay">
-                    <p>در انتظار امکان‌سنجی...</p>
-                </div>
+            <div class="location-section">
                 <div class="location-header">
                     <h3><i class="fas fa-map-marker-alt"></i> موقعیت جغرافیایی</h3>
                 </div>
@@ -686,6 +558,7 @@
                     </div>
                 </div>
                 
+                <!-- دکمه دریافت موقعیت جغرافیایی -->
                 <button id="get-location-btn" class="btn btn-tertiary">
                     <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
                 </button>
@@ -697,16 +570,19 @@
             
             <div id="status-message" class="status-message"></div>
             
+            <!-- متن توسعه‌دهنده -->
             <div class="dev-credit">
-                Dev by: Snapp North Zone Sales HQ<br>
-                تیم فروش شمال کشور 💎
+                Dev by:<br>
+                Snapp North Zone Sales HQ<br>
+                تیم فروش شمال کشور<br>
+                💎</span>
             </div>
         </div>
     </div>
 
     <script>
+        // عناصر DOM
         const marketingCodeInput = document.getElementById('marketing-code');
-        const marketingCodeError = document.getElementById('marketing-code-error');
         const requestTypeSelect = document.getElementById('request-type');
         const startCameraBtn = document.getElementById('start-camera');
         const captureBtn = document.getElementById('capture-btn');
@@ -721,32 +597,13 @@
         const getLocationBtn = document.getElementById('get-location-btn');
         const timeRestrictionInfo = document.getElementById('time-restriction');
         const systemDisabledOverlay = document.getElementById('system-disabled-overlay');
-        const requestInfoContainer = document.getElementById('request-info-container');
-        const lastRequestTime = document.getElementById('last-request-time');
-        const requestFeasibility = document.getElementById('request-feasibility');
-        const systemStatus = document.getElementById('system-status');
-        const statusIcon = document.getElementById('status-icon');
-        const statusText = document.getElementById('status-text');
-        const systemClock = document.getElementById('system-clock');
-        const cameraSection = document.getElementById('camera-section');
-        const locationSection = document.getElementById('location-section');
-        const cameraOverlay = document.getElementById('camera-overlay');
-        const locationOverlay = document.getElementById('location-overlay');
         
+        // متغیرهای وضعیت
         let stream = null;
         let locationData = null;
-        let currentCameraMode = "environment";
-        let requestInfoCallbackCounter = 0;
-        let isFeasibilityAllowed = false;
-        let feasibilityData = {};
-        let clockInterval;
-        let selectedRequestType = null;
-        let isFetchingFeasibility = false;
-        let requestCache = {};
-        let debounceTimeout;
+        let currentCameraMode = "environment"; // حالت پیش‌فرض دوربین عقب
         
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfxR-iDd9TgiP-R8WNqIFPtpSoIQ3f2l65Y-eUVc1LnBdneelRoepvzU7M6top274R/exec";
-        
+        // بازه‌های زمانی مجاز برای ثبت حضور
         const allowedTimeSlots = [
             { start: { hour: 6, minute: 0 }, end: { hour: 6, minute: 30 } },
             { start: { hour: 8, minute: 0 }, end: { hour: 8, minute: 30 } },
@@ -756,38 +613,14 @@
             { start: { hour: 16, minute: 0 }, end: { hour: 16, minute: 30 } },
             { start: { hour: 18, minute: 0 }, end: { hour: 18, minute: 30 } },
             { start: { hour: 20, minute: 0 }, end: { hour: 20, minute: 30 } },
-            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } }
+            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } },
+            { start: { hour: 0, minute: 0 }, end: { hour: 0, minute: 30 } }
         ];
         
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            systemClock.textContent = `${hours}:${minutes}:${seconds}`;
-        }
-        
-        function toggleSections(enable) {
-            if (enable && !isFetchingFeasibility) {
-                cameraSection.classList.remove('section-disabled');
-                locationSection.classList.remove('section-disabled');
-                cameraOverlay.classList.remove('show');
-                locationOverlay.classList.remove('show');
-                startCameraBtn.disabled = false;
-                getLocationBtn.disabled = false;
-            } else {
-                cameraSection.classList.add('section-disabled');
-                locationSection.classList.add('section-disabled');
-                cameraOverlay.classList.add('show');
-                locationOverlay.classList.add('show');
-                startCameraBtn.disabled = true;
-                captureBtn.disabled = true;
-                getLocationBtn.disabled = true;
-            }
-        }
-        
+        // فعال‌سازی دوربین
         async function startCamera() {
             try {
+                // تنظیمات برای استفاده از دوربین
                 const constraints = {
                     video: {
                         facingMode: currentCameraMode,
@@ -809,6 +642,7 @@
                 startCameraBtn.disabled = true;
                 startCameraBtn.innerHTML = '<i class="fas fa-check"></i> دوربین فعال شد';
                 
+                // تنظیم عنوان دوربین
                 const cameraType = currentCameraMode === "environment" ? "عقب" : "جلو";
                 document.querySelector('.camera-placeholder p').textContent = `دوربین ${cameraType} فعال است`;
                 
@@ -818,19 +652,23 @@
             }
         }
         
+        // دکمه شروع دوربین
         startCameraBtn.addEventListener('click', startCamera);
         
+        // دکمه چرخش دوربین
         rotateCameraBtn.addEventListener('click', () => {
             currentCameraMode = currentCameraMode === "environment" ? "user" : "environment";
             startCamera();
         });
         
+        // دریافت موقعیت جغرافیایی با دکمه
         getLocationBtn.addEventListener('click', () => {
             showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
             getLocationBtn.disabled = true;
             getLocation();
         });
         
+        // دریافت موقعیت جغرافیایی
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -848,8 +686,10 @@
                         showStatus('موقعیت جغرافیایی دریافت شد', 'success');
                         getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
                         
-                        updateFeasibility();
-                        validateForm();
+                        // فعال کردن دکمه ارسال
+                        if (marketingCodeInput.value.trim() !== '') {
+                            submitBtn.disabled = false;
+                        }
                     },
                     error => {
                         showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
@@ -868,17 +708,23 @@
             }
         }
         
+        // تابع برای بررسی محدودیت زمانی ثبت حضور
         function isWithinAllowedTime() {
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            
+            // تبدیل زمان فعلی به دقیقه برای مقایسه آسان
             const currentTotalMinutes = currentHour * 60 + currentMinute;
             
             for (const slot of allowedTimeSlots) {
                 const startTotalMinutes = slot.start.hour * 60 + slot.start.minute;
                 const endTotalMinutes = slot.end.hour * 60 + slot.end.minute;
                 
+                // برای نیمه شب (بازه 00:00 تا 00:30)
                 if (slot.start.hour === 0) {
+                    // اگر ساعت فعلی بین 0 تا 0:30 باشد
                     if (currentHour === 0 && currentMinute >= 0 && currentMinute <= 30) {
                         return true;
                     }
@@ -892,211 +738,49 @@
             return false;
         }
         
+        // تابع برای بررسی زمان غیرفعال (00:30 تا 5:30)
         function isInDisabledTime() {
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
+            const currentSeconds = now.getSeconds();
             const currentTotalMinutes = currentHour * 60 + currentMinute;
             
-            const disableStart = 0 * 60 + 30;
-            const disableEnd = 5 * 60 + 30;
+            // بازه غیرفعال: از 00:30 تا 5:30
+            const disableStart = 0 * 60 + 30; // 00:30 (30 دقیقه)
+            const disableEnd = 5 * 60 + 30;   // 5:30 (330 دقیقه)
             
-            return currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd;
+            // اگر زمان فعلی بین 00:30 تا 5:30 باشد
+            if (currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd) {
+                return true;
+            }
+            return false;
         }
         
+        // اعتبارسنجی کد بازاریابی (5 رقمی بودن)
         function validateMarketingCode(code) {
+            // کد باید دقیقاً 5 رقم باشد
             const regex = /^\d{5}$/;
             return regex.test(code);
         }
         
-        function updateFeasibility() {
-            const marketingCode = marketingCodeInput.value.trim();
-            const requestType = requestTypeSelect.value;
-            
-            if (!validateMarketingCode(marketingCode) || !requestType) {
-                return;
-            }
-            
-            isFeasibilityAllowed = feasibilityData[requestType]?.status || false;
-            requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
-            requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
-            requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
-            
-            validateForm();
-        }
-        
-        async function fetchRequestInfo() {
-            const marketingCode = marketingCodeInput.value.trim();
-            const requestType = requestTypeSelect.value;
-            
-            if (!validateMarketingCode(marketingCode) || !requestType) {
-                lastRequestTime.innerHTML = '<span style="color:#6c757d">کد بازاریابی نامعتبر</span>';
-                requestFeasibility.innerHTML = '<span style="color:#6c757d">کد بازاریابی نامعتبر</span>';
-                toggleSections(false);
-                return;
-            }
-            
-            const cacheKey = `${marketingCode}_${requestType}`;
-            if (requestCache[cacheKey]) {
-                const { timestamp, data } = requestCache[cacheKey];
-                if (Date.now() - timestamp < 300000) {
-                    processRequestInfo(data);
-                    return;
-                }
-            }
-            
-            isFetchingFeasibility = true;
-            toggleSections(false);
-            
-            lastRequestTime.innerHTML = '<div class="loading-spinner"></div>';
-            requestFeasibility.innerHTML = '<div class="loading-spinner"></div>';
-            
-            const callbackName = 'jsonpCallback_' + (requestInfoCallbackCounter++);
-            const url = `${GOOGLE_SCRIPT_URL}?code=${marketingCode}&type=${encodeURIComponent(requestType)}&callback=${callbackName}`;
-            
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.getElementById('jsonp-script-' + callbackName)?.remove();
-                
-                requestCache[cacheKey] = {
-                    timestamp: Date.now(),
-                    data: data
-                };
-                
-                isFetchingFeasibility = false;
-                processRequestInfo(data);
-            };
-            
-            const script = document.createElement('script');
-            script.id = 'jsonp-script-' + callbackName;
-            script.src = url;
-            
-            script.onerror = function() {
-                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در اتصال به سرور. <button onclick="fetchRequestInfo()" style="color:#1a2980; text-decoration:underline; background:none; border:none; cursor:pointer;">تلاش مجدد</button></span>';
-                requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در اتصال به سرور</span>';
-                isFeasibilityAllowed = false;
-                feasibilityData[requestType] = { status: false };
-                delete window[callbackName];
-                document.getElementById('jsonp-script-' + callbackName)?.remove();
-                isFetchingFeasibility = false;
-                toggleSections(false);
-                validateForm();
-            };
-            
-            document.body.appendChild(script);
-        }
-        
-        function processRequestInfo(data) {
-            const requestType = requestTypeSelect.value;
-            
-            if (data.success) {
-                if (data.exists) {
-                    const requestDate = new Date(data.lastRecord.timestamp);
-                    const formattedTime = requestDate.toLocaleTimeString('fa-IR', {
-                        hour12: false,
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    lastRequestTime.textContent = formattedTime;
-                    
-                    feasibilityData[requestType] = { status: data.lastRecord.status };
-                    isFeasibilityAllowed = data.lastRecord.status;
-                    
-                    requestFeasibility.textContent = isFeasibilityAllowed ? 'مجاز' : 'غیرمجاز';
-                    requestFeasibility.classList.toggle('feasibility-allowed', isFeasibilityAllowed);
-                    requestFeasibility.classList.toggle('feasibility-denied', !isFeasibilityAllowed);
-                    
-                    toggleSections(isFeasibilityAllowed);
-                } else {
-                    lastRequestTime.textContent = 'اطلاعاتی موجود نیست';
-                    requestFeasibility.textContent = 'مجاز';
-                    requestFeasibility.classList.add('feasibility-allowed');
-                    requestFeasibility.classList.remove('feasibility-denied');
-                    isFeasibilityAllowed = true;
-                    feasibilityData[requestType] = { status: true };
-                    
-                    toggleSections(true);
-                }
-            } else {
-                lastRequestTime.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                requestFeasibility.innerHTML = '<span style="color:#dc3545">خطا در دریافت اطلاعات</span>';
-                isFeasibilityAllowed = false;
-                feasibilityData[requestType] = { status: false };
-                toggleSections(false);
-                console.error('خطا در دریافت اطلاعات:', data.error);
-            }
-            
-            validateForm();
-        }
-        
+        // نمایش اطلاعات محدودیت زمانی برای ثبت حضور
         requestTypeSelect.addEventListener('change', function() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                selectedRequestType = this.value;
-                locationData = null;
-                latitudeValue.textContent = '---';
-                longitudeValue.textContent = '---';
-                accuracyValue.textContent = '---';
-                getLocationBtn.disabled = false;
-                getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
-                
-                if (this.value === 'ثبت حضور') {
-                    timeRestrictionInfo.classList.add('show');
-                } else {
-                    timeRestrictionInfo.classList.remove('show');
-                }
-                
-                if (this.value !== '') {
-                    requestInfoContainer.style.display = 'grid';
-                    if (validateMarketingCode(marketingCodeInput.value.trim())) {
-                        isFetchingFeasibility = true;
-                        toggleSections(false);
-                        fetchRequestInfo();
-                    }
-                } else {
-                    requestInfoContainer.style.display = 'none';
-                    toggleSections(false);
-                }
-                
-                updateFeasibility();
-                validateForm();
-            }, 500);
+            if (this.value === 'ثبت حضور') {
+                timeRestrictionInfo.classList.add('show');
+            } else {
+                timeRestrictionInfo.classList.remove('show');
+            }
         });
         
-        function validateForm() {
-            const marketingCode = marketingCodeInput.value.trim();
-            const isValidCode = validateMarketingCode(marketingCode);
-            const hasLocation = !!locationData;
-            const hasRequestType = requestTypeSelect.value !== '';
-            const isRequestTypeValid = requestTypeSelect.value === selectedRequestType;
-            
-            if (marketingCode !== '') {
-                if (!isValidCode) {
-                    marketingCodeError.textContent = 'کد بازاریابی باید دقیقاً 5 رقم باشد';
-                    marketingCodeError.style.display = 'block';
-                } else {
-                    marketingCodeError.style.display = 'none';
-                }
-            } else {
-                marketingCodeError.style.display = 'none';
-            }
-            
-            const isFeasible = isFeasibilityAllowed && isRequestTypeValid;
-            const isValid = isValidCode && hasLocation && hasRequestType && isFeasible && !isFetchingFeasibility;
-            submitBtn.disabled = !isValid;
-            
-            return isValid;
-        }
-        
+        // تابع برای غیرفعال کردن کل سیستم در ساعات تعطیل
         function toggleSystemState() {
             const isDisabled = isInDisabledTime();
             
             if (isDisabled) {
                 systemDisabledOverlay.style.display = 'flex';
-                systemStatus.className = 'system-status inactive';
-                statusIcon.className = 'fas fa-exclamation-circle';
-                statusText.textContent = 'سامانه غیرفعال است - ساعت: ';
                 
+                // غیرفعال کردن تمام دکمه‌ها و عناصر ورودی
                 marketingCodeInput.disabled = true;
                 requestTypeSelect.disabled = true;
                 startCameraBtn.disabled = true;
@@ -1105,6 +789,7 @@
                 submitBtn.disabled = true;
                 rotateCameraBtn.disabled = true;
                 
+                // توقف دوربین اگر فعال باشد
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                     cameraFeed.style.display = 'none';
@@ -1112,45 +797,53 @@
                 }
             } else {
                 systemDisabledOverlay.style.display = 'none';
-                systemStatus.className = 'system-status active';
-                statusIcon.className = 'fas fa-clock';
-                statusText.textContent = 'ساعت سیستم: ';
                 
+                // فعال کردن دوباره عناصر
                 marketingCodeInput.disabled = false;
                 requestTypeSelect.disabled = false;
-                startCameraBtn.disabled = !isFeasibilityAllowed || isFetchingFeasibility;
-                captureBtn.disabled = true;
-                getLocationBtn.disabled = !isFeasibilityAllowed || isFetchingFeasibility;
-                submitBtn.disabled = true;
-                rotateCameraBtn.disabled = !isFeasibilityAllowed || isFetchingFeasibility;
+                startCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                getLocationBtn.disabled = false;
+                submitBtn.disabled = false;
+                rotateCameraBtn.disabled = false;
                 
-                toggleSections(isFeasibilityAllowed);
+                // به‌روزرسانی وضعیت دکمه‌ها
                 updateButtonStates();
             }
         }
         
+        // تابع برای به‌روزرسانی وضعیت دکمه‌ها
         function updateButtonStates() {
+            // وضعیت دکمه شروع دوربین
             if (stream) {
                 startCameraBtn.disabled = true;
                 captureBtn.disabled = false;
             } else {
-                startCameraBtn.disabled = !isFeasibilityAllowed || isFetchingFeasibility;
+                startCameraBtn.disabled = false;
                 captureBtn.disabled = true;
             }
             
-            validateForm();
+            // وضعیت دکمه ارسال
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
             
+            // وضعیت دکمه دریافت موقعیت
             if (locationData) {
                 getLocationBtn.disabled = true;
             } else {
-                getLocationBtn.disabled = !isFeasibilityAllowed || isFetchingFeasibility;
+                getLocationBtn.disabled = false;
             }
         }
         
+        // ثبت حضور و ارسال به گوگل فرم با استفاده از Fetch API
         submitBtn.addEventListener('click', async () => {
             const marketingCode = marketingCodeInput.value.trim();
             const requestType = requestTypeSelect.value;
             
+            // اعتبارسنجی کد بازاریابی
             if (!validateMarketingCode(marketingCode)) {
                 showStatus('کد بازاریابی باید دقیقاً 5 رقم عددی باشد', 'error');
                 marketingCodeInput.focus();
@@ -1162,23 +855,17 @@
                 return;
             }
             
-            if (requestType !== selectedRequestType) {
-                showStatus('نوع درخواست تغییر کرده است. لطفاً موقعیت جغرافیایی را مجدداً دریافت کنید.', 'error');
-                return;
-            }
-            
             if (!locationData) {
                 showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
                 return;
             }
             
+            // اعتبارسنجی زمان ثبت حضور
             if (requestType === 'ثبت حضور' && !isWithinAllowedTime()) {
-                showStatus('ثبت حضور فقط در بازه‌های زمانی مشخص امکان‌پذیر است.', 'error');
-                return;
-            }
-            
-            if (!isFeasibilityAllowed) {
-                showStatus('درخواست مجدد در این زمان مجاز نمی‌باشد', 'error');
+                const now = new Date();
+                const currentTime = now.toLocaleTimeString('fa-IR');
+                
+                showStatus(`ثبت حضور فقط در بازه‌های زمانی مشخص امکان‌پذیر است. زمان فعلی: ${currentTime}`, 'error');
                 return;
             }
             
@@ -1186,15 +873,18 @@
             submitBtn.disabled = true;
             
             try {
+                // ساخت URL برای ارسال به گوگل فرم
                 const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
                 
+                // ساخت پارامترهای ارسالی
                 const params = new URLSearchParams();
-                params.append('entry.1228562108', marketingCode);
-                params.append('entry.2093256559', locationData.latitude);
-                params.append('entry.1314182104', locationData.longitude);
-                params.append('entry.1995166577', locationData.accuracy);
-                params.append('entry.1723693542', requestType);
+                params.append('entry.1228562108', marketingCode); // کد بازاریابی
+                params.append('entry.2093256559', locationData.latitude); // عرض جغرافیایی
+                params.append('entry.1314182104', locationData.longitude); // طول جغرافیایی
+                params.append('entry.1995166577', locationData.accuracy); // دقت
+                params.append('entry.1723693542', requestType); // نوع درخواست (به جای دقت موقعیت)
                 
+                // ارسال درخواست POST
                 await fetch(formUrl, {
                     method: 'POST',
                     headers: {
@@ -1204,15 +894,20 @@
                     mode: 'no-cors'
                 });
                 
+                // نمایش انیمیشن موفقیت
                 showSuccessAnimation();
+                
+                // نمایش پیام موفقیت
                 showStatus('اطلاعات با موفقیت به سرور ارسال شد!', 'success');
                 
+                // ریست فرم
                 setTimeout(() => {
                     marketingCodeInput.value = '';
                     submitBtn.disabled = true;
                     getLocationBtn.disabled = false;
                     getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
                     
+                    // توقف دوربین
                     if (stream) {
                         stream.getTracks().forEach(track => track.stop());
                         cameraFeed.style.display = 'none';
@@ -1222,21 +917,11 @@
                         captureBtn.disabled = true;
                     }
                     
+                    // ریست موقعیت
                     locationData = null;
                     latitudeValue.textContent = '---';
                     longitudeValue.textContent = '---';
                     accuracyValue.textContent = '---';
-                    
-                    requestInfoContainer.style.display = 'none';
-                    lastRequestTime.innerHTML = '';
-                    requestFeasibility.innerHTML = '';
-                    isFeasibilityAllowed = false;
-                    feasibilityData = {};
-                    selectedRequestType = null;
-                    requestCache = {};
-                    isFetchingFeasibility = false;
-                    
-                    toggleSections(false);
                 }, 2000);
                 
             } catch (error) {
@@ -1246,6 +931,7 @@
             }
         });
         
+        // نمایش پیام وضعیت
         function showStatus(message, type) {
             statusMessage.textContent = message;
             statusMessage.className = 'status-message ' + type;
@@ -1256,30 +942,28 @@
             }, 5000);
         }
         
-        marketingCodeInput.addEventListener('input', function() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                this.value = this.value.replace(/\D/g, '').slice(0, 5);
-                
-                if (requestInfoContainer.style.display === 'grid') {
-                    isFetchingFeasibility = true;
-                    toggleSections(false);
-                    fetchRequestInfo();
-                }
-                
-                validateForm();
-            }, 500);
+        // اعتبارسنجی فرم
+        marketingCodeInput.addEventListener('input', () => {
+            if (marketingCodeInput.value.trim() !== '' && locationData) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
         });
         
+        // انیمیشن موفقیت
         function showSuccessAnimation() {
+            // انیمیشن دکمه
             submitBtn.classList.add('success-animation');
             setTimeout(() => {
                 submitBtn.classList.remove('success-animation');
             }, 2000);
             
+            // ایجاد کنفتی
             createConfetti();
         }
         
+        // ایجاد کنفتی
         function createConfetti() {
             confettiElement.style.display = 'block';
             const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
@@ -1297,6 +981,7 @@
                 confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 confettiElement.appendChild(confetti);
                 
+                // انیمیشن سقوط
                 const animation = confetti.animate([
                     { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
                     { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
@@ -1305,6 +990,7 @@
                     easing: 'cubic-bezier(0,0.8,1,0.2)'
                 });
                 
+                // حذف المان پس از پایان انیمیشن
                 animation.onfinish = () => {
                     confetti.remove();
                     if (confettiElement.children.length === 0) {
@@ -1314,10 +1000,10 @@
             }
         }
         
+        // اجرای تابع toggleSystemState در هنگام لود و هر دقیقه
         window.addEventListener('load', () => {
-            updateClock();
-            clockInterval = setInterval(updateClock, 1000);
             toggleSystemState();
+            // بررسی هر دقیقه
             setInterval(toggleSystemState, 60000);
         });
     </script>
