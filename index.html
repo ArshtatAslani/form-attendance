@@ -4,1036 +4,597 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سامانه حضور و غیاب</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            background: #f0fdf4;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            color: #333;
+            padding: 16px;
+            color: #1f2937;
         }
-        
+
         .container {
-            background-color: rgba(255, 255, 255, 0.95);
+            background: white;
             width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+            max-width: 480px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             overflow: hidden;
-            animation: fadeIn 0.8s ease-out;
-            position: relative;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+
         .header {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
+            background: #047857;
             color: white;
             text-align: center;
-            padding: 25px 20px;
-            position: relative;
+            padding: 20px 16px;
         }
-        
+
         .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+            font-size: 1.6rem;
         }
-        
+
         .content {
-            padding: 30px;
-            position: relative;
+            padding: 20px;
         }
-        
+
+        .system-status {
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .system-status.active  { background: #ecfdf5; color: #065f46; }
+        .system-status.inactive { background: #fef2f2; color: #991b1b; }
+
         .input-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             position: relative;
         }
-        
+
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #065f46;
         }
-        
-        .input-group input, .input-group select {
+
+        .input-group input,
+        .input-group select {
             width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background-color: white;
-            appearance: none;
+            padding: 12px 12px 12px 44px;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            font-size: 15px;
         }
-        
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #047857;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(4,120,87,0.15);
+        }
+
         .input-group i {
             position: absolute;
-            left: 15px;
-            top: 42px;
-            font-size: 20px;
-            color: #1a2980;
+            left: 14px;
+            top: 38px;
+            color: #047857;
+            font-size: 18px;
         }
-        
-        .input-group input:focus, .input-group select:focus {
-            border-color: #1a2980;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.2);
-        }
-        
-        .input-group select {
-            cursor: pointer;
-        }
-        
+
         .select-arrow {
             position: absolute;
-            right: 15px;
-            top: 42px;
-            font-size: 16px;
-            color: #1a2980;
+            right: 14px;
+            top: 38px;
+            color: #065f46;
             pointer-events: none;
         }
-        
-        .camera-section {
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .camera-container {
-            position: relative;
-            width: 100%;
-            height: 280px;
-            background-color: #0f172a;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            border: 3px solid #1a2980;
-        }
-        
-        #camera-feed {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        
-        .camera-placeholder {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .camera-placeholder i {
-            font-size: 64px;
-            margin-bottom: 15px;
-            color: #26d0ce;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.7; }
-        }
-        
-        .camera-controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
+
         .btn {
-            padding: 14px 25px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
-        
-        .btn-primary {
-            background: linear-gradient(to right, #1a2980, #26d0ce);
-            color: white;
-            flex: 1;
-        }
-        
-        .btn-secondary {
-            background-color: #f1f2f6;
-            color: #2f3542;
-            flex: 1;
-        }
-        
+
         .btn-tertiary {
-            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            background: #10b981;
             color: white;
             width: 100%;
+            margin-top: 12px;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(26, 41, 128, 0.4);
-        }
-        
-        .btn-secondary:hover {
-            background-color: #dfe4ea;
-        }
-        
-        .btn-tertiary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(255, 126, 95, 0.4);
-        }
-        
+
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.55;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+            background: #d1fae5;
         }
-        
+
         .location-section {
-            background-color: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            animation: slideIn 0.5s ease-out;
-            position: relative;
+            background: #f0fdf4;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 16px 0;
         }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .location-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .location-header i {
-            font-size: 24px;
-            color: #e74c3c;
-            margin-left: 10px;
-        }
-        
-        .location-data {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
+
         .location-item {
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .location-item:last-child {
-            border-bottom: none;
-        }
-        
-        .location-label {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .location-value {
-            color: #1a2980;
-            font-weight: 500;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(to right, #00b09b, #96c93d);
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 176, 155, 0.4);
-        }
-        
-        .submit-btn:disabled {
-            background: linear-gradient(to right, #cccccc, #999999);
-            transform: none;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-        
-        .status-message {
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 20px;
-            text-align: center;
-            display: none;
-            animation: slideIn 0.5s ease-out;
-        }
-        
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .processing {
-            background-color: #cce5ff;
-            color: #004085;
-            border: 1px solid #b8daff;
-        }
-        
-        .confetti {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .camera-rotation-control {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 10;
-        }
-        
-        .dev-credit {
-            text-align: center;
-            direction: ltr;
-            font-size: 14px;
-            margin: 15px auto 0;
-            padding: 10px 20px;
-            background: rgba(38, 208, 206, 0.15);
-            border-radius: 10px;
-            color: #1a2980;
-            font-weight: 600;
-            border: 1px solid rgba(26, 41, 128, 0.2);
-            display: block;
-            width: fit-content;
-            max-width: 90%;
-            letter-spacing: 0.5px;
+            border-bottom: 1px solid #a7f3d0;
         }
 
-        @media (max-width: 480px) {
-            .dev-credit {
-                font-size: 11px;
-                padding: 5px 8px;
-                margin-top: 10px;
-            }
+        .location-item:last-child { border-bottom: none; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #047857;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 12px;
         }
-        
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .camera-container {
-                height: 220px;
-            }
-            
-            .btn {
-                padding: 12px 15px;
-                font-size: 14px;
-            }
+
+        .submit-btn:disabled {
+            background: #a7f3d0;
         }
-        
+
+        .status-message {
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 16px;
+            text-align: center;
+            display: none;
+        }
+
+        .success    { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .error      { background: #fee2e2; color: #991b1b; }
+        .processing { background: #ecfdf5; color: #065f46; }
+
         .time-restriction-info {
-            background-color: #fff9db;
-            border-left: 4px solid #f59f00;
-            padding: 12px 15px;
+            background: #ecfdf5;
+            border-right: 4px solid #047857;
+            padding: 12px;
             border-radius: 8px;
-            margin: 10px 0;
+            margin: 12px 0;
             font-size: 14px;
             display: none;
         }
-        
-        .time-restriction-info.show {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
+
         .system-disabled-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.85);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            inset: 0;
+            background: rgba(240,253,244,0.94);
+            z-index: 100;
+            display: none;
             flex-direction: column;
-            border-radius: 20px;
+            align-items: center;
+            justify-content: center;
             text-align: center;
             padding: 20px;
-            display: none;
         }
-        
-        .system-disabled-overlay i {
-            font-size: 48px;
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        
-        .system-disabled-overlay p {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-            max-width: 80%;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid #1a2980;
-            border-top: 3px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .system-status {
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+
+        .spot-location {
+            background: #ecfdf5;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
             text-align: center;
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .system-status.active {
-            background: #e8f5e9;
-            border-color: #c8e6c9;
-        }
-        
-        .system-status.inactive {
-            background: #ffebee;
-            border-color: #ffcdd2;
-        }
-        
-        .system-clock {
-            color: #ff0000;
-            font-family: Arial;
-            font-size: 18px;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.2);
+            display: none;
         }
 
         .marketing-code-error {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 4px;
             display: none;
+        }
+
+        @media (max-width: 480px) {
+            .content { padding: 16px; }
+            .header h1 { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-    <div class="confetti" id="confetti"></div>
-    
-    <div class="container">
-        <div class="system-disabled-overlay" id="system-disabled-overlay">
-            <i class="fas fa-power-off"></i>
-            <p>سامانه از ساعت 00:30 تا 5:30 صبح غیرفعال می‌باشد.</p>
-        </div>
-        
-        <div class="header">
-            <h1><i class="fas fa-camera"></i> سامانه حضور و غیاب</h1>
-        </div>
-        
-        <div class="content">
-            <div class="system-status active" id="system-status">
-                <i class="fas fa-clock" id="status-icon"></i>
-                <span id="status-text">ساعت سیستم: </span>
-                <span id="system-clock" class="system-clock">00:00:00</span>
-            </div>
-            
-            <div class="input-group">
-                <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
-                <i class="fas fa-tag"></i>
-                <input type="text" id="marketing-code" maxlength="5" placeholder="کد 5 رقمی خود را وارد نمایید...">
-                <div id="marketing-code-error" class="marketing-code-error"></div>
-            </div>
-            
-            <div class="input-group">
-                <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
-                <i class="fas fa-list-alt"></i>
-                <select id="request-type" required>
-                    <option value="" disabled selected hidden>نوع درخواست را انتخاب نمایید</option>
-                    <option value="شروع شیفت">شروع شیفت</option>
-                    <option value="پایان شیفت">پایان شیفت</option>
-                    <option value="ثبت حضور">ثبت حضور</option>
-                </select>
-                <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
-            </div>
-            
-            <div id="time-restriction" class="time-restriction-info">
-                <p><i class="fas fa-info-circle"></i> ثبت حضور فقط در بازه‌های زمانی زیر فعال است:</p>
-                <ul>
-                    <li>6:00 - 6:30</li>
-                    <li>8:00 - 8:30</li>
-                    <li>10:00 - 10:30</li>
-                    <li>12:00 - 12:30</li>
-                    <li>14:00 - 14:30</li>
-                    <li>16:00 - 16:30</li>
-                    <li>18:00 - 18:30</li>
-                    <li>20:00 - 20:30</li>
-                    <li>22:00 - 22:30</li>
-                </ul>
-            </div>
-            
-            <div id="camera-section" class="camera-section">
-                <div class="camera-container">
-                    <div class="camera-placeholder">
-                        <i class="fas fa-camera"></i>
-                        <p>دوربین عقب آماده است</p>
-                    </div>
-                    <video id="camera-feed" autoplay playsinline></video>
-                    <div class="camera-rotation-control" id="rotate-camera">
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
-                </div>
-                
-                <div class="camera-controls">
-                    <button id="start-camera" class="btn btn-primary">
-                        <i class="fas fa-video"></i> فعال‌سازی دوربین
-                    </button>
-                    <button id="capture-btn" class="btn btn-secondary" disabled>
-                        <i class="fas fa-camera-retro"></i> عکس‌برداری
-                    </button>
-                </div>
-            </div>
-            
-            <div id="location-section" class="location-section">
-                <div class="location-header">
-                    <h3><i class="fas fa-map-marker-alt"></i> موقعیت جغرافیایی</h3>
-                </div>
-                <div class="location-data">
-                    <div class="location-item">
-                        <span class="location-label">عرض جغرافیایی:</span>
-                        <span id="latitude-value" class="location-value">---</span>
-                    </div>
-                    <div class="location-item">
-                        <span class="location-label">طول جغرافیایی:</span>
-                        <span id="longitude-value" class="location-value">---</span>
-                    </div>
-                    <div class="location-item">
-                        <span class="location-label">دقت موقعیت:</span>
-                        <span id="accuracy-value" class="location-value">---</span>
-                    </div>
-                </div>
-                
-                <button id="get-location-btn" class="btn btn-tertiary">
-                    <i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی
-                </button>
-            </div>
-            
-            <button id="submit-btn" class="submit-btn" disabled>
-                <i class="fas fa-paper-plane"></i> ارسال اطلاعات
-            </button>
-            
-            <div id="status-message" class="status-message"></div>
-            
-            <div class="dev-credit">
-                Dev by: Snapp North Zone Sales HQ<br>
-                تیم فروش شمال کشور 💎
-            </div>
-        </div>
+
+<div class="container">
+    <div class="system-disabled-overlay" id="system-disabled-overlay">
+        <i class="fas fa-power-off fa-3x" style="color:#991b1b; margin-bottom:16px;"></i>
+        <p style="font-size:1.1rem; font-weight:600;">سامانه از ساعت ۰۰:۳۰ تا ۰۵:۳۰ غیرفعال است</p>
     </div>
 
-    <script>
-        const marketingCodeInput = document.getElementById('marketing-code');
-        const marketingCodeError = document.getElementById('marketing-code-error');
-        const requestTypeSelect = document.getElementById('request-type');
-        const startCameraBtn = document.getElementById('start-camera');
-        const captureBtn = document.getElementById('capture-btn');
-        const cameraFeed = document.getElementById('camera-feed');
-        const submitBtn = document.getElementById('submit-btn');
-        const statusMessage = document.getElementById('status-message');
-        const latitudeValue = document.getElementById('latitude-value');
-        const longitudeValue = document.getElementById('longitude-value');
-        const accuracyValue = document.getElementById('accuracy-value');
-        const confettiElement = document.getElementById('confetti');
-        const rotateCameraBtn = document.getElementById('rotate-camera');
-        const getLocationBtn = document.getElementById('get-location-btn');
-        const timeRestrictionInfo = document.getElementById('time-restriction');
-        const systemDisabledOverlay = document.getElementById('system-disabled-overlay');
-        const systemStatus = document.getElementById('system-status');
-        const statusIcon = document.getElementById('status-icon');
-        const statusText = document.getElementById('status-text');
-        const systemClock = document.getElementById('system-clock');
-        
-        let stream = null;
-        let locationData = null;
-        let currentCameraMode = "environment";
-        let selectedRequestType = null;
-        let debounceTimeout;
-        
-        const allowedTimeSlots = [
-            { start: { hour: 6, minute: 0 }, end: { hour: 6, minute: 30 } },
-            { start: { hour: 8, minute: 0 }, end: { hour: 8, minute: 30 } },
-            { start: { hour: 10, minute: 0 }, end: { hour: 10, minute: 30 } },
-            { start: { hour: 12, minute: 0 }, end: { hour: 12, minute: 30 } },
-            { start: { hour: 14, minute: 0 }, end: { hour: 14, minute: 30 } },
-            { start: { hour: 16, minute: 0 }, end: { hour: 16, minute: 30 } },
-            { start: { hour: 18, minute: 0 }, end: { hour: 18, minute: 30 } },
-            { start: { hour: 20, minute: 0 }, end: { hour: 20, minute: 30 } },
-            { start: { hour: 22, minute: 0 }, end: { hour: 22, minute: 30 } }
-        ];
-        
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            systemClock.textContent = `${hours}:${minutes}:${seconds}`;
+    <div class="header">
+        <h1>سامانه حضور و غیاب</h1>
+    </div>
+
+    <div class="content">
+        <div class="system-status active" id="system-status">
+            <i class="fas fa-clock"></i>
+            <span>ساعت سیستم:</span>
+            <span id="system-clock">00:00:00</span>
+        </div>
+
+        <div class="input-group">
+            <label for="marketing-code"><i class="fas fa-barcode"></i> کد بازاریابی</label>
+            <i class="fas fa-tag"></i>
+            <input type="text" id="marketing-code" maxlength="5" placeholder="کد ۵ رقمی">
+            <div id="marketing-code-error" class="marketing-code-error"></div>
+        </div>
+
+        <div class="input-group">
+            <label for="request-type"><i class="fas fa-tasks"></i> نوع درخواست</label>
+            <i class="fas fa-list-alt"></i>
+            <select id="request-type">
+                <option value="" disabled selected>نوع درخواست را انتخاب کنید</option>
+                <option value="شروع شیفت">شروع شیفت</option>
+                <option value="پایان شیفت">پایان شیفت</option>
+                <option value="ثبت حضور">ثبت حضور</option>
+            </select>
+            <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+        </div>
+
+        <div class="input-group" id="spot-group" style="display:none;">
+            <label for="spot-select"><i class="fas fa-map-pin"></i> نام اسپات</label>
+            <i class="fas fa-map-pin"></i>
+            <select id="spot-select">
+                <option value="" disabled selected>نام اسپات را انتخاب کنید</option>
+            </select>
+            <span class="select-arrow"><i class="fas fa-chevron-down"></i></span>
+        </div>
+
+        <div class="spot-location" id="spot-location" style="display:none;">
+            <p>عرض جغرافیایی اسپات: <span id="spot-lat">---</span></p>
+            <p>طول جغرافیایی اسپات: <span id="spot-long">---</span></p>
+        </div>
+
+        <div id="time-restriction" class="time-restriction-info">
+            <p><i class="fas fa-info-circle"></i> ثبت حضور فقط در این بازه‌ها مجاز است:</p>
+            <ul style="padding-right:20px; margin-top:8px; list-style-type:disc;">
+                <li>۶:۰۰ - ۶:۳۰</li>
+                <li>۸:۰۰ - ۸:۳۰</li>
+                <li>۱۰:۰۰ - ۱۰:۳۰</li>
+                <li>۱۲:۰۰ - ۱۲:۳۰</li>
+                <li>۱۴:۰۰ - ۱۴:۳۰</li>
+                <li>۱۶:۰۰ - ۱۶:۳۰</li>
+                <li>۱۸:۰۰ - ۱۸:۳۰</li>
+                <li>۲۰:۰۰ - ۲۰:۳۰</li>
+                <li>۲۲:۰۰ - ۲۲:۳۰</li>
+            </ul>
+        </div>
+
+        <div class="location-section">
+            <h3><i class="fas fa-map-marker-alt"></i> موقعیت جغرافیایی</h3>
+            <div class="location-item"><span>عرض جغرافیایی:</span><span id="latitude-value">---</span></div>
+            <div class="location-item"><span>طول جغرافیایی:</span><span id="longitude-value">---</span></div>
+            <div class="location-item"><span>دقت موقعیت:</span><span id="accuracy-value">---</span></div>
+            <button id="get-location-btn" class="btn btn-tertiary">دریافت موقعیت</button>
+        </div>
+
+        <button id="submit-btn" class="submit-btn" disabled>ارسال اطلاعات</button>
+
+        <div id="status-message" class="status-message"></div>
+
+        <div style="text-align:center; margin-top:20px; font-size:13px; color:#065f46;">
+            Dev by: Snapp North Zone Sales HQ
+        </div>
+    </div>
+</div>
+
+<script>
+// متغیرها
+const marketingCodeInput   = document.getElementById('marketing-code');
+const marketingCodeError   = document.getElementById('marketing-code-error');
+const requestTypeSelect    = document.getElementById('request-type');
+const spotGroup            = document.getElementById('spot-group');
+const spotSelect           = document.getElementById('spot-select');
+const spotLocation         = document.getElementById('spot-location');
+const spotLat              = document.getElementById('spot-lat');
+const spotLong             = document.getElementById('spot-long');
+const submitBtn            = document.getElementById('submit-btn');
+const statusMessage        = document.getElementById('status-message');
+const latitudeValue        = document.getElementById('latitude-value');
+const longitudeValue       = document.getElementById('longitude-value');
+const accuracyValue        = document.getElementById('accuracy-value');
+const getLocationBtn       = document.getElementById('get-location-btn');
+const timeRestrictionInfo  = document.getElementById('time-restriction');
+const systemDisabledOverlay= document.getElementById('system-disabled-overlay');
+const systemStatus         = document.getElementById('system-status');
+const systemClock          = document.getElementById('system-clock');
+
+let locationData = null;
+let spots = [];
+let selectedSpot = null;
+let selectedRequestType = null;
+let debounceTimeout;
+
+const allowedTimeSlots = [
+    { start: { h:6,  m:0  }, end: { h:6,  m:30 } },
+    { start: { h:8,  m:0  }, end: { h:8,  m:30 } },
+    { start: { h:10, m:0  }, end: { h:10,m:30 } },
+    { start: { h:12, m:0  }, end: { h:12,m:30 } },
+    { start: { h:14, m:0  }, end: { h:14,m:30 } },
+    { start: { h:16, m:0  }, end: { h:16,m:30 } },
+    { start: { h:18, m:0  }, end: { h:18,m:30 } },
+    { start: { h:20, m:0  }, end: { h:20,m:30 } },
+    { start: { h:22, m:0  }, end: { h:22,m:30 } }
+];
+
+// توابع کمکی
+function updateClock() {
+    const n = new Date();
+    systemClock.textContent = `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')}`;
+}
+
+function isInDisabledTime() {
+    const n = new Date();
+    const m = n.getHours() * 60 + n.getMinutes();
+    return m >= 30 && m < 330;   // 00:30 تا 05:30
+}
+
+function isWithinAllowedTime() {
+    const n = new Date();
+    const m = n.getHours() * 60 + n.getMinutes();
+    for (const s of allowedTimeSlots) {
+        const start = s.start.h * 60 + s.start.m;
+        const end   = s.end.h   * 60 + s.end.m;
+        if (m >= start && m < end) return true;
+    }
+    return false;
+}
+
+function validateMarketingCode(code) {
+    return /^\d{5}$/.test(code);
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // متر
+}
+
+async function fetchSpots(code) {
+    try {
+        // آدرس واقعی وب‌اپ اسکریپت خودت را جایگزین کن
+        const url = `https://script.google.com/macros/s/AKfycbwnHxuCeQrHBVHpT253b23qgG0jtf-_u8JZ4nORAqjBSfnb6rPVJzPTLJblnLtLltOT/exec?code=${code}`;
+        const res = await fetch(url);
+        spots = await res.json();
+
+        spotSelect.innerHTML = '<option value="" disabled selected>نام اسپات را انتخاب کنید</option>';
+
+        if (spots.length > 0) {
+            spots.forEach((s, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.text = s.name;
+                spotSelect.appendChild(opt);
+            });
+            spotGroup.style.display = 'block';
+        } else {
+            showStatus('اسپاتی برای این کد یافت نشد', 'error');
+            spotGroup.style.display = 'none';
+            spotLocation.style.display = 'none';
         }
-        
-        async function startCamera() {
-            try {
-                const constraints = {
-                    video: {
-                        facingMode: currentCameraMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-                
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                cameraFeed.srcObject = stream;
-                cameraFeed.style.display = 'block';
-                document.querySelector('.camera-placeholder').style.display = 'none';
-                captureBtn.disabled = false;
-                startCameraBtn.disabled = true;
-                startCameraBtn.innerHTML = '<i class="fas fa-check"></i> دوربین فعال شد';
-                
-                const cameraType = currentCameraMode === "environment" ? "عقب" : "جلو";
-                document.querySelector('.camera-placeholder p').textContent = `دوربین ${cameraType} فعال است`;
-                
-            } catch (err) {
-                showStatus(`خطا در دسترسی به دوربین: ${err.message}`, 'error');
-                console.error('خطای دوربین:', err);
-            }
-        }
-        
-        startCameraBtn.addEventListener('click', startCamera);
-        
-        rotateCameraBtn.addEventListener('click', () => {
-            currentCameraMode = currentCameraMode === "environment" ? "user" : "environment";
-            startCamera();
-        });
-        
-        getLocationBtn.addEventListener('click', () => {
-            showStatus('در حال دریافت موقعیت جغرافیایی...', 'processing');
-            getLocationBtn.disabled = true;
-            getLocation();
-        });
-        
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        
-                        latitudeValue.textContent = locationData.latitude.toFixed(6);
-                        longitudeValue.textContent = locationData.longitude.toFixed(6);
-                        accuracyValue.textContent = `${Math.round(locationData.accuracy)} متر`;
-                        
-                        showStatus('موقعیت جغرافیایی دریافت شد', 'success');
-                        getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
-                        
-                        validateForm();
-                    },
-                    error => {
-                        showStatus(`خطا در دریافت موقعیت: ${error.message}`, 'error');
-                        console.error('خطای موقعیت‌یابی:', error);
-                        getLocationBtn.disabled = false;
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                showStatus('مرورگر شما از موقعیت‌یابی جغرافیایی پشتیبانی نمی‌کند', 'error');
-                getLocationBtn.disabled = false;
-            }
-        }
-        
-        function isWithinAllowedTime() {
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            const currentTotalMinutes = currentHour * 60 + currentMinute;
-            
-            for (const slot of allowedTimeSlots) {
-                const startTotalMinutes = slot.start.hour * 60 + slot.start.minute;
-                const endTotalMinutes = slot.end.hour * 60 + slot.end.minute;
-                
-                if (slot.start.hour === 0) {
-                    if (currentHour === 0 && currentMinute >= 0 && currentMinute <= 30) {
-                        return true;
-                    }
-                } else {
-                    if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes) {
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
-        }
-        
-        function isInDisabledTime() {
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            const currentTotalMinutes = currentHour * 60 + currentMinute;
-            
-            const disableStart = 0 * 60 + 30;
-            const disableEnd = 5 * 60 + 30;
-            
-            return currentTotalMinutes >= disableStart && currentTotalMinutes < disableEnd;
-        }
-        
-        function validateMarketingCode(code) {
-            const regex = /^\d{5}$/;
-            return regex.test(code);
-        }
-        
-        requestTypeSelect.addEventListener('change', function() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                selectedRequestType = this.value;
-                locationData = null;
-                latitudeValue.textContent = '---';
-                longitudeValue.textContent = '---';
-                accuracyValue.textContent = '---';
-                getLocationBtn.disabled = false;
-                getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
-                
-                if (this.value === 'ثبت حضور') {
-                    timeRestrictionInfo.classList.add('show');
-                } else {
-                    timeRestrictionInfo.classList.remove('show');
-                }
-                
-                validateForm();
-            }, 500);
-        });
-        
-        function validateForm() {
-            const marketingCode = marketingCodeInput.value.trim();
-            const isValidCode = validateMarketingCode(marketingCode);
-            const hasLocation = !!locationData;
-            const hasRequestType = requestTypeSelect.value !== '';
-            const isRequestTypeValid = requestTypeSelect.value === selectedRequestType;
-            
-            if (marketingCode !== '') {
-                if (!isValidCode) {
-                    marketingCodeError.textContent = 'کد بازاریابی باید دقیقاً 5 رقم باشد';
-                    marketingCodeError.style.display = 'block';
-                } else {
-                    marketingCodeError.style.display = 'none';
-                }
-            } else {
-                marketingCodeError.style.display = 'none';
-            }
-            
-            const isValid = isValidCode && hasLocation && hasRequestType && isRequestTypeValid;
-            submitBtn.disabled = !isValid;
-            
-            return isValid;
-        }
-        
-        function toggleSystemState() {
-            const isDisabled = isInDisabledTime();
-            
-            if (isDisabled) {
-                systemDisabledOverlay.style.display = 'flex';
-                systemStatus.className = 'system-status inactive';
-                statusIcon.className = 'fas fa-exclamation-circle';
-                statusText.textContent = 'سامانه غیرفعال است - ساعت: ';
-                
-                marketingCodeInput.disabled = true;
-                requestTypeSelect.disabled = true;
-                startCameraBtn.disabled = true;
-                captureBtn.disabled = true;
-                getLocationBtn.disabled = true;
-                submitBtn.disabled = true;
-                rotateCameraBtn.disabled = true;
-                
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    cameraFeed.style.display = 'none';
-                    document.querySelector('.camera-placeholder').style.display = 'block';
-                }
-            } else {
-                systemDisabledOverlay.style.display = 'none';
-                systemStatus.className = 'system-status active';
-                statusIcon.className = 'fas fa-clock';
-                statusText.textContent = 'ساعت سیستم: ';
-                
-                marketingCodeInput.disabled = false;
-                requestTypeSelect.disabled = false;
-                startCameraBtn.disabled = false;
-                captureBtn.disabled = true;
-                getLocationBtn.disabled = false;
-                submitBtn.disabled = true;
-                rotateCameraBtn.disabled = false;
-                
-                updateButtonStates();
-            }
-        }
-        
-        function updateButtonStates() {
-            if (stream) {
-                startCameraBtn.disabled = true;
-                captureBtn.disabled = false;
-            } else {
-                startCameraBtn.disabled = false;
-                captureBtn.disabled = true;
-            }
-            
+        validateForm();
+    } catch(e) {
+        showStatus('خطا در بارگیری اسپات‌ها', 'error');
+    }
+}
+
+function getLocation() {
+    if (!navigator.geolocation) {
+        showStatus('مرورگر شما موقعیت‌یابی را پشتیبانی نمی‌کند', 'error');
+        return;
+    }
+
+    showStatus('در حال دریافت موقعیت...', 'processing');
+    getLocationBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            locationData = {
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy
+            };
+            latitudeValue.textContent  = locationData.latitude.toFixed(6);
+            longitudeValue.textContent = locationData.longitude.toFixed(6);
+            accuracyValue.textContent  = Math.round(locationData.accuracy) + ' متر';
+            showStatus('موقعیت دریافت شد', 'success');
+            getLocationBtn.innerHTML = '<i class="fas fa-check"></i> موقعیت دریافت شد';
             validateForm();
-            
-            if (locationData) {
-                getLocationBtn.disabled = true;
-            } else {
-                getLocationBtn.disabled = false;
-            }
+        },
+        err => {
+            showStatus('خطا در دریافت موقعیت: ' + err.message, 'error');
+            getLocationBtn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+
+function showStatus(msg, cls) {
+    statusMessage.textContent = msg;
+    statusMessage.className = 'status-message ' + cls;
+    statusMessage.style.display = 'block';
+    setTimeout(() => { statusMessage.style.display = 'none'; }, 5000);
+}
+
+function validateForm() {
+    const code = marketingCodeInput.value.trim();
+    const validCode = validateMarketingCode(code);
+    const hasLoc  = !!locationData;
+    const hasType = requestTypeSelect.value !== '';
+    const hasSpot = !!selectedSpot;
+    const sameType = requestTypeSelect.value === selectedRequestType;
+
+    if (code && !validCode) {
+        marketingCodeError.textContent = 'کد باید دقیقاً ۵ رقم باشد';
+        marketingCodeError.style.display = 'block';
+    } else {
+        marketingCodeError.style.display = 'none';
+    }
+
+    submitBtn.disabled = !(validCode && hasLoc && hasType && hasSpot && sameType);
+}
+
+// Event Listener ها
+marketingCodeInput.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').slice(0,5);
+    const code = this.value.trim();
+
+    spots = [];
+    selectedSpot = null;
+    spotGroup.style.display = 'none';
+    spotLocation.style.display = 'none';
+    spotSelect.innerHTML = '<option value="" disabled selected>نام اسپات را انتخاب کنید</option>';
+
+    if (validateMarketingCode(code)) {
+        fetchSpots(code);
+    }
+    validateForm();
+});
+
+requestTypeSelect.addEventListener('change', function() {
+    selectedRequestType = this.value;
+    locationData = null;
+    latitudeValue.textContent = longitudeValue.textContent = accuracyValue.textContent = '---';
+    getLocationBtn.disabled = false;
+    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
+
+    timeRestrictionInfo.style.display = (this.value === 'ثبت حضور') ? 'block' : 'none';
+
+    validateForm();
+});
+
+spotSelect.addEventListener('change', function() {
+    const idx = this.value;
+    selectedSpot = idx ? spots[idx] : null;
+    if (selectedSpot) {
+        spotLat.textContent = selectedSpot.lat.toFixed(6);
+        spotLong.textContent = selectedSpot.long.toFixed(6);
+        spotLocation.style.display = 'block';
+    } else {
+        spotLocation.style.display = 'none';
+    }
+    validateForm();
+});
+
+getLocationBtn.addEventListener('click', getLocation);
+
+submitBtn.addEventListener('click', async () => {
+    const code = marketingCodeInput.value.trim();
+    if (!validateMarketingCode(code)) return;
+    if (!requestTypeSelect.value) return;
+    if (requestTypeSelect.value !== selectedRequestType) {
+        showStatus('نوع درخواست تغییر کرده - لطفاً موقعیت را مجدداً بگیرید', 'error');
+        return;
+    }
+    if (!locationData) {
+        showStatus('لطفاً موقعیت را دریافت کنید', 'error');
+        return;
+    }
+    if (requestTypeSelect.value === 'ثبت حضور' && !isWithinAllowedTime()) {
+        showStatus('ثبت حضور فقط در بازه‌های مجاز امکان‌پذیر است', 'error');
+        return;
+    }
+    if (selectedSpot) {
+        const dist = calculateDistance(
+            locationData.latitude,
+            locationData.longitude,
+            selectedSpot.lat,
+            selectedSpot.long
+        );
+        if (dist > 500) {
+            showStatus('شما در محدوده این اسپات نیستید (بیش از ۵۰۰ متر)', 'error');
+            return;
         }
-        
-        submitBtn.addEventListener('click', async () => {
-            const marketingCode = marketingCodeInput.value.trim();
-            const requestType = requestTypeSelect.value;
-            
-            if (!validateMarketingCode(marketingCode)) {
-                showStatus('کد بازاریابی باید دقیقاً 5 رقم عددی باشد', 'error');
-                marketingCodeInput.focus();
-                return;
-            }
-            
-            if (!requestType) {
-                showStatus('لطفاً نوع درخواست را انتخاب کنید', 'error');
-                return;
-            }
-            
-            if (requestType !== selectedRequestType) {
-                showStatus('نوع درخواست تغییر کرده است. لطفاً موقعیت جغرافیایی را مجدداً دریافت کنید.', 'error');
-                return;
-            }
-            
-            if (!locationData) {
-                showStatus('لطفاً موقعیت جغرافیایی را دریافت کنید', 'error');
-                return;
-            }
-            
-            if (requestType === 'ثبت حضور' && !isWithinAllowedTime()) {
-                showStatus('ثبت حضور فقط در بازه‌های زمانی مشخص امکان‌پذیر است.', 'error');
-                return;
-            }
-            
-            showStatus('در حال ارسال اطلاعات به سرور...', 'processing');
+    }
+
+    showStatus('در حال ارسال...', 'processing');
+    submitBtn.disabled = true;
+
+    try {
+        const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
+        const data = new URLSearchParams();
+        data.append('entry.1228562108', code);
+        data.append('entry.2093256559', locationData.latitude);
+        data.append('entry.1314182104', locationData.longitude);
+        data.append('entry.1995166577', locationData.accuracy);
+        data.append('entry.1723693542', requestTypeSelect.value);
+
+        await fetch(formUrl, { method: 'POST', body: data, mode: 'no-cors' });
+
+        showStatus('اطلاعات با موفقیت ثبت شد', 'success');
+
+        setTimeout(() => {
+            marketingCodeInput.value = '';
+            requestTypeSelect.value = '';
+            spotGroup.style.display = 'none';
+            spotLocation.style.display = 'none';
+            locationData = null;
+            latitudeValue.textContent = longitudeValue.textContent = accuracyValue.textContent = '---';
             submitBtn.disabled = true;
-            
-            try {
-                const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdY70VGHakFIzh9zjWbfZ2T-tBqUg3xtNEZwG4drNpjnbwrjg/formResponse';
-                
-                const params = new URLSearchParams();
-                params.append('entry.1228562108', marketingCode);
-                params.append('entry.2093256559', locationData.latitude);
-                params.append('entry.1314182104', locationData.longitude);
-                params.append('entry.1995166577', locationData.accuracy);
-                params.append('entry.1723693542', requestType);
-                
-                await fetch(formUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: params.toString(),
-                    mode: 'no-cors'
-                });
-                
-                showSuccessAnimation();
-                showStatus('اطلاعات با موفقیت به سرور ارسال شد!', 'success');
-                
-                setTimeout(() => {
-                    marketingCodeInput.value = '';
-                    submitBtn.disabled = true;
-                    getLocationBtn.disabled = false;
-                    getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
-                    
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                        cameraFeed.style.display = 'none';
-                        document.querySelector('.camera-placeholder').style.display = 'block';
-                        startCameraBtn.disabled = false;
-                        startCameraBtn.innerHTML = '<i class="fas fa-video"></i> فعال‌سازی دوربین';
-                        captureBtn.disabled = true;
-                    }
-                    
-                    locationData = null;
-                    latitudeValue.textContent = '---';
-                    longitudeValue.textContent = '---';
-                    accuracyValue.textContent = '---';
-                    
-                    selectedRequestType = null;
-                }, 2000);
-                
-            } catch (error) {
-                showStatus('خطا در ارسال اطلاعات: ' + error.message, 'error');
-                submitBtn.disabled = false;
-                console.error('خطای ارسال:', error);
-            }
-        });
-        
-        function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message ' + type;
-            statusMessage.style.display = 'block';
-            
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 5000);
-        }
-        
-        marketingCodeInput.addEventListener('input', function() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                this.value = this.value.replace(/\D/g, '').slice(0, 5);
-                
-                validateForm();
-            }, 500);
-        });
-        
-        function showSuccessAnimation() {
-            submitBtn.classList.add('success-animation');
-            setTimeout(() => {
-                submitBtn.classList.remove('success-animation');
-            }, 2000);
-            
-            createConfetti();
-        }
-        
-        function createConfetti() {
-            confettiElement.style.display = 'block';
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            
-            for (let i = 0; i < 150; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'absolute';
-                confetti.style.width = '10px';
-                confetti.style.height = '10px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.borderRadius = '50%';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.top = '-10px';
-                confetti.style.opacity = Math.random() + 0.5;
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                confettiElement.appendChild(confetti);
-                
-                const animation = confetti.animate([
-                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                    { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
-                ], {
-                    duration: Math.random() * 3000 + 2000,
-                    easing: 'cubic-bezier(0,0.8,1,0.2)'
-                });
-                
-                animation.onfinish = () => {
-                    confetti.remove();
-                    if (confettiElement.children.length === 0) {
-                        confettiElement.style.display = 'none';
-                    }
-                };
-            }
-        }
-        
-        window.addEventListener('load', () => {
-            updateClock();
-            const clockInterval = setInterval(updateClock, 1000);
-            toggleSystemState();
-            setInterval(toggleSystemState, 60000);
-        });
-    </script>
+            getLocationBtn.disabled = false;
+            getLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> دریافت موقعیت جغرافیایی';
+            timeRestrictionInfo.style.display = 'none';
+        }, 1800);
+    } catch (err) {
+        showStatus('خطا در ارسال: ' + err.message, 'error');
+        submitBtn.disabled = false;
+    }
+});
+
+// شروع برنامه
+setInterval(updateClock, 1000);
+updateClock();
+
+function checkSystemState() {
+    const disabled = isInDisabledTime();
+    systemDisabledOverlay.style.display = disabled ? 'flex' : 'none';
+    systemStatus.className = 'system-status ' + (disabled ? 'inactive' : 'active');
+
+    if (disabled) {
+        marketingCodeInput.disabled = true;
+        requestTypeSelect.disabled = true;
+        getLocationBtn.disabled = true;
+        submitBtn.disabled = true;
+    } else {
+        marketingCodeInput.disabled = false;
+        requestTypeSelect.disabled = false;
+        getLocationBtn.disabled = false;
+        validateForm();
+    }
+}
+
+checkSystemState();
+setInterval(checkSystemState, 60000);
+</script>
 </body>
 </html>
